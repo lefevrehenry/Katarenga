@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
+﻿CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
 project(Katarenga)
 
 set(CMAKE_BUILD_TYPE RELEASE)
@@ -6,10 +6,14 @@ set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(HEADER_FILES
+    src/Board.hpp
+    src/Cell.hpp
+    src/Piece.hpp
 )
 
 set(SOURCE_FILES
-    main.cpp
+    src/main.cpp
+    src/Board.cpp
 )
 
 set(SHADER_FILES
