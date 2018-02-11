@@ -12,7 +12,7 @@ public:
 	Piece(int player,
 	      Cell * cell):
 	    _player(player),
-	    _cell(cell) {}
+	    _cell(cell) { _cell->setPiece(this); }
 
 	int getPlayer() const { return _player; }
 	Cell * getCell() const { return _cell; }

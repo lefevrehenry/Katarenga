@@ -35,15 +35,15 @@ class BoardCell : public Cell
 {
 public:
 	BoardCell() {}
-	/*BoardCell(CellType type,	// Not used if we declare the 'plateau' as a static table
+	BoardCell(CellType type,
 		 int row,
 		 int column):
 		_type(type),
 		_row(row),
 		_column(column),
-		_index(8*row+column){}*/
+	    _index(8*row+column){}
 
-	void init(CellType type,
+	/*void init(CellType type,
 	          int row,
 	          int column)
 	{
@@ -51,7 +51,7 @@ public:
 		_row = row;
 		_column = column;
 		_index = 8*row * column;
-	}
+	}*/
 
 	CellType getType() const { return _type; }
 
@@ -72,8 +72,8 @@ class CampCell : public Cell
 {
 public:
 	CampCell() {}
-	/*CampCell(int index):	// Not used if we declare the CampCells statically in Board constructor
-		_index(index){}*/
+	CampCell(int index):
+	    _index(index){}
 
 	void init(int index){ _index = index; }
 
