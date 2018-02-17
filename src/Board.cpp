@@ -1,4 +1,5 @@
 ﻿#include "Board.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 
@@ -11,13 +12,35 @@ Board::Board()
 		return;
 	}
 
+
+	std::string boardString = generateBoardString();
+	int index = 0;
+
+
+	boardString.at(1);
 	// Init BoardCells
 	for(int i = 1; i<=8; ++i)		// Iterates over rows
 	{
 		_plateau[i] = (Cell**) malloc(8 * sizeof(BoardCell*));
 		for(int j = 1; j<=8; ++j)	// Iterates over columns
 		{
-			_plateau[i][j] = new BoardCell(CellType::KING, i, j);
+			if(boardString.at(index) == 'K'){
+				_plateau[i][j] = new BoardCell(CellType::KING, i, j);
+			}
+			else if (boardString.at(index) == 'R'){
+				_plateau[i][j] = new BoardCell(CellType::ROCK, i, j);
+			}
+			else if (boardString.at(index) == 'B'){
+				_plateau[i][j] = new BoardCell(CellType::BISHOP, i, j);
+			}
+			else if (boardString.at(index) == 'N'){
+				_plateau[i][j] = new BoardCell(CellType::KNIGHT, i, j);
+			}
+			else{
+				std::cout << "TODO RAISE ERROR" << std::endl;
+				return;
+			}
+			index++;
 		}
 	}
 

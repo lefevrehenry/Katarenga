@@ -9,11 +9,13 @@ set(HEADER_FILES
     src/Board.hpp
     src/Cell.hpp
     src/Piece.hpp
+    src/utils.hpp
 )
 
 set(SOURCE_FILES
     src/main.cpp
     src/Board.cpp
+    src/utils.cpp
 )
 
 set(SHADER_FILES
