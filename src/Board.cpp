@@ -1,5 +1,4 @@
 ﻿#include "Board.hpp"
-#include "utils.hpp"
 
 #include <iostream>
 
@@ -94,7 +93,61 @@ Board::~Board()
 }
 
 
+std::vector<move> Board::getAllMoves(int row, int col)
+{
+	std::vector<move> list;
+	Cell* cell = _plateau[row][col];
+	if (cell->isEmpty() || cell->isCampCell()) // If CampCell, the piece cannot move anymore
+	{
+		return list;
+	}
 
+	int player = cell->getPiece()->getPlayer();
+	// Check if the piece can go to an adversary camp
+	if (row == 1 && player == -1){
+		if(_plateau[0][0]->isEmpty())
+		{
+			list.push_back(move(0,0));
+		}
+		if(_plateau[0][1]->isEmpty())
+		{
+			list.push_back(move(0,1));
+		}
+	}
+	if (row == 8 && player == 1){
+		if(_plateau[8][0]->isEmpty())
+		{
+			list.push_back(move(8,0));
+		}
+		if(_plateau[8][1]->isEmpty())
+		{
+			list.push_back(move(8,1));
+		}
+	}
+
+	switch(((BoardCell*)cell)->getType())
+	{
+	case CellType::KING:
+		for(int i = -1; i<=1; ++i){
+			for(int j=-1; j<=1; ++j)
+			{
+				if(i == 0 && j == 0)
+					continue;
+				if( (row+i < 1) || (row+i > 8) || (col+j < 1) || (col+j > 8))
+					continue;
+				Cell* new_cell = _plateau[row+i][col+j];
+				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
+				{
+					list.push_back(move(row+i, col+j));
+				}
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	return list;
+}
 
 
 
@@ -105,13 +158,14 @@ Board::~Board()
 void
 Board::print()
 {
-	std::string s = "";
+	std::string s = "  1  2  3  4  5  6  7  8\n";
 	s+= (_plateau[0][0]->isEmpty() ? " " : "X");
 	s+= "        White        ";
 	s+= (_plateau[0][1]->isEmpty() ? " " : "X");
 	s+= "\n";
 	for(int i = 1; i<=8; ++i)		// Iterates over rows
 	{
+		s+= std::to_string(i) + " ";
 		for(int j = 1; j<=8; ++j)	// Iterates over columns
 		{
 			BoardCell * cell = (BoardCell*) _plateau[i][j];
@@ -145,6 +199,6 @@ Board::print()
 	s+= (_plateau[9][0]->isEmpty() ? " " : "X");
 	s+= "        Black        ";
 	s+= (_plateau[9][1]->isEmpty() ? " " : "X");
-	s+= "\n";
+	//s+= "\n";
 	std::cout << s << std::endl;
 }

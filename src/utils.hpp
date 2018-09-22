@@ -40,3 +40,5 @@ void pickRand(int *a, int *b, int *c, int *d);
 // Generates a Sring containing the cell types of the board, row by row.
 std::string generateBoardString();
 
+typedef std::pair<int,int> move;
+

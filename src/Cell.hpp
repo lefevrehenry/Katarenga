@@ -43,16 +43,6 @@ public:
 		_column(column),
 	    _index(8*row+column){}
 
-	/*void init(CellType type,
-	          int row,
-	          int column)
-	{
-		_type = type;
-		_row = row;
-		_column = column;
-		_index = 8*row * column;
-	}*/
-
 	CellType getType() const { return _type; }
 
 	int getIndex() const { return _index; }

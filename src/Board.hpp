@@ -1,6 +1,7 @@
 ﻿#ifndef BOARD_HPP
 #define BOARD_HPP
 
+#include "utils.hpp"
 #include "Cell.hpp"
 #include "Piece.hpp"
 
@@ -17,7 +18,7 @@ public:
 
 	bool isValidMove(int s_row, int s_col, int e_row, int e_col);
 
-	std::vector<std::pair<int,int>> getAllMoves(int row, int col);
+	std::vector<move> getAllMoves(int row, int col);
 
 
 	void print();
