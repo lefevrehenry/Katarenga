@@ -66,6 +66,9 @@ Board::Board()
 		_piecesB.push_back(pieceB);
 	}
 
+	//For tests
+	//Piece * pp = new Piece(-1, _plateau[4][5]);
+
 }
 
 Board::~Board()
@@ -102,7 +105,10 @@ std::vector<move> Board::getAllMoves(int row, int col)
 		return list;
 	}
 
+	int i,j;
 	int player = cell->getPiece()->getPlayer();
+
+
 	// Check if the piece can go to an adversary camp
 	if (row == 1 && player == -1){
 		if(_plateau[0][0]->isEmpty())
@@ -124,21 +130,211 @@ std::vector<move> Board::getAllMoves(int row, int col)
 			list.push_back(move(8,1));
 		}
 	}
-
+	BoardCell* new_cell;
 	switch(((BoardCell*)cell)->getType())
 	{
-	case CellType::KING:
-		for(int i = -1; i<=1; ++i){
-			for(int j=-1; j<=1; ++j)
+	case CellType::KING: // Check cells directly around
+		for(i = -1; i<=1; ++i){
+			for(j=-1; j<=1; ++j)
 			{
 				if(i == 0 && j == 0)
+				{
 					continue;
+				}
 				if( (row+i < 1) || (row+i > 8) || (col+j < 1) || (col+j > 8))
+				{
 					continue;
-				Cell* new_cell = _plateau[row+i][col+j];
+				}
+
+				new_cell = (BoardCell*)_plateau[row+i][col+j];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
 					list.push_back(move(row+i, col+j));
+				}
+			}
+		}
+		break; //Switch break;
+
+
+	case CellType::BISHOP: // Check cells in diagonal until next edge or Bishop cell or oponnent
+		// Top left direction
+		i = 1;
+		j = 1;
+		while((row-i)>= 1 && (col-j) >= 1)
+		{
+			if(! checkCellAddMove(row-i, col-j, player, CellType::BISHOP, &list))
+			{
+				break;
+			}
+			++i;
+			++j;
+		}
+
+		// Top right direction
+		i = 1;
+		j = 1;
+		while((row-i)>= 1 && (col+j) <= 8)
+		{
+			if(! checkCellAddMove(row-i, col+j, player, CellType::BISHOP, &list))
+			{
+				break;
+			}
+			++i;
+			++j;
+		}
+
+		// Bottom left direction
+		i = 1;
+		j = 1;
+		while((row+i) <= 8 && (col-j) >= 1)
+		{
+			if(! checkCellAddMove(row+i, col-j, player, CellType::BISHOP, &list))
+			{
+				break;
+			}
+			++i;
+			++j;
+		}
+
+		// Bottom right direction
+		i = 1;
+		j = 1;
+		while((row+i) <= 8 && (col+j) <= 8)
+		{
+			if(! checkCellAddMove(row+i, col+j, player, CellType::BISHOP, &list))
+			{
+				break;
+			}
+			++i;
+			++j;
+		}
+		break; //Switch break;
+
+
+	case CellType::ROCK: // Check cells in straight line until Rock cell or edge or oponnent
+		i = 1;
+		while((row-i) >= 1) // Top line
+		{
+			if(! checkCellAddMove(row-i, col, player, CellType::ROCK, &list))
+			{
+				break;
+			}
+			++i;
+		}
+
+		i = 1;
+		while((row+i) <= 8) // Bottom line
+		{
+			if(! checkCellAddMove(row+i, col, player, CellType::ROCK, &list))
+			{
+				break;
+			}
+			++i;
+		}
+
+		i = 1;
+		while((col-i) >= 1) // Left line
+		{
+			if(! checkCellAddMove(row, col-i, player, CellType::ROCK, &list))
+			{
+				break;
+			}
+			++i;
+		}
+
+		i = 1;
+		while((col+i) <= 8) // Right line
+		{
+			if(! checkCellAddMove(row, col+i, player, CellType::ROCK, &list))
+			{
+				break;
+			}
+			++i;
+		}
+
+		break; //Switch break
+
+
+	case CellType::KNIGHT:
+		//Left top and bottom
+		if((col-2) >= 1)
+		{
+			if((row-1) >= 1)
+			{
+				new_cell = (BoardCell*) _plateau[row-1][col-2];
+				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
+				{
+					list.push_back(move(row-1, col-2));
+				}
+			}
+			if((row+1) <= 8)
+			{
+				new_cell = (BoardCell*) _plateau[row+1][col-2];
+				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
+				{
+					list.push_back(move(row+1, col-2));
+				}
+			}
+		}
+		//Right top and bottom
+		if((col+2) <= 8)
+		{
+			if((row-1) >= 1)
+			{
+				new_cell = (BoardCell*) _plateau[row-1][col+2];
+				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
+				{
+					list.push_back(move(row-1, col+2));
+				}
+			}
+			if((row+1) <= 8)
+			{
+				new_cell = (BoardCell*) _plateau[row+1][col+2];
+				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
+				{
+					list.push_back(move(row+1, col+2));
+				}
+			}
+		}
+
+		//Top left and right
+		if((row-2) >= 1)
+		{
+			if((col-1) >= 1)
+			{
+				new_cell = (BoardCell*) _plateau[row-2][col-1];
+				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
+				{
+					list.push_back(move(row-2, col-1));
+				}
+			}
+			if((col+1) <= 8)
+			{
+				new_cell = (BoardCell*) _plateau[row-2][col+1];
+				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
+				{
+					list.push_back(move(row-2, col+1));
+				}
+			}
+		}
+
+		//Bottom left and right
+		if((row+2) <= 8)
+		{
+			if((col-1) >= 1)
+			{
+				new_cell = (BoardCell*) _plateau[row+2][col-1];
+				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
+				{
+					list.push_back(move(row+2, col-1));
+				}
+			}
+			if((col+1) <= 8)
+			{
+				new_cell = (BoardCell*) _plateau[row+2][col+1];
+				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
+				{
+					list.push_back(move(row+2, col+1));
 				}
 			}
 		}
@@ -149,7 +345,29 @@ std::vector<move> Board::getAllMoves(int row, int col)
 	return list;
 }
 
-
+// Internal function to populate the vector of moves, called in getAllMoves.
+// Returns false if the while loop calling this function has to break.
+bool Board::checkCellAddMove(int row, int col, int player, CellType type, std::vector<move> *plist)
+{
+	BoardCell* new_cell = (BoardCell*) _plateau[row][col];
+	if(new_cell->isEmpty())
+	{
+		plist->push_back(move(row,col));
+		if(new_cell->getType() == type)
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if(new_cell->getPiece()->getPlayer() == -player)
+		{
+			plist->push_back(move(row,col));
+		}
+		return false;
+	}
+	return true;
+}
 
 
 

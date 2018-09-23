@@ -24,6 +24,9 @@ public:
 	void print();
 
 private:
+
+	bool checkCellAddMove(int row, int col, int player, CellType type, std::vector<move>* plist);
+
 	Cell *** _plateau;			// The Board containing the 8*8 BoardCells and the 4 CampCells
 	//CampCell _campW[2];					// The 2 CampCells of White
 	std::vector<Piece*> _piecesW;		// The list of White Pieces
