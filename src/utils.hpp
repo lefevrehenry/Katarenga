@@ -1,6 +1,8 @@
 ﻿#include <string>
 #include <cstdlib>
 
+class Cell;
+
 const char bb[8][4][4] = {{{'R', 'B', 'K', 'N'}, // 0
                            {'N', 'R', 'N', 'K'},
                            {'B', 'B', 'K', 'R'},
@@ -40,5 +42,5 @@ void pickRand(int *a, int *b, int *c, int *d);
 // Generates a Sring containing the cell types of the board, row by row.
 std::string generateBoardString();
 
-typedef std::pair<int,int> move;
+typedef std::pair<Cell*,Cell*> move;
 

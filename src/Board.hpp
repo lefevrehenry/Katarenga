@@ -14,18 +14,20 @@ public:
 	Board();
 	~Board();
 
-	bool movePiece(int s_row, int s_col, int e_row, int e_col);
+    bool movePiece(move move);
 
-	bool isValidMove(int s_row, int s_col, int e_row, int e_col);
+    bool isValidMove(Cell* src_cell, Cell* dst_cell, int player);
+
+    move askNextMove();
 
 	std::vector<move> getAllMoves(int row, int col);
 
-
+    void main_loop();
 	void print();
 
 private:
 
-	bool checkCellAddMove(int row, int col, int player, CellType type, std::vector<move>* plist);
+    bool checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<move>* plist);
 
 	Cell *** _plateau;			// The Board containing the 8*8 BoardCells and the 4 CampCells
 	//CampCell _campW[2];					// The 2 CampCells of White

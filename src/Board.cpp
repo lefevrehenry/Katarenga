@@ -96,6 +96,56 @@ Board::~Board()
 }
 
 
+void
+Board::main_loop()
+{
+    int n = 0;
+    move move;
+    while(true)
+    {
+        print();
+
+        move = askNextMove();
+
+        // TODO Remove this, it's just here to avoid looping when testing
+        if(n++ == 5)
+        {
+            break;
+        }
+    }
+}
+
+move Board::askNextMove()
+{
+    int ri, ci, rj, cj;
+    bool flag = true;
+    std::cout << (this->_currentPlayer == 1 ? "It's White's (+)" : "Black's (-)") << " turn, what is you move? (row,col) -> (row,col)" << std::endl;
+    while(flag)
+    {
+        std::cin >> ri;
+        std::cin >> ci;
+        std::cin >> rj;
+        std::cin >> cj;
+
+        if(!isValidMove(_plateau[ri][ci], _plateau[rj][cj], _currentPlayer))
+        {
+            std::cout << "Invalid move... what is your move? (row,col) -> (row,col)" << std::endl;
+        }
+        else
+        {
+            flag = false;
+        }
+    }
+    return move(_plateau[ri][ci], _plateau[rj][cj]);
+}
+
+
+bool Board::isValidMove(Cell* src_cell, Cell* dst_cell, int player)
+{
+
+    return true;
+}
+
 std::vector<move> Board::getAllMoves(int row, int col)
 {
 	std::vector<move> list;
@@ -103,8 +153,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 	if (cell->isEmpty() || cell->isCampCell()) // If CampCell, the piece cannot move anymore
 	{
 		return list;
-	}
-
+    }
 	int i,j;
 	int player = cell->getPiece()->getPlayer();
 
@@ -113,21 +162,21 @@ std::vector<move> Board::getAllMoves(int row, int col)
 	if (row == 1 && player == -1){
 		if(_plateau[0][0]->isEmpty())
 		{
-			list.push_back(move(0,0));
+            list.push_back(move(cell,_plateau[0][0]));
 		}
 		if(_plateau[0][1]->isEmpty())
 		{
-			list.push_back(move(0,1));
+            list.push_back(move(cell,_plateau[0][1]));
 		}
 	}
 	if (row == 8 && player == 1){
 		if(_plateau[8][0]->isEmpty())
 		{
-			list.push_back(move(8,0));
+            list.push_back(move(cell,_plateau[8][0]));
 		}
 		if(_plateau[8][1]->isEmpty())
 		{
-			list.push_back(move(8,1));
+            list.push_back(move(cell,_plateau[8][1]));
 		}
 	}
 	BoardCell* new_cell;
@@ -149,7 +198,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 				new_cell = (BoardCell*)_plateau[row+i][col+j];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-					list.push_back(move(row+i, col+j));
+                    list.push_back(move(cell,_plateau[row+i][col+j]));
 				}
 			}
 		}
@@ -162,7 +211,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 		j = 1;
 		while((row-i)>= 1 && (col-j) >= 1)
 		{
-			if(! checkCellAddMove(row-i, col-j, player, CellType::BISHOP, &list))
+            if(! checkCellAddMove((BoardCell*) cell, row-i, col-j, player, CellType::BISHOP, &list))
 			{
 				break;
 			}
@@ -175,7 +224,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 		j = 1;
 		while((row-i)>= 1 && (col+j) <= 8)
 		{
-			if(! checkCellAddMove(row-i, col+j, player, CellType::BISHOP, &list))
+            if(! checkCellAddMove((BoardCell*) cell, row-i, col+j, player, CellType::BISHOP, &list))
 			{
 				break;
 			}
@@ -188,7 +237,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 		j = 1;
 		while((row+i) <= 8 && (col-j) >= 1)
 		{
-			if(! checkCellAddMove(row+i, col-j, player, CellType::BISHOP, &list))
+            if(! checkCellAddMove((BoardCell*) cell, row+i, col-j, player, CellType::BISHOP, &list))
 			{
 				break;
 			}
@@ -201,7 +250,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 		j = 1;
 		while((row+i) <= 8 && (col+j) <= 8)
 		{
-			if(! checkCellAddMove(row+i, col+j, player, CellType::BISHOP, &list))
+            if(! checkCellAddMove((BoardCell*) cell, row+i, col+j, player, CellType::BISHOP, &list))
 			{
 				break;
 			}
@@ -215,7 +264,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 		i = 1;
 		while((row-i) >= 1) // Top line
 		{
-			if(! checkCellAddMove(row-i, col, player, CellType::ROCK, &list))
+            if(! checkCellAddMove((BoardCell*) cell, row-i, col, player, CellType::ROCK, &list))
 			{
 				break;
 			}
@@ -225,7 +274,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 		i = 1;
 		while((row+i) <= 8) // Bottom line
 		{
-			if(! checkCellAddMove(row+i, col, player, CellType::ROCK, &list))
+            if(! checkCellAddMove((BoardCell*) cell, row+i, col, player, CellType::ROCK, &list))
 			{
 				break;
 			}
@@ -235,7 +284,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 		i = 1;
 		while((col-i) >= 1) // Left line
 		{
-			if(! checkCellAddMove(row, col-i, player, CellType::ROCK, &list))
+            if(! checkCellAddMove((BoardCell*) cell, row, col-i, player, CellType::ROCK, &list))
 			{
 				break;
 			}
@@ -245,7 +294,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 		i = 1;
 		while((col+i) <= 8) // Right line
 		{
-			if(! checkCellAddMove(row, col+i, player, CellType::ROCK, &list))
+            if(! checkCellAddMove((BoardCell*) cell, row, col+i, player, CellType::ROCK, &list))
 			{
 				break;
 			}
@@ -264,7 +313,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 				new_cell = (BoardCell*) _plateau[row-1][col-2];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-					list.push_back(move(row-1, col-2));
+                    list.push_back(move(cell,_plateau[row-1][col-2]));
 				}
 			}
 			if((row+1) <= 8)
@@ -272,7 +321,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 				new_cell = (BoardCell*) _plateau[row+1][col-2];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-					list.push_back(move(row+1, col-2));
+                    list.push_back(move(cell,_plateau[row+1][col-2]));
 				}
 			}
 		}
@@ -284,7 +333,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 				new_cell = (BoardCell*) _plateau[row-1][col+2];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-					list.push_back(move(row-1, col+2));
+                    list.push_back(move(cell,_plateau[row-1][col+2]));
 				}
 			}
 			if((row+1) <= 8)
@@ -292,7 +341,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 				new_cell = (BoardCell*) _plateau[row+1][col+2];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-					list.push_back(move(row+1, col+2));
+                    list.push_back(move(cell,_plateau[row+1][col+2]));
 				}
 			}
 		}
@@ -305,7 +354,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 				new_cell = (BoardCell*) _plateau[row-2][col-1];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-					list.push_back(move(row-2, col-1));
+                    list.push_back(move(cell,_plateau[row-2][col-1]));
 				}
 			}
 			if((col+1) <= 8)
@@ -313,7 +362,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 				new_cell = (BoardCell*) _plateau[row-2][col+1];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-					list.push_back(move(row-2, col+1));
+                    list.push_back(move(cell,_plateau[row-2][col+1]));
 				}
 			}
 		}
@@ -326,7 +375,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 				new_cell = (BoardCell*) _plateau[row+2][col-1];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-					list.push_back(move(row+2, col-1));
+                    list.push_back(move(cell,_plateau[row+2][col-1]));
 				}
 			}
 			if((col+1) <= 8)
@@ -334,7 +383,7 @@ std::vector<move> Board::getAllMoves(int row, int col)
 				new_cell = (BoardCell*) _plateau[row+2][col+1];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-					list.push_back(move(row+2, col+1));
+                    list.push_back(move(cell,_plateau[row+2][col+1]));
 				}
 			}
 		}
@@ -347,22 +396,22 @@ std::vector<move> Board::getAllMoves(int row, int col)
 
 // Internal function to populate the vector of moves, called in getAllMoves.
 // Returns false if the while loop calling this function has to break.
-bool Board::checkCellAddMove(int row, int col, int player, CellType type, std::vector<move> *plist)
+bool Board::checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<move> *plist)
 {
-	BoardCell* new_cell = (BoardCell*) _plateau[row][col];
-	if(new_cell->isEmpty())
+    BoardCell * dst_cell = (BoardCell*)_plateau[row][col];
+    if(dst_cell->isEmpty())
 	{
-		plist->push_back(move(row,col));
-		if(new_cell->getType() == type)
+        plist->push_back(move(src_cell,dst_cell));
+        if(dst_cell->getType() == type)
 		{
 			return false;
 		}
 	}
 	else
 	{
-		if(new_cell->getPiece()->getPlayer() == -player)
+        if(dst_cell->getPiece()->getPlayer() == -player)
 		{
-			plist->push_back(move(row,col));
+            plist->push_back(move(src_cell, dst_cell));
 		}
 		return false;
 	}
