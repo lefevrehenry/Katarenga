@@ -7,10 +7,8 @@ int main()
 	Board board;
 	board.print();
 
-	std::vector<move> list = board.getAllMoves(4,5);
-	for(move m: list){
-		std::cout << m.first << m.second << std::endl;
-	}
+    //board.doTest();
+    board.main_loop();
 
 	return 0;
 }

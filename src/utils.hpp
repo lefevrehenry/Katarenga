@@ -1,4 +1,7 @@
-﻿#include <string>
+﻿#ifndef UTILS_HPP
+#define UTILS_HPP
+
+#include <string>
 #include <cstdlib>
 
 class Cell;
@@ -44,3 +47,4 @@ std::string generateBoardString();
 
 typedef std::pair<Cell*,Cell*> move;
 
+#endif // UTILS_HPP

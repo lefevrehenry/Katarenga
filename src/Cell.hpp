@@ -15,7 +15,10 @@ enum class CellType
 class Cell
 {
 public:
-	Cell() {}
+    Cell() {}
+    Cell(int row, int column):
+        _row(row),
+        _column(column){}
 	virtual ~Cell() {}
 
 	bool isEmpty() const { return _piece == nullptr; } // Tells whether the cell is empty or not
@@ -23,9 +26,17 @@ public:
 	Piece * getPiece() const { return _piece; }
 	void setPiece(Piece *piece) { _piece = piece; }
 
+    int getIndex() const { return _index; }
+    int getRow() const { return _row; }
+    int getColumn() const { return _column; }
+
 	virtual bool isCampCell() = 0;
 protected:
 	Piece * _piece = nullptr; // Points to the Piece on this Cell, or nullptr
+    int _row;       // Row of this Cell
+    int _column;    // Column of this Cell
+    int _index;     // Index of this Cell, equals to 8*row+column-1 if BoardCell
+                    // 1 or 2 for a White CampCell, -1 or -2 for a Black CampCell
 };
 
 
@@ -35,25 +46,17 @@ class BoardCell : public Cell
 {
 public:
 	BoardCell() {}
-	BoardCell(CellType type,
-		 int row,
-		 int column):
-		_type(type),
-		_row(row),
-		_column(column),
-	    _index(8*row+column){}
+    BoardCell(CellType type, int row, int column):
+        Cell(row,column),
+        _type(type)
+        {_index = 8*row+column-1;}
 
 	CellType getType() const { return _type; }
-
-	int getIndex() const { return _index; }
 
 	bool isCampCell() { return false; }
 
 private:
 	CellType _type;				// Type of the BoardCell
-	int _row;					// Row of this BoardCell on the board
-	int _column;				// Column of this BoardCell on the board
-	int _index;					// Index of this BoardCell, equals to 8*row + column
 };
 
 
@@ -62,17 +65,12 @@ class CampCell : public Cell
 {
 public:
 	CampCell() {}
-	CampCell(int index):
-	    _index(index){}
-
-	void init(int index){ _index = index; }
+    CampCell(int row, int column, int index):
+        Cell(row, column){_index = index;}
 
 	bool isEmpty(){ return _piece == nullptr; }	// Tells whether the CampCell is occupied or not
 
 	bool isCampCell() { return true; }
-
-private:
-	int _index;					// The index of the CampCell. Either 1 or 2 for White player; -1 or -2 for Black player.
 };
 
 #endif // CELL_HPP
