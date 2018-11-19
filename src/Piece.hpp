@@ -16,7 +16,7 @@ public:
 	    _player(player),
         _moveList(moveList),
         _cell(cell) { _cell->setPiece(this);}
-
+    ~Piece() {delete _moveList; }
 
     int getPlayer() const { return _player; }
     std::vector<move>* getMoveList() { return _moveList; }

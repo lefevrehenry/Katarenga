@@ -1,6 +1,7 @@
 ﻿#include "Board.hpp"
 
 #include <iostream>
+#include <algorithm>
 
 Board::Board()
 {
@@ -83,14 +84,14 @@ Board::~Board()
 	for(size_t i = 0; i<_piecesW.size(); ++i)
 	{
         p = _piecesW[i];
-        delete p->getMoveList();
+        //delete p->getMoveList();
         delete p;
 		_piecesW[i] = nullptr;
 	}
 	for(size_t i = 0; i<_piecesB.size(); ++i)
 	{
         p = _piecesB[i];
-        delete p->getMoveList();
+        //delete p->getMoveList();
         delete p;
 		_piecesB[i] = nullptr;
 	}
@@ -168,7 +169,7 @@ Board::main_loop()
             std::cout << "Congrats! " << (_currentPlayer==1?"White (+)":"Black (-)") << " player won the game!" << std::endl;
             break;
         }
-        _currentPlayer = 1 - _currentPlayer;
+        _currentPlayer = -_currentPlayer;
 
         // TODO Remove this, it's just here to avoid looping when testing
         if(n++ == 5)
@@ -187,13 +188,13 @@ Board::doMove(move move)
     Piece * piece = src_cell->getPiece();
 
     std::cout << "Before move piece is at " << src_cell->getRow() << " " << src_cell->getColumn() << std::endl;
+    if(!dst_cell->isEmpty()){
+        removePiece(dst_cell->getPiece());
+    }
     dst_cell->setPiece(piece);
     src_cell->setPiece(nullptr);
     piece->setCell(dst_cell);
     fillAllMoves(dst_cell->getRow(), dst_cell->getColumn(), piece->getMoveList());
-
-    std::cout << dst_cell << " " << piece->getCell() << std::endl;
-
 }
 
 
@@ -202,13 +203,24 @@ Board::askNextValidMove()
 {
     int ri, ci, rj, cj;
     bool flag = true;
-    std::cout << (this->_currentPlayer == 1 ? "It's White's (+)" : "Black's (-)") << " turn, what is you move? (row,col) -> (row,col)" << std::endl;
+    std::cout << (this->_currentPlayer == 1 ? "It's White's (+)" : "Black's (-)") << " turn, what is your move?" << std::endl;
     while(flag)
     {
+        std::cout << "Initial row?";
         std::cin >> ri;
+        std::cout << "Initial column?";
         std::cin >> ci;
+        std::cout << "Target row?";
         std::cin >> rj;
+        std::cout << "Target column?";
         std::cin >> cj;
+
+        /*for(move m : *_plateau[ri][ci]->getPiece()->getMoveList())
+        {
+            BoardCell * a = (BoardCell*)m.first;
+            BoardCell * b = (BoardCell*)m.second;
+            std::cout << "Possible move from " << a->getIndex() << " to " << b->getIndex() << std::endl;
+        }*/
 
         move move(_plateau[ri][ci], _plateau[rj][cj]);
 
@@ -227,7 +239,7 @@ Board::askNextValidMove()
 
 bool Board::isValidMove(move m, int current_player)
 {
-    std::cout << "Is this move valid?" << m.first->getIndex() << " -> " << m.second->getIndex() << std::endl;
+    std::cout << "Is this move valid? " << m.first->getIndex() << " -> " << m.second->getIndex() << std::endl;
 
     if (m.first->isEmpty() || m.first->getPiece()->getPlayer() != current_player)
     {
@@ -240,10 +252,14 @@ bool Board::isValidMove(move m, int current_player)
 
     for (move move : *(m.first->getPiece()->getMoveList()))
     {
-        std::cout << "Testing " << m.first->getIndex() << " -> " << m.second->getIndex() << std::endl;
+        std::cout << "Testing " << move.first->getIndex() << " -> " << move.second->getIndex() << std::endl;
         if (move.second == m.second)
         {
             return true;
+        }
+        else
+        {
+            std::cout << "Cell " << move.second->getIndex() << " and " << m.second->getIndex() << " does not match" << std::endl;
         }
     }
 
@@ -539,6 +555,21 @@ Board::gameFinished()
     return false;
 }
 
+
+void
+Board::removePiece(Piece * p)
+{
+    std::cout << "Outch! " << ((p->getPlayer() == 1) ? "White" : "Black") << " just lost a Piece!" << std::endl;
+    std::vector<Piece*> * list = p->getPlayer()==1 ? &_piecesW : &_piecesB;
+
+    auto it = std::find(list->begin(), list->end(), p);
+    if (it != list->end())
+    {
+        list->erase(it);
+    }
+
+    delete p;
+}
 
 void
 Board::print()
