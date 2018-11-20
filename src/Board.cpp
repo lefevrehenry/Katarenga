@@ -187,7 +187,6 @@ Board::doMove(move move)
     Cell * dst_cell = move.second;
     Piece * piece = src_cell->getPiece();
 
-    std::cout << "Before move piece is at " << src_cell->getRow() << " " << src_cell->getColumn() << std::endl;
     if(!dst_cell->isEmpty()){
         removePiece(dst_cell->getPiece());
     }
@@ -201,45 +200,35 @@ Board::doMove(move move)
 move
 Board::askNextValidMove()
 {
-    int ri, ci, rj, cj;
+    int srci, desti;
     bool flag = true;
+    move m;
     std::cout << (this->_currentPlayer == 1 ? "It's White's (+)" : "Black's (-)") << " turn, what is your move?" << std::endl;
     while(flag)
     {
-        std::cout << "Initial row?";
-        std::cin >> ri;
-        std::cout << "Initial column?";
-        std::cin >> ci;
-        std::cout << "Target row?";
-        std::cin >> rj;
-        std::cout << "Target column?";
-        std::cin >> cj;
+        std::cout << "Source index: ";
+        std::cin >> srci;
+        std::cout << "Destination index: ";
+        std::cin >> desti;
 
-        /*for(move m : *_plateau[ri][ci]->getPiece()->getMoveList())
+        m = move(indexToCell(srci),indexToCell(desti));
+
+        if(!isValidMove(m, _currentPlayer))
         {
-            BoardCell * a = (BoardCell*)m.first;
-            BoardCell * b = (BoardCell*)m.second;
-            std::cout << "Possible move from " << a->getIndex() << " to " << b->getIndex() << std::endl;
-        }*/
-
-        move move(_plateau[ri][ci], _plateau[rj][cj]);
-
-        if(!isValidMove(move, _currentPlayer))
-        {
-            std::cout << "Invalid move... what is your move? (row,col) -> (row,col)" << std::endl;
+            std::cout << "Invalid move... what is your move?" << std::endl;
         }
         else
         {
             flag = false;
         }
     }
-    return move(_plateau[ri][ci], _plateau[rj][cj]);
+    return m;
 }
 
 
 bool Board::isValidMove(move m, int current_player)
 {
-    std::cout << "Is this move valid? " << m.first->getIndex() << " -> " << m.second->getIndex() << std::endl;
+    //std::cout << "Is this move valid? " << m.first->getIndex() << " -> " << m.second->getIndex() << std::endl;
 
     if (m.first->isEmpty() || m.first->getPiece()->getPlayer() != current_player)
     {
@@ -252,15 +241,15 @@ bool Board::isValidMove(move m, int current_player)
 
     for (move move : *(m.first->getPiece()->getMoveList()))
     {
-        std::cout << "Testing " << move.first->getIndex() << " -> " << move.second->getIndex() << std::endl;
+        //std::cout << "Testing " << move.first->getIndex() << " -> " << move.second->getIndex() << std::endl;
         if (move.second == m.second)
         {
             return true;
         }
-        else
+        /*else
         {
             std::cout << "Cell " << move.second->getIndex() << " and " << m.second->getIndex() << " does not match" << std::endl;
-        }
+        }*/
     }
 
     return false;
@@ -555,6 +544,29 @@ Board::gameFinished()
     return false;
 }
 
+Cell *
+Board::indexToCell(int cell_index)
+{
+    switch(cell_index)
+    {
+    case 1:
+        return _plateau[0][0];
+        break;
+    case 2:
+        return _plateau[0][1];
+        break;
+    case -1:
+        return _plateau[9][0];
+        break;
+    case -2:
+        return _plateau[9][1];
+        break;
+    default:
+        int row = cell_index/8;
+        int col = (cell_index % 8) + 1;
+        return _plateau[row][col];
+    }
+}
 
 void
 Board::removePiece(Piece * p)

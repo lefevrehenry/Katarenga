@@ -4,10 +4,8 @@
 
 int main()
 {
-	Board board;
-	board.print();
+    Board board;
 
-    //board.doTest();
     board.main_loop();
 
 	return 0;

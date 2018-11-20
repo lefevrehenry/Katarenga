@@ -33,6 +33,7 @@ public:
 
 private:
     void removePiece(Piece * p);
+    Cell * indexToCell(int cell_index);
     bool checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<move>* plist);
 
     Cell *** _plateau;                  // The Board containing the 8*8 BoardCells and the 4 CampCells
