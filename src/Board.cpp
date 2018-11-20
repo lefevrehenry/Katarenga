@@ -111,44 +111,6 @@ Board::~Board()
      _plateau = nullptr;   // that?
 }
 
-
-void Board::doTest()
-{
-    BoardCell * cell = (BoardCell *)_plateau[1][5];
-    Piece * p = cell->getPiece();
-    std::cout << cell->isEmpty() << " " << cell->getRow() << std::endl;
-    for(move m : *p->getMoveList())
-    {
-        BoardCell * a = (BoardCell*)m.first;
-        BoardCell * b = (BoardCell*)m.second;
-        std::cout << "Possible move from " << a->getIndex() << " to " << b->getIndex() << std::endl;
-    }
-
-    move move(_plateau[1][5], _plateau[5][5]);
-    if(isValidMove(move, _currentPlayer))
-    {
-        doMove(move);
-    }
-    else
-    {
-        std::cout << "AAAA" << std::endl;
-    }
-
-    cell = (BoardCell*) p->getCell();
-    std::cout << "Now piece is at " << cell->getRow() << " " << cell->getColumn() << std::endl;
-
-    print();
-
-    if(isValidMove(move, _currentPlayer))
-    {
-        std::cout << "NOOB" << std::endl;
-    }
-    else
-    {
-        std::cout << "BBBB" << std::endl;
-    }
-}
-
 void
 Board::main_loop()
 {
@@ -170,12 +132,6 @@ Board::main_loop()
             break;
         }
         _currentPlayer = -_currentPlayer;
-
-        // TODO Remove this, it's just here to avoid looping when testing
-        if(n++ == 5)
-        {
-            break;
-        }
     }
 }
 
@@ -586,9 +542,9 @@ Board::removePiece(Piece * p)
 void
 Board::print()
 {
-	std::string s = "  1  2  3  4  5  6  7  8\n";
+    std::string s = "   1    2    3    4    5    6    7    8\n";
 	s+= (_plateau[0][0]->isEmpty() ? " " : "X");
-	s+= "        White        ";
+    s+= "              White              ";
 	s+= (_plateau[0][1]->isEmpty() ? " " : "X");
 	s+= "\n";
 	for(int i = 1; i<=8; ++i)		// Iterates over rows
@@ -628,7 +584,7 @@ Board::print()
 		s+="\n";
 	}
 	s+= (_plateau[9][0]->isEmpty() ? " " : "X");
-	s+= "        Black        ";
+    s+= "              Black              ";
 	s+= (_plateau[9][1]->isEmpty() ? " " : "X");
 	//s+= "\n";
 	std::cout << s << std::endl;

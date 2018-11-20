@@ -14,8 +14,6 @@ public:
 	Board();
 	~Board();
 
-    void doTest(); //TODO REMOVE THIS
-
     bool movePiece(move move);
 
     bool isValidMove(move m, int current_player);
