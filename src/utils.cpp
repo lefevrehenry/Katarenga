@@ -1,8 +1,5 @@
 ﻿#include "utils.hpp"
 
-//TODO remove iostream
-#include <iostream>
-
 // Generates 4 different random values between 0 and 7.
 void pickRand(int *a, int *b, int *c, int *d){
 	srand (time(NULL));
@@ -22,9 +19,7 @@ void pickRand(int *a, int *b, int *c, int *d){
 std::string generateBoardString()
 {
 	int a,b,c,d;
-	//pickRand(&a, &b, &c, &d);
-	std::cout << "WARNING the board is fixed and not randomly picked" << std::endl;
-	a=1; b=2; c=3; d=4;
+    pickRand(&a, &b, &c, &d);
 
 	std::string s1 = "";
 	std::string s2 = "";
