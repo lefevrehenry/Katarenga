@@ -5,6 +5,7 @@
 #include <map>
 
 #include "docopt/docopt.h"
+#include "zmq.hpp"
 
 using namespace std;
 
@@ -66,9 +67,34 @@ int main(int argc, char * argv[])
 {
     // Let's parse the command-line arguments!
     MainArguments main_args;
-    if (!parse_main_args(argc, argv, main_args))
+    if (parse_main_args(argc, argv, main_args))
     {
         return 1;
+    }
+
+    cout << "HELLO!" << endl;
+
+    if (main_args.is_server)
+    {
+        zmq::context_t context(1);
+        zmq::socket_t socket(context, ZMQ_REP);
+        socket.bind(main_args.socket_endpoint);
+
+        zmq::message_t m;
+        socket.recv(&m);
+        string s((char*)m.data(), m.size());
+        cout << "Server received " << s.c_str() << m.size();
+    }
+    else
+    {
+        zmq::context_t context(1);
+        zmq::socket_t socket (context, ZMQ_REQ);
+        socket.connect(main_args.socket_endpoint);
+        cout << "Client connected! Sending message" << endl;
+
+        //zmq::message_t m(4);
+        string s = "toto";
+        socket.send(s.data(), s.size());
     }
 
     //Board board;
