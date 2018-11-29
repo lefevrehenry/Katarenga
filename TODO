@@ -1,0 +1,33 @@
+Main thread : 
+- lance un thread GL
+- si serveur :
+    - lance un thread serveur
+    - attend la terminaison d'un des deux threads (GL ou serveur)
+- sinon :
+    - attend la terminaison du thread GL
+
+
+/!\ Attention besoin de gérer si problème réseau, connexion au socket perdu -> besoin de terminer le thread GL.
+
+
+Dans le Thread GL : 
+- Crée un objet Board
+- Crée un socket et se connecte au serveur
+- Fait tout ce qu'a besoin GL pour fonctionner
+- Dans la main loop :
+    - Récupère un coup et l'envoie au serveur via socket
+    - Attend la réponse du serveur (coup valie ou non)
+    - Si coup valide, attend le coup de l'adversaire en écoutant le socket
+
+
+Dans le Thread Serveur :
+- Crée un objet Board
+- Ouvre 2 sockets et attend la connexion des 2 clients (les threads GL)
+- Dans la main loop :
+    - Attend le coup du joueur Blanc
+    - Vérifie et valide le coup en broadcastant aux 2 clients
+    - Attend le coup du joueur Noir
+    - Vérifie et valide le coup en broadcastant aux 2 clients
+
+/!\ Attention besoin de gérer les déconnexion des clients.
+
