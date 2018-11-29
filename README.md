@@ -9,7 +9,7 @@ curl https://nixos.org/nix/install | sh
 ```
 Follow the instructions displayed at the end of the script. You usually need to source a file to access the Nix commands:
 ```
-source ~/nix-profiles/etc/profile.d/nix.sh
+source ~/nix-profile/etc/profile.d/nix.sh
 ```
 
 Then, in your Katarenga folder you can simply execute `nix-shell` to be in a shell with everything you need to build katarenga.
