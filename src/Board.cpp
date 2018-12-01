@@ -3,8 +3,9 @@
 #include <iostream>
 #include <algorithm>
 
-Board::Board()
+Board::Board(bool verbose)
 {
+    _verbose = verbose;
 	// Initialization of the BoardCells
 	_plateau = (Cell***) malloc(10 * sizeof(Cell**));
 	if(!_plateau){
@@ -75,7 +76,11 @@ Board::Board()
         fillAllMoves(1, j, _piecesW[j-1]->getMoveList());
         fillAllMoves(8, j, _piecesB[j-1]->getMoveList());
     }
-    std::cout << "Board successfully initialized, now is time to play!" << std::endl;
+
+    if(_verbose)
+    {
+        std::cout << "Board successfully initialized, now is time to play!" << std::endl;
+    }
 }
 
 Board::~Board()

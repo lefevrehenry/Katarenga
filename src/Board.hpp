@@ -11,7 +11,7 @@
 class Board
 {
 public:
-	Board();
+    Board(bool verbose);
 	~Board();
 
     bool movePiece(move move);
@@ -38,6 +38,7 @@ private:
 	std::vector<Piece*> _piecesW;		// The list of White Pieces
 	std::vector<Piece*> _piecesB;		// The list of Black Pieces
 
+    bool _verbose;                       // Whether to talk a lot or not
     int _currentPlayer = 1;				// 1 if White, -1 if Black
     int _isWin = 0;						// 0 if not win, 1 if White wins, -1 if Black wins
 };
