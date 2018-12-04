@@ -1,4 +1,4 @@
-#include "network.hpp"
+#include "network_utils.hpp"
 
 //  Receive message from socket and convert into string
 std::string s_recv (zmq::socket_t & socket)

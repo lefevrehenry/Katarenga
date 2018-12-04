@@ -1,5 +1,5 @@
-#ifndef NETWORK_HPP
-#define NETWORK_HPP
+#ifndef NETWORK_UTILS_HPP
+#define NETWORK_UTILS_HPP
 
 #include "zmq.hpp"
 #include <string>
@@ -10,5 +10,5 @@ std::string s_recv (zmq::socket_t & socket);
 //  Convert string to message and send to socket
 bool s_send (zmq::socket_t & socket, std::string & string);
 
-#endif // NETWORK_HPP
+#endif // NETWORK_UTILS_HPP
 

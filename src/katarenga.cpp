@@ -1,7 +1,7 @@
 #include "katarenga.hpp"
 #include "Board.hpp"
-#include "network.hpp"
-//#include "server.hpp"
+#include "network_utils.hpp"
+#include "server.hpp"
 //#include "graphics.hpp"
 
 #include <iostream>
@@ -81,49 +81,14 @@ Other options:
 }
 
 
-// TODO move this function in server.cpp
-void server_function(int socket_portW, int socket_portB)
-{
-    bool verbose = false;
-
-    // Open sockets for White and Black players
-    zmq::context_t contextW(1);
-    zmq::socket_t socketW(contextW, ZMQ_PAIR);
-    socketW.bind("tcp://*:"+to_string(socket_portW));
-
-    zmq::context_t contextB(1);
-    zmq::socket_t socketB(contextB, ZMQ_PAIR);
-    socketB.bind("tcp://*:"+to_string(socket_portB));
-
-    if(verbose) {cout << "I'm the server and my two sockets are open" << endl;}
-
-    Board server_board(verbose);
-    bool end_game = false;
-    while (!end_game)
-    {
-        string s = s_recv(socketW);
-        cout << "Server received: " << s << endl;
-
-        string s2 = s_recv(socketB);
-        cout << "Server received: " << s2 << endl;
-
-        s_send(socketB, s);
-        s_send(socketW, s2);
-
-        end_game = true;
-    }
-
-    socketW.close();
-    socketB.close();
-    cout << "Terminating server thread." << endl;
-}
 
 // TODO move this function in another file
 void GL_function(int this_player, int socket_port)
 {
+    string socket_endpoint = "tcp://127.0.0.1:" + to_string(socket_port);
     zmq::context_t contextGL(1);
     zmq::socket_t socketGL(contextGL, ZMQ_PAIR);
-    socketGL.connect("tcp://127.0.0.1:"+to_string(socket_port));
+    socketGL.connect(socket_endpoint);
 
     string s = "Hello from ";
     s = s + (this_player == 1 ? "White":"Black") + " player GL thread";
@@ -135,8 +100,6 @@ void GL_function(int this_player, int socket_port)
     s = s_recv(socketGL);
 
     cout << "GL thread just received " << s << endl;
-
-
 
     socketGL.close();
     cout << "Terminating GL thread." << endl;
@@ -163,7 +126,7 @@ int main(int argc, char * argv[])
     std::thread thr_server;
     if (main_args.is_server)
     {
-        std::thread thr(server_function, main_args.server_player_port, main_args.server_opponent_port);
+        std::thread thr(server_function, main_args.server_player_port, main_args.server_opponent_port, main_args.verbose);
         thr_server.swap(thr);
     }
 
@@ -181,12 +144,8 @@ int main(int argc, char * argv[])
     socketGL.recv(&m);
     socketServer.send(m);
 
-    //m.rebuild();
     socketServer.recv(&m);
     socketGL.send(m);
-
-    //string s = s_recv(socketGL);
-    //s_send(socketServer, s);
 
     cout << s_player <<  " player relayed message from GL thread to server" << endl;
 
@@ -197,6 +156,7 @@ int main(int argc, char * argv[])
     }
     cout << s_player << " player terminating main process" << endl;
 
-    //socketGL.close();
+    socketServer.close();
+    socketGL.close();
     return 0;
 }
