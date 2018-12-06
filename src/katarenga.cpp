@@ -2,11 +2,10 @@
 #include "Board.hpp"
 #include "network_utils.hpp"
 #include "server.hpp"
-//#include "graphics.hpp"
+#include "player.hpp"
 
 #include <iostream>
 #include <map>
-#include <thread>
 
 #include "docopt/docopt.h"
 
@@ -18,16 +17,16 @@ int parse_main_args(int argc, char * argv[], MainArguments & main_args)
 R"(Katarenga: A nice two-player board game!.
 
 Usage:
-    katarenga (--white | --black)   [--server-ip <ip>]
-                                    [--server-port <port>]
-                                    [--graphics-port <port>]
-                                    [options]
+    katarenga (--white | --black | --server)  [--server-ip <ip>]
+                                              [--server-port <port>]
+                                              [--graphics-port <port>]
+                                              [options]
     katarenga -h | --help
 
 Input options:
-    --white                        This process will be the White player.
-                                   For the moment, this process will also hold the server thread.
-    --black                        This process will be the Black player.
+    --white                        This process will be the client process for the White player.
+    --black                        This process will be the client process for the Black player.
+    --server                       This process will be the server process.
     --server-ip <ip>               If client process, the IP address of the server.
                                    If server process, this option is ignored.
                                    [default: 127.0.0.1]
@@ -47,24 +46,30 @@ Other options:
     int graphics_black_port = offset_port + 2;
     int server_black_port = offset_port + 3;;
 
-    if (args["--white"].asBool())
+    if (args["--server"].asBool())
+    {
+        main_args.player = 0;
+        main_args.is_server = true;
+        main_args.server_white_port = offset_port + 1;
+        main_args.server_black_port = offset_port + 3;
+    }
+    else if (args["--white"].asBool())
     {
         main_args.player = 1;
-        main_args.is_server = true;
+        main_args.is_server = false;
         main_args.graphics_port = offset_port;
-        main_args.server_player_port = offset_port + 1;
-        main_args.server_opponent_port = offset_port + 3;
+        main_args.server_white_port = offset_port + 1;
     }
     else if (args["--black"].asBool())
     {
         main_args.player = -1;
         main_args.is_server = false;
         main_args.graphics_port = offset_port + 2;
-        main_args.server_player_port = offset_port + 3;
+        main_args.server_black_port = offset_port + 3;
     }
     else
     {
-        cout << "Argument parsing error, please specify whether the process is a server or a client" << endl;
+        cout << "Argument parsing error, please specify whether the process is a server, white or black player." << endl;
         return 1;
     }
 
@@ -73,37 +78,13 @@ Other options:
 
     if(main_args.verbose)
     {
-        cout << "Parsing argument successfully done!\nI'm a Katarenga " << (main_args.player==1?"White":"Black")
-          << " player, server endpoint: " << main_args.server_ip << ":" << main_args.server_player_port
-          << ", graphics port: " << main_args.graphics_port << endl;
+        cout << "Parsing argument successfully done!\nI'm a Katarenga "
+             << (main_args.player==1?"White player": (main_args.player==0?"Server":"Black player"))
+             << ", the server IP is: " << main_args.server_ip << " and the offset port is " << offset_port << endl;
     }
     return 0;
 }
 
-
-
-// TODO move this function in another file
-void GL_function(int this_player, int socket_port)
-{
-    string socket_endpoint = "tcp://127.0.0.1:" + to_string(socket_port);
-    zmq::context_t contextGL(1);
-    zmq::socket_t socketGL(contextGL, ZMQ_PAIR);
-    socketGL.connect(socket_endpoint);
-
-    string s = "Hello from ";
-    s = s + (this_player == 1 ? "White":"Black") + " player GL thread";
-
-    cout << "GL thread sending " << s << endl;
-
-    s_send(socketGL, s);
-
-    s = s_recv(socketGL);
-
-    cout << "GL thread just received " << s << endl;
-
-    socketGL.close();
-    cout << "Terminating GL thread." << endl;
-}
 
 int main(int argc, char * argv[])
 {
@@ -113,50 +94,24 @@ int main(int argc, char * argv[])
     {
         return 1;
     }
-    Board board(main_args.verbose);
-    int i_player = main_args.player;
-    string s_player = main_args.player == 1 ? "White" : "Black";
 
-    cout << "I'm main thread of " << s_player << " " << i_player << endl;
-
-    ///////////////////////////////////////////
-    // TODO put this in an init network/threads function
-
-    // If I'm holding the server, launch it
-    std::thread thr_server;
-    if (main_args.is_server)
-    {
-        std::thread thr(server_function, main_args.server_player_port, main_args.server_opponent_port, main_args.verbose);
-        thr_server.swap(thr);
-    }
-
-    zmq::context_t contextGL(1);
-    zmq::socket_t socketGL(contextGL, ZMQ_PAIR);
-    std::thread thr_GL(GL_function, main_args.player, main_args.graphics_port);
-    socketGL.bind("tcp://*:"+to_string(main_args.graphics_port));
-
-    zmq::context_t contextS(1);
-    zmq::socket_t socketServer(contextS, ZMQ_PAIR);
-    string server_endpoint = "tcp://" + main_args.server_ip + ":" + to_string(main_args.server_player_port);;
-    socketServer.connect(server_endpoint);
-
-    zmq::message_t m;
-    socketGL.recv(&m);
-    socketServer.send(m);
-
-    socketServer.recv(&m);
-    socketGL.send(m);
-
-    cout << s_player <<  " player relayed message from GL thread to server" << endl;
-
-    thr_GL.join();
     if(main_args.is_server)
     {
-        thr_server.join();
+        server_function(main_args.server_white_port, main_args.server_black_port, main_args.verbose);
     }
-    cout << s_player << " player terminating main process" << endl;
+    else
+    {
+        string server_endpoint;
+        if (main_args.player == 1)
+        {
+            server_endpoint = "tcp://" + main_args.server_ip + ":" + to_string(main_args.server_white_port);
+        }
+        else
+        {
+            server_endpoint = "tcp://" + main_args.server_ip + ":" + to_string(main_args.server_black_port);
+        }
+        player_function(main_args.player, main_args.graphics_port, server_endpoint, main_args.verbose);
+    }
 
-    socketServer.close();
-    socketGL.close();
     return 0;
 }
