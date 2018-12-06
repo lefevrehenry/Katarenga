@@ -26,6 +26,8 @@ public:
 
     bool gameFinished();
 
+    int getCurrentPlayer(){ return _currentPlayer; }
+
     void main_loop();
 	void print();
 
@@ -33,6 +35,11 @@ private:
     void removePiece(Piece * p);
     Cell * indexToCell(int cell_index);
     bool checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<move>* plist);
+
+    // Converts a string representation of a move to a move
+    move stringToMove(std::string & move_str);
+    // Converts a move to a string representation of that move
+    std::string moveToString(move move);
 
     Cell *** _plateau;                  // The Board containing the 8*8 BoardCells and the 4 CampCells
 	std::vector<Piece*> _piecesW;		// The list of White Pieces

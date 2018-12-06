@@ -529,6 +529,82 @@ Board::indexToCell(int cell_index)
     }
 }
 
+// Converts a string representation of a move to a move
+move Board::stringToMove(std::string & move_str)
+{
+    /* A string move is of the form:
+     * src_cell_index:dest_cell_index
+     * Where the index is between 08 and 72 for a Board cell
+     * and -1/-2/+1/+2 for a Camp cell. */
+    if (move_str.size() != 5)
+    {
+        std::cout << "ERROR while retrieving a move from a string (" << move_str << ")." << std::endl;
+        // TODO RAISE ERROR
+        return move();
+    }
+
+    int src_index, dest_index;
+    std::string src_str = move_str.substr(0, 2);
+    std::string dest_str = move_str.substr(3, 2);
+
+    int i = stoi(src_str);
+    int j = stoi(dest_str);
+    std::cout << i << " " << j << std::endl;
+
+    return move(indexToCell(stoi(src_str)),indexToCell(stoi(dest_str)));
+}
+
+// Converts a move to a string representation of that move
+std::string Board::moveToString(move move)
+{
+    int src_index = move.first->getIndex();
+    int dest_index = move.second->getIndex();
+    std::string s;
+
+    if (src_index == 1 || src_index == 2)
+    {
+        s = "+" + std::to_string(src_index);
+    }
+    else if (src_index == -1 || src_index == -2)
+    {
+        s = "-" + std::to_string(src_index);
+    }
+    else if (src_index < 10)
+    {
+        s = "0" + std::to_string(src_index);
+    }
+    else
+    {
+        s = std::to_string(src_index);
+    }
+    s += ":";
+    if (dest_index == 1 || dest_index == 2)
+    {
+        s += "+" + std::to_string(dest_index);
+    }
+    else if (dest_index == -1 || dest_index == -2)
+    {
+        s += std::to_string(dest_index);
+    }
+    else if (dest_index < 10)
+    {
+        s += "0" + std::to_string(dest_index);
+    }
+    else
+    {
+        s += std::to_string(dest_index);
+    }
+
+    if (s.size() != 5)
+    {
+        std::cout << s << " " << s.size() << std::endl;
+        std::cout << "ERROR while transcripting a move ("<< src_index << ":" << dest_index << ") to a string." << std::endl;
+        //TODO RAISE ERROR
+        return std::string();
+    }
+    return s;
+}
+
 void
 Board::removePiece(Piece * p)
 {
