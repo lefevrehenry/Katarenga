@@ -1,4 +1,5 @@
 ﻿#include "utils.hpp"
+#include <string>
 
 // Generates 4 different random values between 0 and 7.
 void pickRand(int *a, int *b, int *c, int *d){
@@ -16,10 +17,22 @@ void pickRand(int *a, int *b, int *c, int *d){
 }
 
 // Generates a Sring containing the cell types of the board, row by row.
-std::string generateBoardString()
+std::string generateBoardString(std::string & board_configuration)
 {
 	int a,b,c,d;
-    pickRand(&a, &b, &c, &d);
+
+    if (board_configuration.size() == 4)
+    {
+        a = stoi(board_configuration.substr(0,1));
+        b = stoi(board_configuration.substr(0,2));
+        c = stoi(board_configuration.substr(0,3));
+        d = stoi(board_configuration.substr(0,4));
+    }
+    else
+    {
+        pickRand(&a, &b, &c, &d);
+        board_configuration = std::to_string(a) + std::to_string(b) + std::to_string(c) + std::to_string(d);
+    }
 
 	std::string s1 = "";
 	std::string s2 = "";

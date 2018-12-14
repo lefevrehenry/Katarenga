@@ -45,6 +45,6 @@ const char bb[8][4][4] = {{{'R', 'B', 'K', 'N'}, // 0
 void pickRand(int *a, int *b, int *c, int *d);
 
 // Generates a Sring containing the cell types of the board, row by row.
-std::string generateBoardString();
+std::string generateBoardString(std::string & board_configuration);
 
 #endif // UTILS_HPP

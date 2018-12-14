@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-using namespace std;
+using std::cout, std::endl, std::string, std::to_string;
 using namespace zmq;
 
 void server_function(int socket_white_port, int socket_black_port, bool verbose)
@@ -18,20 +18,48 @@ void server_function(int socket_white_port, int socket_black_port, bool verbose)
     zmq::socket_t socketB(contextB, ZMQ_PAIR);
     socketB.bind("tcp://*:"+to_string(socket_black_port));
 
-    if(verbose) { cout << "I'm the server and my two sockets are open" << endl; }
+    if(verbose){ cout << "Waiting for a Hello from White process" << endl; }
+    s_recv(socketW);
+    if(verbose){ cout << "Waiting for a Hello from Black process" << endl; }
+    s_recv(socketB);
 
-    Board server_board(verbose);
+    // Setup game
+    string board_configuration = "";
+    Board board(board_configuration, verbose);
+
+    // Send the board configuration to players
+    s_send(socketW, board_configuration);
+    s_send(socketB, board_configuration);
+
+    // Main loop
+    int current_player = board.getCurrentPlayer();
+    string move_str;
     bool end_game = false;
     while (!end_game)
     {
-        string s = s_recv(socketW);
-        cout << "Server received: " << s << endl;
+        bool invalid_move;
+
+        // Get move from White
+        move_str = s_recv(socketW);
+        invalid_move = !board.isValidMove(move_str, current_player);
+        while(invalid_move)
+        {
+            s_send(socketW, "reject");
+            move_str = s_recv(socketW);
+            invalid_move = !board.isValidMove(move_str, current_player);
+        }
+
+        if (verbose){ cout << "Server received valid move " << move_str << " from White" << endl; }
+        board.movePiece(move_str);
+        current_player = -current_player;
+
+
+        // Get move from Black
+
 
         string s2 = s_recv(socketB);
-        cout << "Server received: " << s2 << endl;
-
-        s_send(socketB, s);
-        s_send(socketW, s2);
+        cout << "Server received: " << s2 << " from Black" << endl;
+;
 
         end_game = true;
     }

@@ -14,16 +14,13 @@ void graphics_function(int this_player, int socket_port, bool verbose)
     zmq::socket_t socketGL(contextGL, ZMQ_PAIR);
     socketGL.connect(socket_endpoint);
 
-    string s = "Hello from ";
-    s = s + (this_player == 1 ? "White":"Black") + " player GL thread";
+    string board_configuration = s_recv(socketGL);
+    s_send(socketGL, "ACK");
 
-    cout << "GL thread sending " << s << endl;
+    Board board(board_configuration, verbose);
 
-    s_send(socketGL, s);
 
-    s = s_recv(socketGL);
 
-    cout << "GL thread just received " << s << endl;
 
     socketGL.close();
     cout << "Terminating GL thread." << endl;

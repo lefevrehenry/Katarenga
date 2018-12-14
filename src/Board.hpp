@@ -11,16 +11,16 @@
 class Board
 {
 public:
-    Board(bool verbose);
+    Board(std::string & board_configuration, bool verbose);
 	~Board();
 
-    bool movePiece(move move);
-
-    bool isValidMove(move m, int current_player);
+    bool isValidMove(move & m, int current_player);
+    bool isValidMove(std::string & move_str, int current_player);
 
     move askNextValidMove();
 
-    void doMove(move);
+    void movePiece(move & move);
+    void movePiece(std::string & move_str);
 
     void fillAllMoves(int row, int col, std::vector<move> * moveList);
 
@@ -39,7 +39,7 @@ private:
     // Converts a string representation of a move to a move
     move stringToMove(std::string & move_str);
     // Converts a move to a string representation of that move
-    std::string moveToString(move move);
+    std::string moveToString(move & move);
 
     Cell *** _plateau;                  // The Board containing the 8*8 BoardCells and the 4 CampCells
 	std::vector<Piece*> _piecesW;		// The list of White Pieces

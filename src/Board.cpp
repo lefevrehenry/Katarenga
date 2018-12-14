@@ -3,7 +3,7 @@
 #include <iostream>
 #include <algorithm>
 
-Board::Board(bool verbose)
+Board::Board(std::string & board_configuration, bool verbose)
 {
     _verbose = verbose;
 	// Initialization of the BoardCells
@@ -13,11 +13,11 @@ Board::Board(bool verbose)
 		return;
 	}
 
+    std::string boardString = generateBoardString(board_configuration);
 
-	std::string boardString = generateBoardString();
+    if(verbose){ std::cout << "String used for the board generation: " << board_configuration << std::endl; }
+
 	int index = 0;
-
-
 	boardString.at(1);
 	// Init BoardCells
 	for(int i = 1; i<=8; ++i)		// Iterates over rows
@@ -127,22 +127,21 @@ Board::main_loop()
     {
         move = askNextValidMove();
 
-        doMove(move);
+        movePiece(move);
 
         print();
 
         if(gameFinished())
         {
-            std::cout << "Congrats! " << (_currentPlayer==1?"White (+)":"Black (-)") << " player won the game!" << std::endl;
+            std::cout << "Congrats! " << ((-_currentPlayer)==1?"White (+)":"Black (-)") << " player won the game!" << std::endl;
             break;
         }
-        _currentPlayer = -_currentPlayer;
     }
 }
 
 
 void
-Board::doMove(move move)
+Board::movePiece(move & move)
 {
     BoardCell * src_cell = (BoardCell *)move.first;
     Cell * dst_cell = move.second;
@@ -155,6 +154,14 @@ Board::doMove(move move)
     src_cell->setPiece(nullptr);
     piece->setCell(dst_cell);
     fillAllMoves(dst_cell->getRow(), dst_cell->getColumn(), piece->getMoveList());
+    _currentPlayer = -_currentPlayer;
+}
+
+void
+Board::movePiece(std::string & move_str)
+{
+    move m = stringToMove(move_str);
+    movePiece(m);
 }
 
 
@@ -187,9 +194,10 @@ Board::askNextValidMove()
 }
 
 
-bool Board::isValidMove(move m, int current_player)
+bool Board::isValidMove(move & m, int current_player)
 {
-    //std::cout << "Is this move valid? " << m.first->getIndex() << " -> " << m.second->getIndex() << std::endl;
+    if(_verbose)
+        std::cout << "Is this move valid? " << m.first->getIndex() << " -> " << m.second->getIndex() << std::endl;
 
     if (m.first->isEmpty() || m.first->getPiece()->getPlayer() != current_player)
     {
@@ -202,18 +210,19 @@ bool Board::isValidMove(move m, int current_player)
 
     for (move move : *(m.first->getPiece()->getMoveList()))
     {
-        //std::cout << "Testing " << move.first->getIndex() << " -> " << move.second->getIndex() << std::endl;
         if (move.second == m.second)
         {
             return true;
         }
-        /*else
-        {
-            std::cout << "Cell " << move.second->getIndex() << " and " << m.second->getIndex() << " does not match" << std::endl;
-        }*/
     }
 
     return false;
+}
+
+bool Board::isValidMove(std::string & move_str, int current_player)
+{
+    move m = stringToMove(move_str);
+    return isValidMove(m, current_player);
 }
 
 // Fills the list with possible moves of the Piece in the cell (row,col)
@@ -555,7 +564,7 @@ move Board::stringToMove(std::string & move_str)
 }
 
 // Converts a move to a string representation of that move
-std::string Board::moveToString(move move)
+std::string Board::moveToString(move & move)
 {
     int src_index = move.first->getIndex();
     int dest_index = move.second->getIndex();
