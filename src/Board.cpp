@@ -127,7 +127,7 @@ Board::main_loop()
     {
         move = askNextValidMove();
 
-        movePiece(move);
+        playMove(move);
 
         print();
 
@@ -141,8 +141,15 @@ Board::main_loop()
 
 
 void
-Board::movePiece(move & move)
+Board::playMove(move & move)
 {
+    if (!isValidMove(move, getCurrentPlayer()))
+    {
+        // TODO throw an error
+        std::cout << "ERROR: Trying to play an invalid move" << std::endl;
+        return;
+    }
+
     BoardCell * src_cell = (BoardCell *)move.first;
     Cell * dst_cell = move.second;
     Piece * piece = src_cell->getPiece();
@@ -158,10 +165,10 @@ Board::movePiece(move & move)
 }
 
 void
-Board::movePiece(std::string & move_str)
+Board::playMove(std::string & move_str)
 {
     move m = stringToMove(move_str);
-    movePiece(m);
+    playMove(m);
 }
 
 
@@ -194,16 +201,16 @@ Board::askNextValidMove()
 }
 
 
-bool Board::isValidMove(move & m, int current_player)
+bool Board::isValidMove(move & m, int player)
 {
     if(_verbose)
         std::cout << "Is this move valid? " << m.first->getIndex() << " -> " << m.second->getIndex() << std::endl;
 
-    if (m.first->isEmpty() || m.first->getPiece()->getPlayer() != current_player)
+    if (m.first->isEmpty() || m.first->getPiece()->getPlayer() != player)
     {
         return false;
     }
-    if (!m.second->isEmpty() && m.second->getPiece()->getPlayer() == current_player)
+    if (!m.second->isEmpty() && m.second->getPiece()->getPlayer() == player)
     {
         return false;
     }
@@ -219,10 +226,10 @@ bool Board::isValidMove(move & m, int current_player)
     return false;
 }
 
-bool Board::isValidMove(std::string & move_str, int current_player)
+bool Board::isValidMove(std::string & move_str, int player)
 {
     move m = stringToMove(move_str);
-    return isValidMove(m, current_player);
+    return isValidMove(m, player);
 }
 
 // Fills the list with possible moves of the Piece in the cell (row,col)
@@ -498,20 +505,20 @@ bool Board::checkCellAddMove(BoardCell* src_cell, int row, int col, int player, 
 }
 
 
-bool
+int
 Board::gameFinished()
 {
     // Check if White won
     if (!_plateau[9][0]->isEmpty() && !_plateau[9][1]->isEmpty())
     {
-        return true;
+        return 1;
     }
     // Check if Black won
     if (!_plateau[0][0]->isEmpty() && !_plateau[0][1]->isEmpty())
     {
-        return true;
+        return -1;
     }
-    return false;
+    return 0;
 }
 
 Cell *

@@ -24,9 +24,9 @@ std::string generateBoardString(std::string & board_configuration)
     if (board_configuration.size() == 4)
     {
         a = stoi(board_configuration.substr(0,1));
-        b = stoi(board_configuration.substr(0,2));
-        c = stoi(board_configuration.substr(0,3));
-        d = stoi(board_configuration.substr(0,4));
+        b = stoi(board_configuration.substr(1,1));
+        c = stoi(board_configuration.substr(2,1));
+        d = stoi(board_configuration.substr(3,1));
     }
     else
     {

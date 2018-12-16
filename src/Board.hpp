@@ -14,17 +14,18 @@ public:
     Board(std::string & board_configuration, bool verbose);
 	~Board();
 
-    bool isValidMove(move & m, int current_player);
-    bool isValidMove(std::string & move_str, int current_player);
+    bool isValidMove(move & m, int player);
+    bool isValidMove(std::string & move_str, int player);
 
     move askNextValidMove();
 
-    void movePiece(move & move);
-    void movePiece(std::string & move_str);
+    void playMove(move & move);
+    void playMove(std::string & move_str);
 
     void fillAllMoves(int row, int col, std::vector<move> * moveList);
 
-    bool gameFinished();
+    // Return 0 if not finished, 1 if White won, -1 if Black won.
+    int gameFinished();
 
     int getCurrentPlayer(){ return _currentPlayer; }
 

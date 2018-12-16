@@ -17,43 +17,82 @@ void player_function(int this_player, int graphics_port, std::string & server_en
     cout << "I'm main process of " << s_player << " " << this_player << endl;
 
     // Setup the two connection with the graphics thread and the server process
-    zmq::context_t contextGL(1);
-    zmq::socket_t socketGL(contextGL, ZMQ_PAIR);
+    zmq::context_t context(1);
+    zmq::socket_t socketGL(context, ZMQ_PAIR);
     socketGL.bind("tcp://*:"+to_string(graphics_port));
     std::thread thr_GL(graphics_function, this_player, graphics_port, verbose);
 
-    zmq::context_t contextS(1);
-    zmq::socket_t socketServer(contextS, ZMQ_PAIR);
+    zmq::socket_t socketServer(context, ZMQ_PAIR);
     socketServer.connect(server_endpoint);
 
     // Receive the board configuration from the server
-    std::string board_configuration = s_recv(socketServer); //TODO put in a loop and send noACK if size is not equal to 4
+    std::string board_configuration = s_recv(socketServer);
     s_send(socketServer, "ACK");
+
+    cout << "RECEIVED board config:\n" << board_configuration << endl;
 
     // Forward the board configuration to the graphics thread and wait for ACK.
     s_send(socketGL, board_configuration);
     s_recv(socketGL);
 
+    cout << "just sent board config to graphics thread" << endl;
 
     // Main loop of the game
     Board board(board_configuration, verbose);
 
+    cout << "Client process ready to play!" << endl;
 
-    // If white player
-    // Wait for a move from the GL thread
-    // While this move is not valid, reject the move
+    string move_str;
+    string ret;
+    bool end_game = false;
+    while(!end_game)
+    {
+        board.print();
 
-    // Send move to server
-    // Wait for ACK or reject
-    // Transfer answer to GL thread
+        if (board.getCurrentPlayer() == this_player)
+        {
+            move_str = s_recv(socketGL);
+            if (board.isValidMove(move_str, this_player))
+            {
+                s_send(socketServer, move_str);
+                ret = s_recv(socketServer);
+                if (ret == move_str)
+                {
+                    // Move was validated by server
+                    board.playMove(move_str);
+                    s_send(socketGL, "accept");
+                }
+                else if (ret == "reject")
+                {
+                    s_send(socketGL, "reject");
+                }
+                else
+                {
+                    //Throw error
+                    cout << "ERROR: server sent '" << ret << "' back but reject or move '" << move_str << "' was expected." << endl;
+                    pthread_cancel(thr_GL.native_handle()); // This should do what I want: kill the thread
+                    return;
+                }
+            }
+            else
+            {
+                // Move sent by the graphics thread is not valid
+                s_send(socketGL, "reject");
+            }
+        }
+        else
+        {
+            // Other player's turn, waiting for message from server
+            move_str = s_recv(socketServer);
+            board.playMove(move_str);
+            s_send(socketGL, move_str);
+        }
 
-    // if reject: loop now
-    // else continue
-
-    // Wait now for move of the opponnent from the server
-    // Forward it to GL thread
-
-
+        if (board.gameFinished() != 0)
+        {
+            end_game = true;
+        }
+    }
 
     // Clean up and terminate
     thr_GL.join();

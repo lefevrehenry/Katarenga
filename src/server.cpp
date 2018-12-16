@@ -18,50 +18,63 @@ void server_function(int socket_white_port, int socket_black_port, bool verbose)
     zmq::socket_t socketB(contextB, ZMQ_PAIR);
     socketB.bind("tcp://*:"+to_string(socket_black_port));
 
-    if(verbose){ cout << "Waiting for a Hello from White process" << endl; }
-    s_recv(socketW);
-    if(verbose){ cout << "Waiting for a Hello from Black process" << endl; }
-    s_recv(socketB);
-
     // Setup game
     string board_configuration = "";
     Board board(board_configuration, verbose);
 
-    // Send the board configuration to players
+
+    // Send the board configuration to players and recv ACKs
+    if(verbose){ cout << "Sending board configuration to players" << endl; }
     s_send(socketW, board_configuration);
     s_send(socketB, board_configuration);
+    s_recv(socketW);
+    s_recv(socketB);
 
     // Main loop
-    int current_player = board.getCurrentPlayer();
     string move_str;
     bool end_game = false;
+    int has_won = 0;
     while (!end_game)
     {
-        bool invalid_move;
+        board.print();
 
-        // Get move from White
-        move_str = s_recv(socketW);
-        invalid_move = !board.isValidMove(move_str, current_player);
-        while(invalid_move)
+        // TODO put all this in a generic function depending on the current player?
+        if(board.getCurrentPlayer() == 1)
         {
-            s_send(socketW, "reject");
+            // Waiting for White to send his move
             move_str = s_recv(socketW);
-            invalid_move = !board.isValidMove(move_str, current_player);
+            if(!board.isValidMove(move_str, 1))
+            {
+                s_send(socketW, "reject");
+            }
+            else
+            {
+                board.playMove(move_str);
+                s_send(socketW, move_str);
+                s_send(socketB, move_str);
+            }
+        }
+        else
+        {
+            move_str = s_recv(socketB);
+            if(!board.isValidMove(move_str, -1))
+            {
+                s_send(socketB, "reject");
+            }
+            else
+            {
+                board.playMove(move_str);
+                s_send(socketW, move_str);
+                s_send(socketB, move_str);
+            }
         }
 
-        if (verbose){ cout << "Server received valid move " << move_str << " from White" << endl; }
-        board.movePiece(move_str);
-        current_player = -current_player;
-
-
-        // Get move from Black
-
-
-        string s2 = s_recv(socketB);
-        cout << "Server received: " << s2 << " from Black" << endl;
-;
-
-        end_game = true;
+        cout << "Server just treated the move " << move_str << endl;
+        if ((has_won = board.gameFinished()) != 0)
+        {
+            end_game = true;
+            cout << (has_won == 1?"White":"Black") << " player has won the game." << endl;
+        }
     }
 
     socketW.close();
