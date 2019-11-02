@@ -8,7 +8,7 @@ in
 {
     katarenga = stdenv.mkDerivation rec {
         name = "katarenga-${version}";
-        nativeBuildInputs = [ cmake ];
+        nativeBuildInputs = [ cmake glfw3 glm assimp ];
         buildInputs = [ cppzmq zeromq docopt_cpp ];
         src = ./.;
     };
