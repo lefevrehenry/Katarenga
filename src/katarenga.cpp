@@ -8,6 +8,7 @@
 #include <map>
 
 #include "docopt/docopt.h"
+#include <GLFW/glfw3.h>
 
 using namespace std;
 
