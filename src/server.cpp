@@ -4,7 +4,11 @@
 
 #include <iostream>
 
-using std::cout, std::endl, std::string, std::to_string;
+using std::cout;        // At some point we'll
+using std::endl;        // Need to get rid of
+using std::string;      // These
+using std::to_string;   // Declarations
+
 using namespace zmq;
 
 void server_function(int socket_white_port, int socket_black_port, bool verbose)

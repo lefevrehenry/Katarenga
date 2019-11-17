@@ -4,7 +4,12 @@
 
 #include <iostream>
 
-using std::cout, std::cin, std::endl, std::string, std::to_string;
+using std::cout;        // At some point
+using std::cin;         // We'll need to
+using std::endl;        // Get rid of
+using std::string;      // These
+using std::to_string;   // Declarations
+
 using namespace zmq;
 
 
