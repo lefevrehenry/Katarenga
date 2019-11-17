@@ -12,12 +12,9 @@ Follow the instructions displayed at the end of the script. You usually need to 
 source ~/.nix-profile/etc/profile.d/nix.sh
 ```
 
-Then, in your Katarenga folder you can simply execute `nix-shell` to be in a shell with everything you need to build katarenga.
-You can now execute
+Then you can install katarenga by executing the following command:
 ```
-mkdir build
-cd build
-cmake ..
-make
+nix-env -f https://github.com/Mommessc/clem-pkgs/archive/master.tar.gz -iA katarenga
 ```
-and try out this game!
+
+The installation folder will be accessible via the symbolic link `result` from where you ran the command.
