@@ -15,7 +15,7 @@ using namespace std;
 int parse_main_args(int argc, char * argv[], MainArguments & main_args)
 {
     static const char usage[] =
-R"(Katarenga: A nice two-player board game!.
+R"(Katarenga: A nice two-player board game!
 
 Usage:
     katarenga (--white | --black | --server)  [--server-ip <ip>]

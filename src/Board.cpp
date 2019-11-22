@@ -60,17 +60,17 @@ Board::Board(std::string & board_configuration, bool verbose)
 	for(int j = 1; j<=8; ++j)
 	{
 		// For White
-        std::vector<move>* moveListW = new std::vector<move>();
+        std::vector<Move>* moveListW = new std::vector<Move>();
         Piece * pieceW = new Piece(1, _plateau[1][j],moveListW);
 		_piecesW.push_back(pieceW);
 
 		// For Black
-        std::vector<move>* moveListB = new std::vector<move>();
+        std::vector<Move>* moveListB = new std::vector<Move>();
         Piece * pieceB = new Piece(-1, _plateau[8][j], moveListB);
 		_piecesB.push_back(pieceB);
 	}
 
-    // Initalization of the list of possible moves for every Piece
+    // Initalization of the list of possible Moves for every Piece
     for(int j = 1; j<=8; ++j)
     {
         fillAllMoves(1, j, _piecesW[j-1]->getMoveList());
@@ -120,7 +120,7 @@ void
 Board::main_loop()
 {
     int n = 0;
-    move move
+    Move move
             ;
     print();
     while(true)
@@ -141,7 +141,7 @@ Board::main_loop()
 
 
 void
-Board::playMove(move & move)
+Board::playMove(Move & move)
 {
     if (!isValidMove(move, getCurrentPlayer()))
     {
@@ -167,17 +167,17 @@ Board::playMove(move & move)
 void
 Board::playMove(std::string & move_str)
 {
-    move m = stringToMove(move_str);
+    Move m = stringToMove(move_str);
     playMove(m);
 }
 
 
-move
+Move
 Board::askNextValidMove()
 {
     int srci, desti;
     bool flag = true;
-    move m;
+    Move m;
     std::cout << (this->_currentPlayer == 1 ? "It's White's (+)" : "Black's (-)") << " turn, what is your move?" << std::endl;
     while(flag)
     {
@@ -186,7 +186,7 @@ Board::askNextValidMove()
         std::cout << "Destination index: ";
         std::cin >> desti;
 
-        m = move(indexToCell(srci),indexToCell(desti));
+        m = Move(indexToCell(srci),indexToCell(desti));
 
         if(!isValidMove(m, _currentPlayer))
         {
@@ -201,10 +201,12 @@ Board::askNextValidMove()
 }
 
 
-bool Board::isValidMove(move & m, int player)
+bool Board::isValidMove(Move & m, int player)
 {
     if(_verbose)
+    {
         std::cout << "Is this move valid? " << m.first->getIndex() << " -> " << m.second->getIndex() << std::endl;
+    }
 
     if (m.first->isEmpty() || m.first->getPiece()->getPlayer() != player)
     {
@@ -215,7 +217,7 @@ bool Board::isValidMove(move & m, int player)
         return false;
     }
 
-    for (move move : *(m.first->getPiece()->getMoveList()))
+    for (Move move : *(m.first->getPiece()->getMoveList()))
     {
         if (move.second == m.second)
         {
@@ -228,12 +230,12 @@ bool Board::isValidMove(move & m, int player)
 
 bool Board::isValidMove(std::string & move_str, int player)
 {
-    move m = stringToMove(move_str);
+    Move m = stringToMove(move_str);
     return isValidMove(m, player);
 }
 
-// Fills the list with possible moves of the Piece in the cell (row,col)
-void Board::fillAllMoves(int row, int col, std::vector<move>* list)
+// Fills the list with possible Moves of the Piece in the cell (row,col)
+void Board::fillAllMoves(int row, int col, std::vector<Move>* list)
 {
     list->clear();
 	Cell* cell = _plateau[row][col];
@@ -249,21 +251,21 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 	if (row == 1 && player == -1){
 		if(_plateau[0][0]->isEmpty())
 		{
-            list->push_back(move(cell,_plateau[0][0]));
+            list->push_back(Move(cell,_plateau[0][0]));
 		}
 		if(_plateau[0][1]->isEmpty())
 		{
-            list->push_back(move(cell,_plateau[0][1]));
+            list->push_back(Move(cell,_plateau[0][1]));
 		}
 	}
 	if (row == 8 && player == 1){
 		if(_plateau[8][0]->isEmpty())
 		{
-            list->push_back(move(cell,_plateau[8][0]));
+            list->push_back(Move(cell,_plateau[8][0]));
 		}
 		if(_plateau[8][1]->isEmpty())
 		{
-            list->push_back(move(cell,_plateau[8][1]));
+            list->push_back(Move(cell,_plateau[8][1]));
 		}
 	}
 	BoardCell* new_cell;
@@ -285,7 +287,7 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 				new_cell = (BoardCell*)_plateau[row+i][col+j];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-                    list->push_back(move(cell,_plateau[row+i][col+j]));
+                    list->push_back(Move(cell,_plateau[row+i][col+j]));
 				}
 			}
 		}
@@ -400,7 +402,7 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 				new_cell = (BoardCell*) _plateau[row-1][col-2];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-                    list->push_back(move(cell,_plateau[row-1][col-2]));
+                    list->push_back(Move(cell,_plateau[row-1][col-2]));
 				}
 			}
 			if((row+1) <= 8)
@@ -408,7 +410,7 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 				new_cell = (BoardCell*) _plateau[row+1][col-2];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-                    list->push_back(move(cell,_plateau[row+1][col-2]));
+                    list->push_back(Move(cell,_plateau[row+1][col-2]));
 				}
 			}
 		}
@@ -420,7 +422,7 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 				new_cell = (BoardCell*) _plateau[row-1][col+2];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-                    list->push_back(move(cell,_plateau[row-1][col+2]));
+                    list->push_back(Move(cell,_plateau[row-1][col+2]));
 				}
 			}
 			if((row+1) <= 8)
@@ -428,7 +430,7 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 				new_cell = (BoardCell*) _plateau[row+1][col+2];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-                    list->push_back(move(cell,_plateau[row+1][col+2]));
+                    list->push_back(Move(cell,_plateau[row+1][col+2]));
 				}
 			}
 		}
@@ -441,7 +443,7 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 				new_cell = (BoardCell*) _plateau[row-2][col-1];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-                    list->push_back(move(cell,_plateau[row-2][col-1]));
+                    list->push_back(Move(cell,_plateau[row-2][col-1]));
 				}
 			}
 			if((col+1) <= 8)
@@ -449,7 +451,7 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 				new_cell = (BoardCell*) _plateau[row-2][col+1];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-                    list->push_back(move(cell,_plateau[row-2][col+1]));
+                    list->push_back(Move(cell,_plateau[row-2][col+1]));
 				}
 			}
 		}
@@ -462,7 +464,7 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 				new_cell = (BoardCell*) _plateau[row+2][col-1];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-                    list->push_back(move(cell,_plateau[row+2][col-1]));
+                    list->push_back(Move(cell,_plateau[row+2][col-1]));
 				}
 			}
 			if((col+1) <= 8)
@@ -470,7 +472,7 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 				new_cell = (BoardCell*) _plateau[row+2][col+1];
 				if(new_cell->isEmpty() || new_cell->getPiece()->getPlayer() == -player)
 				{
-                    list->push_back(move(cell,_plateau[row+2][col+1]));
+                    list->push_back(Move(cell,_plateau[row+2][col+1]));
 				}
 			}
 		}
@@ -480,14 +482,14 @@ void Board::fillAllMoves(int row, int col, std::vector<move>* list)
 	}
 }
 
-// Internal function to populate the vector of moves, called in getAllMoves.
+// Internal function to populate the vector of Moves, called in getAllMoves.
 // Returns false if the while loop calling this function has to break.
-bool Board::checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<move> * plist)
+bool Board::checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<Move> * plist)
 {
     BoardCell * dst_cell = (BoardCell*)_plateau[row][col];
     if(dst_cell->isEmpty())
 	{
-        plist->push_back(move(src_cell,dst_cell));
+        plist->push_back(Move(src_cell,dst_cell));
         if(dst_cell->getType() == type)
 		{
 			return false;
@@ -497,7 +499,7 @@ bool Board::checkCellAddMove(BoardCell* src_cell, int row, int col, int player, 
 	{
         if(dst_cell->getPiece()->getPlayer() == -player)
 		{
-            plist->push_back(move(src_cell, dst_cell));
+            plist->push_back(Move(src_cell, dst_cell));
 		}
 		return false;
 	}
@@ -545,8 +547,8 @@ Board::indexToCell(int cell_index)
     }
 }
 
-// Converts a string representation of a move to a move
-move Board::stringToMove(std::string & move_str)
+// Converts a string representation of a Move to a Move
+Move Board::stringToMove(std::string & move_str)
 {
     /* A string move is of the form:
      * src_cell_index:dest_cell_index
@@ -554,9 +556,9 @@ move Board::stringToMove(std::string & move_str)
      * and -1/-2/+1/+2 for a Camp cell. */
     if (move_str.size() != 5)
     {
-        std::cout << "ERROR while retrieving a move from a string (" << move_str << ")." << std::endl;
+        std::cout << "ERROR while retrieving a Move from a string (" << move_str << ")." << std::endl;
         // TODO RAISE ERROR
-        return move();
+        return Move();
     }
 
     int src_index, dest_index;
@@ -567,11 +569,11 @@ move Board::stringToMove(std::string & move_str)
     int j = stoi(dest_str);
     std::cout << i << " " << j << std::endl;
 
-    return move(indexToCell(stoi(src_str)),indexToCell(stoi(dest_str)));
+    return Move(indexToCell(stoi(src_str)),indexToCell(stoi(dest_str)));
 }
 
-// Converts a move to a string representation of that move
-std::string Board::moveToString(move & move)
+// Converts a Move to a string representation of that Move
+std::string Board::moveToString(Move & move)
 {
     int src_index = move.first->getIndex();
     int dest_index = move.second->getIndex();
@@ -614,7 +616,7 @@ std::string Board::moveToString(move & move)
     if (s.size() != 5)
     {
         std::cout << s << " " << s.size() << std::endl;
-        std::cout << "ERROR while transcripting a move ("<< src_index << ":" << dest_index << ") to a string." << std::endl;
+        std::cout << "ERROR while transcripting a Move ("<< src_index << ":" << dest_index << ") to a string." << std::endl;
         //TODO RAISE ERROR
         return std::string();
     }

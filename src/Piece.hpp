@@ -12,14 +12,14 @@ public:
 	Piece() {}
     Piece(int player,
           Cell * cell,
-          std::vector<move> * moveList):
+          std::vector<Move> * moveList):
 	    _player(player),
         _moveList(moveList),
         _cell(cell) { _cell->setPiece(this);}
     ~Piece() {delete _moveList; }
 
     int getPlayer() const { return _player; }
-    std::vector<move>* getMoveList() { return _moveList; }
+    std::vector<Move>* getMoveList() { return _moveList; }
 	Cell * getCell() const { return _cell; }
 	void setCell(Cell * cell) { _cell = cell; }
 
@@ -28,7 +28,7 @@ public:
 private:
     int _player;
 	Cell * _cell;
-    std::vector<move> * _moveList;
+    std::vector<Move> * _moveList;
 };
 
 #endif // PIECE_HPP

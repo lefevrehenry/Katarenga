@@ -14,15 +14,15 @@ public:
     Board(std::string & board_configuration, bool verbose);
 	~Board();
 
-    bool isValidMove(move & m, int player);
+    bool isValidMove(Move & m, int player);
     bool isValidMove(std::string & move_str, int player);
 
-    move askNextValidMove();
+    Move askNextValidMove();
 
-    void playMove(move & move);
+    void playMove(Move & move);
     void playMove(std::string & move_str);
 
-    void fillAllMoves(int row, int col, std::vector<move> * moveList);
+    void fillAllMoves(int row, int col, std::vector<Move> * moveList);
 
     // Return 0 if not finished, 1 if White won, -1 if Black won.
     int gameFinished();
@@ -35,12 +35,12 @@ public:
 private:
     void removePiece(Piece * p);
     Cell * indexToCell(int cell_index);
-    bool checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<move>* plist);
+    bool checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<Move>* plist);
 
-    // Converts a string representation of a move to a move
-    move stringToMove(std::string & move_str);
-    // Converts a move to a string representation of that move
-    std::string moveToString(move & move);
+    // Converts a string representation of a Move to a Move
+    Move stringToMove(std::string & move_str);
+    // Converts a Move to a string representation of that Move
+    std::string moveToString(Move & move);
 
     Cell *** _plateau;                  // The Board containing the 8*8 BoardCells and the 4 CampCells
 	std::vector<Piece*> _piecesW;		// The list of White Pieces

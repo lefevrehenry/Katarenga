@@ -80,7 +80,7 @@ void graphics_function(int this_player, int socket_port, bool verbose)
             }
             else
             {
-                cout << "ERROR: Weird message received from player thread." << endl;
+                cout << "ERROR: Weird message received from player thread, terminating." << endl;
                 socket.close();
                 return;
             }
