@@ -551,23 +551,22 @@ Board::indexToCell(int cell_index)
 Move Board::stringToMove(std::string & move_str)
 {
     /* A string move is of the form:
-     * src_cell_index:dest_cell_index
+     * m<src_cell_index>:<dest_cell_index>
      * Where the index is between 08 and 72 for a Board cell
      * and -1/-2/+1/+2 for a Camp cell. */
-    if (move_str.size() != 5)
+    if (move_str.size() != 6)
     {
         std::cout << "ERROR while retrieving a Move from a string (" << move_str << ")." << std::endl;
         // TODO RAISE ERROR
         return Move();
     }
 
-    int src_index, dest_index;
-    std::string src_str = move_str.substr(0, 2);
-    std::string dest_str = move_str.substr(3, 2);
+    std::string src_str = move_str.substr(1, 2);
+    std::string dest_str = move_str.substr(4, 2);
 
-    int i = stoi(src_str);
-    int j = stoi(dest_str);
-    std::cout << i << " " << j << std::endl;
+    /*int srci = stoi(src_str);
+    int desti = stoi(dest_str);
+    std::cout << srci << " " << desti << std::endl;*/
 
     return Move(indexToCell(stoi(src_str)),indexToCell(stoi(dest_str)));
 }

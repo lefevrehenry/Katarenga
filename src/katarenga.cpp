@@ -3,6 +3,7 @@
 #include "network_utils.hpp"
 #include "server.hpp"
 #include "player.hpp"
+#include "standalone.hpp"
 
 #include <iostream>
 #include <map>
@@ -18,10 +19,10 @@ int parse_main_args(int argc, char * argv[], MainArguments & main_args)
 R"(Katarenga: A nice two-player board game!
 
 Usage:
-    katarenga (--white | --black | --server)  [--server-ip <ip>]
-                                              [--server-port <port>]
-                                              [--graphics-port <port>]
-                                              [options]
+    katarenga                   [options]
+    katarenga --server          [options]
+    katarenga --white | --black [--server-ip <ip>]
+                                [options]
     katarenga -h | --help
 
 Input options:
@@ -47,41 +48,41 @@ Other options:
     int graphics_black_port = offset_port + 2;
     int server_black_port = offset_port + 3;;
 
+    main_args.verbose = args["--verbose"].asBool();
     if (args["--server"].asBool())
     {
-        main_args.player = 0;
         main_args.is_server = true;
+        main_args.player = 0;
+        main_args.server_ip = args["--server-ip"].asString();
         main_args.server_white_port = offset_port + 1;
         main_args.server_black_port = offset_port + 3;
     }
     else if (args["--white"].asBool())
     {
+        main_args.is_player = true;
         main_args.player = 1;
-        main_args.is_server = false;
+        main_args.server_ip = args["--server-ip"].asString();
         main_args.graphics_port = offset_port;
         main_args.server_white_port = offset_port + 1;
     }
     else if (args["--black"].asBool())
     {
+        main_args.is_player = true;
         main_args.player = -1;
-        main_args.is_server = false;
+        main_args.server_ip = args["--server-ip"].asString();
         main_args.graphics_port = offset_port + 2;
         main_args.server_black_port = offset_port + 3;
     }
     else
     {
-        cout << "Argument parsing error, please specify whether the process is a server, white or black player." << endl;
-        return 1;
+        // This is the standalone version
+        main_args.is_standalone = true;
+        main_args.graphics_port = offset_port;
     }
-
-    main_args.server_ip = args["--server-ip"].asString();
-    main_args.verbose = args["--verbose"].asBool();
 
     if(main_args.verbose)
     {
-        cout << "Parsing argument successfully done!\nI'm a Katarenga "
-             << (main_args.player==1?"White player": (main_args.player==0?"Server":"Black player"))
-             << ", the server IP is: " << main_args.server_ip << " and the offset port is " << offset_port << endl;
+        cout << "Parsing argument successfully done!" << endl;
     }
     return 0;
 }
@@ -96,7 +97,12 @@ int main(int argc, char * argv[])
         return 1;
     }
 
-    if(main_args.is_server)
+    if(main_args.is_standalone)
+    {
+        // TODO Create a standalone version with server and graphics processes
+        standalone_function(main_args.graphics_port, main_args.verbose);
+    }
+    else if(main_args.is_server)
     {
         server_function(main_args.server_white_port, main_args.server_black_port, main_args.verbose);
     }
