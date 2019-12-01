@@ -1,44 +1,10 @@
-Main thread : 
-- lance un thread GL
-- si serveur :
-    - lance un thread serveur
-    - attend la terminaison d'un des deux threads (GL ou serveur)
-- sinon :
-    - attend la terminaison du thread GL
+TODOs
+- thread server sends the configuration of the board to the graphics thread (sends a string containing the 64 types of cells of the board).
+- the graphics thread is the main thread. In the standalone version of Katarenga it spawns a child thread which will hold the server. In the "network" version it will spawn a child thread that will communicate with the server and forward the events to the graphics thread (maybe there is a solution where the graphics thread listens directly to a socket to communicate with the server).
+- put the resources of the chess pieces + board tilings in a resources directory of Katarenga (and not GLTK)
 
 
-/!\ Attention besoin de gérer si problème réseau, connexion au socket perdu -> besoin de terminer le thread GL.
-
-
-Dans le main thread :
-- Crée un objet Board
-- Crée un socket et se connecte au serveur
-- Crée un socket et attend la connexion du thread GL
-- Dans la main loop :
-    - Ecoute le socket du thread GL pour récupérer un coup
-    - Transfert ce coup au serveur et attend la validation
-    - Transfert la validation au thread GL
-    - Attend le coup de l'adversaire pour le transférer au thread GL
-
-
-Dans le Thread GL : 
-- Crée un socket et se connecte au main thread
-- Fait tout ce qu'a besoin GL pour fonctionner
-- Dans la main loop :
-    - Récupère un coup et l'envoie au main thread via socket
-    - attend la réponse du main thread pour mettre à jour le rendu
-    - attend le coup de l'adversaire pour mettre à jour le rendu
-
-
-
-Dans le Thread Serveur :
-- Crée un objet Board
-- Ouvre 2 sockets et attend la connexion des 2 clients (les threads GL)
-- Dans la main loop :
-    - Attend le coup du joueur Blanc
-    - Vérifie et valide le coup en broadcastant aux 2 clients
-    - Attend le coup du joueur Noir
-    - Vérifie et valide le coup en broadcastant aux 2 clients
-
-/!\ Attention besoin de gérer les déconnexion des clients.
+TODO Network :
+- besoin de gérer si problème réseau, connexion au socket perdu -> besoin de terminer le thread GL.
+- besoin de gérer les déconnexion des clients.
 
