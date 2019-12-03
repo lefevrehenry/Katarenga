@@ -1,41 +1,41 @@
 ﻿CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
-project("Katarenga")
-
-set(CMAKE_BUILD_TYPE RELEASE)
+project(Katarenga)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lpthread")
 
-################
-# Dependencies #
-################
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 ## ZeroMQ dependency
-find_package(ZMQ REQUIRED)
-include_directories(${ZMQ_INCLUDE_DIRS})
+find_package(ZMQ MODULE QUIET)
+if(NOT ZMQ_FOUND)
+    find_package(ZMQ CONFIG REQUIRED)
+endif()
 
 ## Docopt dependency
-find_package(docopt REQUIRED)
-include_directories(${DOCOPT_INCLUDE_DIRS})
+find_package(docopt MODULE QUIET)
+if(NOT DOCOPT_FOUND)
+    find_package(docopt CONFIG REQUIRED)
+endif()
 
+## GLTK dependency
+find_package(GLTK MODULE QUIET)
+if(NOT GLTK_FOUND)
+    find_package(GLTK CONFIG REQUIRED)
+endif()
 
-## GLTK dependency
-set(CMAKE_PREFIX_PATH "/home/mommessc/Documents/Git/OpenGL/build/install/lib/cmake")
-find_package(GLTK CONFIG REQUIRED)
-
-file(GLOB katarenga_SRC
+file(GLOB SOURCE_FILES
     "src/*.cpp"
-    "src/*.hpp")
-
-set(SHADER_FILES
+    "src/*.hpp"
 )
 
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-add_executable(katarenga ${katarenga_SRC} ${SHADER_FILES})
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${_ZMQ_INCLUDE_DIR}
+)
 
-target_link_libraries(katarenga
-    ${ZMQ_LIBRARIES}
-    ${DOCOPT_LIBRARIES}
-	GLTK
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    ${_ZMQ_LIBRARY}
+    docopt
+    GLTK
 )
