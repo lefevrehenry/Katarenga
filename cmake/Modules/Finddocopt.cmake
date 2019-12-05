@@ -22,7 +22,7 @@ find_package_handle_standard_args(
 
 if(DOCOPT_FOUND)
     # Create imported target docopt
-    add_library(docopt SHARED IMPORTED)
+    add_library(docopt INTERFACE)
 
     set_target_properties(docopt PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${_DOCOPT_INCLUDE_DIR}"

@@ -20,7 +20,7 @@ find_package_handle_standard_args(
 
 if(GLTK_FOUND)
     # Create imported target GLTK
-    add_library(GLTK SHARED IMPORTED)
+    add_library(GLTK INTERFACE)
 
     set_target_properties(GLTK PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${_GLTK_INCLUDE_DIR}"

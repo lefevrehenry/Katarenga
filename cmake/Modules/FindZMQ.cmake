@@ -26,5 +26,5 @@ if(ZMQ_FOUND)
     )
 endif()
 
-# unset(_ZMQ_INCLUDE_DIR CACHE)
-# unset(_ZMQ_LIBRARY CACHE)
+unset(_ZMQ_INCLUDE_DIR CACHE)
+unset(_ZMQ_LIBRARY CACHE)
