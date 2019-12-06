@@ -3,10 +3,10 @@
 # GLTK_FOUND - System has GLTK
 # GLTK_INCLUDE_DIRS - The GLTK include directories
 # GLTK_LIBRARIES - The libraries needed to use GLTK
-# GLTK_DEFINITIONS - Compiler switches required for using GLTK
+# GLTK - the target to link with
 
-find_path(_GLTK_INCLUDE_DIR GLTK/gltk.h)
-find_library(_GLTK_LIBRARY NAMES GLTK)
+find_path(GLTK_INCLUDE_DIR GLTK/gltk.h)
+find_library(GLTK_LIBRARY NAMES GLTK)
 
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set GLTK_FOUND to TRUE
@@ -14,19 +14,16 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
     GLTK
     DEFAULT_MSG
-    _GLTK_INCLUDE_DIR
-    _GLTK_LIBRARY
+    GLTK_INCLUDE_DIR
+    GLTK_LIBRARY
 )
 
 if(GLTK_FOUND)
     # Create imported target GLTK
-    add_library(GLTK INTERFACE)
+    add_library(GLTK INTERFACE IMPORTED)
 
     set_target_properties(GLTK PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${_GLTK_INCLUDE_DIR}"
-        INTERFACE_LINK_LIBRARIES "${_GLTK_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${GLTK_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${GLTK_LIBRARY}"
     )
 endif()
-
-unset(_GLTK_INCLUDE_DIR CACHE)
-unset(_GLTK_LIBRARY CACHE)

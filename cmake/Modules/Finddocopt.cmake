@@ -1,14 +1,12 @@
-# Try to find docopt and validate that it is installed as it should be
-# Once done it will define
-# - DOCOPT_FOUND
-# - a target 'docopt'
+# - Try to find docopt
+# Once done this will define
+# DOCOPT_FOUND - System has docopt
+# DOCOPT_INCLUDE_DIRS - The docopt include directories
+# DOCOPT_LIBRARIES - The libraries needed to use docopt
+# docopt - the target to link with
 
-# We won't be using PkgConfig and maybe this should change in the future,
-# all we are about to do is check if we can find the file <docopt/docopt.h> and
-# the libdocopt library (static or shared we don't care)
-
-find_path(_DOCOPT_INCLUDE_DIR docopt/docopt.h)
-find_library(_DOCOPT_LIBRARY docopt)
+find_path(DOCOPT_INCLUDE_DIR docopt/docopt.h)
+find_library(DOCOPT_LIBRARY docopt)
 
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set DOCOPT_FOUND to TRUE
@@ -16,19 +14,16 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
     docopt
     DEFAULT_MSG
-    _DOCOPT_INCLUDE_DIR
-    _DOCOPT_LIBRARY
+    DOCOPT_INCLUDE_DIR
+    DOCOPT_LIBRARY
 )
 
 if(DOCOPT_FOUND)
     # Create imported target docopt
-    add_library(docopt INTERFACE)
+    add_library(docopt INTERFACE IMPORTED)
 
     set_target_properties(docopt PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${_DOCOPT_INCLUDE_DIR}"
-        INTERFACE_LINK_LIBRARIES "${_DOCOPT_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${DOCOPT_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${DOCOPT_LIBRARY}"
     )
 endif()
-
-unset(_DOCOPT_INCLUDE_DIR CACHE)
-unset(_DOCOPT_LIBRARY CACHE)
