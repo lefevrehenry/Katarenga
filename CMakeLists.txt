@@ -19,7 +19,7 @@ if(NOT DOCOPT_FOUND)
     find_package(docopt CONFIG REQUIRED)
 endif()
 get_target_property(_DOCOPT_DIR docopt INTERFACE_INCLUDE_DIRECTORIES)
-message("-- Found ZMQ: ${_DOCOPT_DIR}")
+message("-- Found docopt: ${_DOCOPT_DIR}")
 
 ## GLTK dependency
 find_package(GLTK MODULE QUIET)
