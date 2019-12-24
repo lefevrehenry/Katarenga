@@ -5,6 +5,9 @@
 # ZMQPP_LIBRARY - The libraries needed to use ZMQPP
 # ZMQPP - the target to link with
 
+# find ZMQ Core library to link with
+find_package(ZMQ REQUIRED)
+
 find_path(ZMQPP_INCLUDE_DIR zmqpp/zmqpp.hpp)
 find_library(ZMQPP_LIBRARY NAMES zmqpp)
 
@@ -24,6 +27,6 @@ if(ZMQPP_FOUND)
 
     set_target_properties(ZMQPP PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${ZMQPP_INCLUDE_DIR}"
-        INTERFACE_LINK_LIBRARIES "${ZMQPP_LIBRARY}"
+        INTERFACE_LINK_LIBRARIES "${ZMQPP_LIBRARY};ZMQ"
     )
 endif()
