@@ -9,17 +9,15 @@ using std::endl;        // Need to get rid of
 using std::string;      // These
 using std::to_string;   // Declarations
 
-using namespace zmq;
-
 void server_function(int socket_white_port, int socket_black_port, bool verbose)
 {
     // Open sockets for White and Black players
-    zmq::context_t contextW(1);
-    zmq::socket_t socketW(contextW, ZMQ_PAIR);
+    zmqpp::context contextW;
+    zmqpp::socket_t socketW(contextW, zmqpp::socket_type::pair);
     socketW.bind("tcp://*:"+to_string(socket_white_port));
 
-    zmq::context_t contextB(1);
-    zmq::socket_t socketB(contextB, ZMQ_PAIR);
+    zmqpp::context_t contextB;
+    zmqpp::socket_t socketB(contextB, zmqpp::socket_type::pair);
     socketB.bind("tcp://*:"+to_string(socket_black_port));
 
     // Setup game

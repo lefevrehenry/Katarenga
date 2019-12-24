@@ -6,18 +6,18 @@
 #include <iostream>
 #include <thread>
 
+#include <zmqpp/zmqpp.hpp>
+
 using std::cout;        // At some point we'll
 using std::endl;        // Need to get rid of
 using std::string;      // These
 using std::to_string;   // Declarations
 
-using namespace zmq;
-
 void standalone_function(const int graphics_port, const bool verbose)
 {
     // Open socket for graphics thread
-    zmq::context_t context(1);
-    zmq::socket_t socketGL(context, ZMQ_PAIR);
+    zmqpp::context context;
+    zmqpp::socket socketGL(context, zmqpp::socket_type::pair);
     socketGL.bind("tcp://*:"+to_string(graphics_port));
     std::thread thr_GL(standalone_graphics_function, graphics_port, verbose);
 

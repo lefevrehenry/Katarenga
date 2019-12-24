@@ -1,24 +1,29 @@
 #include "network_utils.hpp"
 
 //  Receive message from socket and convert into string
-std::string s_recv (zmq::socket_t & socket)
+std::string s_recv(zmqpp::socket& socket)
 {
-    zmq::message_t message;
-    socket.recv(&message);
+    zmqpp::message message;
+    socket.receive(message);
 
-    return std::string(static_cast<char*>(message.data()), message.size());
+    // how to handle case where the message received has multiple parts ?
+
+    std::string result;
+    message >> result;
+
+    return result;
 }
 
 //  Convert string to message and send to socket
-bool s_send (zmq::socket_t & socket, const std::string & string)
+bool s_send(zmqpp::socket& socket, const std::string& string)
 {
-    zmq::message_t message(string.size());
-    memcpy (message.data(), string.data(), string.size());
+    zmqpp::message message;
+    message << string;
 
-    return socket.send (message);
+    return socket.send(message);
 }
 
-bool s_send(zmq::socket_t & socket, const char * cstring)
+bool s_send(zmqpp::socket& socket, const char* cstring)
 {
     std::string s = cstring;
     return s_send(socket, s);

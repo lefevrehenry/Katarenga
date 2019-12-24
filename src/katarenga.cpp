@@ -46,7 +46,7 @@ Other options:
     int graphics_white_port = offset_port;
     int server_white_port = offset_port + 1;
     int graphics_black_port = offset_port + 2;
-    int server_black_port = offset_port + 3;;
+    int server_black_port = offset_port + 3;
 
     main_args.verbose = args["--verbose"].asBool();
     if (args["--server"].asBool())
