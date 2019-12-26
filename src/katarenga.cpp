@@ -11,9 +11,9 @@
 #include "docopt/docopt.h"
 #include <GLFW/glfw3.h>
 
-using namespace std;
+struct MainArguments MainArguments;
 
-int parse_main_args(int argc, char * argv[], MainArguments & main_args)
+int parse_main_args(int argc, char * argv[])
 {
     static const char usage[] =
 R"(Katarenga: A nice two-player board game!
@@ -40,7 +40,7 @@ Other options:
     -h, --help                     Shows this help.
 )";
 
-    map<string, docopt::value> args = docopt::docopt(usage, {argv+1, argv+argc}, true);
+    std::map<std::string, docopt::value> args = docopt::docopt(usage, {argv+1, argv+argc}, true);
 
     int offset_port = args["--offset-port"].asLong();
     int graphics_white_port = offset_port;
@@ -48,42 +48,43 @@ Other options:
     int graphics_black_port = offset_port + 2;
     int server_black_port = offset_port + 3;
 
-    main_args.verbose = args["--verbose"].asBool();
+    MainArguments.verbose = args["--verbose"].asBool();
     if (args["--server"].asBool())
     {
-        main_args.is_server = true;
-        main_args.player = 0;
-        main_args.server_ip = args["--server-ip"].asString();
-        main_args.server_white_port = offset_port + 1;
-        main_args.server_black_port = offset_port + 3;
+        MainArguments.is_server = true;
+        MainArguments.player = 0;
+        MainArguments.server_ip = args["--server-ip"].asString();
+        MainArguments.server_white_port = offset_port + 1;
+        MainArguments.server_black_port = offset_port + 3;
     }
     else if (args["--white"].asBool())
     {
-        main_args.is_player = true;
-        main_args.player = 1;
-        main_args.server_ip = args["--server-ip"].asString();
-        main_args.graphics_port = offset_port;
-        main_args.server_white_port = offset_port + 1;
+        MainArguments.is_player = true;
+        MainArguments.player = 1;
+        MainArguments.server_ip = args["--server-ip"].asString();
+        MainArguments.graphics_port = offset_port;
+        MainArguments.server_white_port = offset_port + 1;
     }
     else if (args["--black"].asBool())
     {
-        main_args.is_player = true;
-        main_args.player = -1;
-        main_args.server_ip = args["--server-ip"].asString();
-        main_args.graphics_port = offset_port + 2;
-        main_args.server_black_port = offset_port + 3;
+        MainArguments.is_player = true;
+        MainArguments.player = -1;
+        MainArguments.server_ip = args["--server-ip"].asString();
+        MainArguments.graphics_port = offset_port + 2;
+        MainArguments.server_black_port = offset_port + 3;
     }
     else
     {
         // This is the standalone version
-        main_args.is_standalone = true;
-        main_args.graphics_port = offset_port;
+        MainArguments.is_standalone = true;
+        MainArguments.graphics_port = offset_port;
     }
 
-    if(main_args.verbose)
+    if(MainArguments.verbose)
     {
-        cout << "Parsing argument successfully done!" << endl;
+        std::cout << "Parsing argument successfully done!" << std::endl;
     }
+
     return 0;
 }
 
@@ -91,33 +92,32 @@ Other options:
 int main(int argc, char * argv[])
 {
     // Let's parse the command-line arguments!
-    MainArguments main_args;
-    if (parse_main_args(argc, argv, main_args))
+    if (parse_main_args(argc, argv))
     {
         return 1;
     }
 
-    if(main_args.is_standalone)
+    if(MainArguments.is_standalone)
     {
         // TODO Create a standalone version with server and graphics processes
-        standalone_function(main_args.graphics_port, main_args.verbose);
+        standalone_function(MainArguments.graphics_port, MainArguments.verbose);
     }
-    else if(main_args.is_server)
+    else if(MainArguments.is_server)
     {
-        server_function(main_args.server_white_port, main_args.server_black_port, main_args.verbose);
+        server_function(MainArguments.server_white_port, MainArguments.server_black_port, MainArguments.verbose);
     }
     else
     {
-        string server_endpoint;
-        if (main_args.player == 1)
+        std::string server_endpoint;
+        if (MainArguments.player == 1)
         {
-            server_endpoint = "tcp://" + main_args.server_ip + ":" + to_string(main_args.server_white_port);
+            server_endpoint = "tcp://" + MainArguments.server_ip + ":" + std::to_string(MainArguments.server_white_port);
         }
         else
         {
-            server_endpoint = "tcp://" + main_args.server_ip + ":" + to_string(main_args.server_black_port);
+            server_endpoint = "tcp://" + MainArguments.server_ip + ":" + std::to_string(MainArguments.server_black_port);
         }
-        player_function(main_args.player, main_args.graphics_port, server_endpoint, main_args.verbose);
+        player_function(MainArguments.player, MainArguments.graphics_port, server_endpoint, MainArguments.verbose);
     }
 
     return 0;

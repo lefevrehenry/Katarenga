@@ -16,8 +16,6 @@ struct MainArguments
     bool verbose;                   // Whether to be verbose or not.
 };
 
-int parse_main_args(int argc, char * argv[], MainArguments & main_args);
-
-
+extern MainArguments MainArguments;
 
 #endif // KATARENGA_HPP
