@@ -1,8 +1,8 @@
 # - Try to find GLTK
 # Once done this will define
 # GLTK_FOUND - System has GLTK
-# GLTK_INCLUDE_DIRS - The GLTK include directories
-# GLTK_LIBRARIES - The libraries needed to use GLTK
+# GLTK_INCLUDE_DIR - The GLTK include directories
+# GLTK_LIBRARY - The libraries needed to use GLTK
 # GLTK - the target to link with
 
 find_path(GLTK_INCLUDE_DIR GLTK/gltk.h)

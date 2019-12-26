@@ -1,17 +1,20 @@
 ﻿CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
 project(Katarenga)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lpthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+## Threads dependency
+find_package(Threads REQUIRED)
+
 ## ZeroMQ dependency
-find_package(ZMQ MODULE QUIET)
-if(NOT ZMQ_FOUND)
-    find_package(ZMQ CONFIG REQUIRED)
+find_package(ZMQPP MODULE QUIET)
+if(NOT ZMQPP_FOUND)
+    find_package(ZMQPP CONFIG REQUIRED)
 endif()
-get_target_property(_ZMQ_DIR ZMQ INTERFACE_INCLUDE_DIRECTORIES)
-message("-- Found ZMQ: ${_ZMQ_DIR}")
+get_target_property(_ZMQPP_DIR ZMQPP INTERFACE_INCLUDE_DIRECTORIES)
+message("-- Found ZMQPP: ${_ZMQPP_DIR}")
 
 ## Docopt dependency
 find_package(docopt MODULE QUIET)
@@ -37,7 +40,8 @@ file(GLOB SOURCE_FILES
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    ZMQ
+    Threads::Threads
+    ZMQPP
     docopt
     GLTK
 )

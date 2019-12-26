@@ -1,8 +1,8 @@
 # - Try to find docopt
 # Once done this will define
 # DOCOPT_FOUND - System has docopt
-# DOCOPT_INCLUDE_DIRS - The docopt include directories
-# DOCOPT_LIBRARIES - The libraries needed to use docopt
+# DOCOPT_INCLUDE_DIR - The docopt include directories
+# DOCOPT_LIBRARY - The libraries needed to use docopt
 # docopt - the target to link with
 
 find_path(DOCOPT_INCLUDE_DIR docopt/docopt.h)

@@ -10,16 +10,14 @@ using std::endl;        // Get rid of
 using std::string;      // These
 using std::to_string;   // Declarations
 
-using namespace zmq;
-
 
 /*bool polling(socket_t & socket, int timeout)
 {
-    zmq::pollitem_t items [] = {{ socket, 0, ZMQ_POLLIN, 0}};
+    zmqpp::pollitem_t items [] = {{ socket, 0, ZMQ_POLLIN, 0}};
     int n = 0;
     while (1)
     {
-        zmq::poll(&items[0], 1, timeout);
+        zmqpp::poll(&items[0], 1, timeout);
         if (items[0].revents & ZMQ_POLLIN)
         {
             return true;
@@ -36,8 +34,8 @@ using namespace zmq;
 void graphics_function(int this_player, int socket_port, bool verbose)
 {
     string socket_endpoint = "tcp://127.0.0.1:" + to_string(socket_port);
-    zmq::context_t context(1);
-    zmq::socket_t socket(context, ZMQ_PAIR);
+    zmqpp::context_t context;
+    zmqpp::socket_t socket(context, zmqpp::socket_type::pair);
     socket.connect(socket_endpoint);
 
     string board_configuration = s_recv(socket);
@@ -118,8 +116,8 @@ void graphics_function(int this_player, int socket_port, bool verbose)
 void standalone_graphics_function(int socket_port, bool verbose)
 {
     string socket_endpoint = "tcp://127.0.0.1:" + to_string(socket_port);
-    zmq::context_t context(1);
-    zmq::socket_t socketS(context, ZMQ_PAIR);
+    zmqpp::context_t context;
+    zmqpp::socket_t socketS(context, zmqpp::socket_type::pair);
     socketS.connect(socket_endpoint);
 
     string board_configuration = s_recv(socketS);

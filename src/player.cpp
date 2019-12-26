@@ -7,8 +7,6 @@
 #include <thread>
 
 using namespace std;
-using namespace zmq;
-
 
 void player_function(int this_player, int graphics_port, std::string & server_endpoint, bool verbose)
 {
@@ -17,12 +15,12 @@ void player_function(int this_player, int graphics_port, std::string & server_en
     cout << "I'm main process of " << s_player << " " << this_player << endl;
 
     // Setup the two connection with the graphics thread and the server process
-    zmq::context_t context(1);
-    zmq::socket_t socketGL(context, ZMQ_PAIR);
+    zmqpp::context_t context;
+    zmqpp::socket_t socketGL(context, zmqpp::socket_type::pair);
     socketGL.bind("tcp://*:"+to_string(graphics_port));
     std::thread thr_GL(graphics_function, this_player, graphics_port, verbose);
 
-    zmq::socket_t socketServer(context, ZMQ_PAIR);
+    zmqpp::socket_t socketServer(context, zmqpp::socket_type::pair);
     socketServer.connect(server_endpoint);
 
     // Receive the board configuration from the server
