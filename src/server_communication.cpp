@@ -2,9 +2,11 @@
 
 RemoteServer::RemoteServer(const std::string& server_ip, const std::string& server_port) : AbstractServer(),
     m_context(),
-    m_socket(m_context, zmqpp::socket_type::pair)
+    m_socket(m_context, zmqpp::socket_type::pair),
+    m_poller()
 {
     m_socket.connect("tcp://" + server_ip + ":" + server_port);
+    m_poller.add(m_socket, zmqpp::poller::poll_in);
 }
 
 RemoteServer::~RemoteServer()
@@ -31,19 +33,25 @@ void RemoteServer::send(typename T::Request* request)
 template< typename T >
 void RemoteServer::receive(typename T::Reply* reply)
 {
-    zmqpp::message message;
-    m_socket.receive(message);
-
-    if(reply == nullptr)
+    // return if nothing is received within the next few seconds
+    if(!m_poller.poll(RemoteServer::TimeOut))
         return;
 
-    reply->fromMessage(message);
+    if(m_poller.has_input(m_socket)) {
+        zmqpp::message message;
+        m_socket.receive(message);
+
+        if(reply == nullptr)
+            return;
+
+        reply->fromMessage(message);
+    }
 }
 
-template< typename T >
-typename T::Reply RemoteServer::communicate()
+template< typename T, typename ... Args >
+typename T::Reply RemoteServer::communicate(Args&& ... args)
 {
-    typename T::Request request;
+    typename T::Request request(std::forward<Args>(args)...);
     send<T>(&request);
 
     typename T::Reply reply;

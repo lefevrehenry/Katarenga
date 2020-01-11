@@ -34,10 +34,11 @@ private:
     template< typename T >
     void receive(typename T::Reply* reply);
 
-    // todo implement with a poller to have a timeout
-    // todo use perfect forwarding to construct Request
-    template< typename T >
-    typename T::Reply communicate();
+    template< typename T, typename ... Args >
+    typename T::Reply communicate(Args&& ...);
+
+private:
+    static constexpr unsigned int TimeOut = 5000;     // timeout in milliseconds
 
 public:
     bool checkServerConnectivity() override;
@@ -46,6 +47,7 @@ public:
 private:
     zmqpp::context  m_context;
     zmqpp::socket   m_socket;
+    zmqpp::poller   m_poller;
 
 };
 
