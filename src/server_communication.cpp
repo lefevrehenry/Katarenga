@@ -65,22 +65,6 @@ bool RemoteServer::checkServerConnectivity()
     CheckConnectivity::Reply reply = communicate<CheckConnectivity>();
 
     return reply.getConnectivity();
-
-//    zmqpp::poller poller;
-//    poller.add(m_socket, zmqpp::poller::poll_in);
-
-//    zmqpp::message request;
-//    request << "ping";
-
-//    m_socket.send(request, true);
-
-//    zmqpp::message reply;
-//    m_socket.receive(reply);
-
-//    std::string string_reply;
-//    reply >> string_reply;
-
-//    return string_reply == "pong";
 }
 
 std::string RemoteServer::getBoardConfiguration()
