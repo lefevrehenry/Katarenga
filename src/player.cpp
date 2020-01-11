@@ -45,36 +45,36 @@ void player_function()
 //        server_endpoint = "tcp://" + server_ip + ":" + std::to_string(server_black_port);
 //    }
 
-    std::string s_player = this_player == 1 ? "White" : "Black";
+//    std::string s_player = this_player == 1 ? "White" : "Black";
 
-    std::cout << "I'm main process of " << s_player << " " << this_player << std::endl;
+//    std::cout << "I'm main process of " << s_player << " " << this_player << std::endl;
 
-    // Setup the two connection with the graphics thread and the server process
-    zmqpp::context context;
-    zmqpp::socket socketGL(context, zmqpp::socket_type::pair);
-    socketGL.bind("tcp://*:"+std::to_string(graphics_port));
-    std::thread thr_GL(graphics_function, this_player, graphics_port, verbose);
+//    // Setup the two connection with the graphics thread and the server process
+//    zmqpp::context context;
+//    zmqpp::socket socketGL(context, zmqpp::socket_type::pair);
+//    socketGL.bind("tcp://*:"+std::to_string(graphics_port));
+//    std::thread thr_GL(graphics_function, this_player, graphics_port, verbose);
 
-//    zmqpp::socket socketServer(context, zmqpp::socket_type::pair);
-//    socketServer.connect(server_endpoint);
+////    zmqpp::socket socketServer(context, zmqpp::socket_type::pair);
+////    socketServer.connect(server_endpoint);
 
-    // Receive the board configuration from the server
-    std::string board_configuration = server_communication->getBoardConfiguration();
-//    std::string board_configuration = s_recv(socketServer);
-//    s_send(socketServer, "ACK");
+//    // Receive the board configuration from the server
+//    std::string board_configuration = server_communication->getBoardConfiguration();
+////    std::string board_configuration = s_recv(socketServer);
+////    s_send(socketServer, "ACK");
 
-    std::cout << "RECEIVED board config:\n" << board_configuration << std::endl;
+//    std::cout << "RECEIVED board config:\n" << board_configuration << std::endl;
 
-    // Forward the board configuration to the graphics thread and wait for ACK.
-    s_send(socketGL, board_configuration);
-    s_recv(socketGL);
+//    // Forward the board configuration to the graphics thread and wait for ACK.
+//    s_send(socketGL, board_configuration);
+//    s_recv(socketGL);
 
-    std::cout << "just sent board config to graphics thread" << std::endl;
+//    std::cout << "just sent board config to graphics thread" << std::endl;
 
-    // Main loop of the game
-    Board board(board_configuration, verbose);
+//    // Main loop of the game
+//    Board board(board_configuration, verbose);
 
-    std::cout << "Client process ready to play!" << std::endl;
+//    std::cout << "Client process ready to play!" << std::endl;
 
 //    std::string move_str;
 //    std::string ret;
