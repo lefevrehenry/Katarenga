@@ -18,7 +18,7 @@ find_package_handle_standard_args(
     DOCOPT_LIBRARY
 )
 
-if(DOCOPT_FOUND)
+if(DOCOPT_FOUND AND NOT TARGET docopt)
     # Create imported target docopt
     add_library(docopt INTERFACE IMPORTED)
 

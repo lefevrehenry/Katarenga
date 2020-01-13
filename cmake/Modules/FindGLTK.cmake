@@ -18,7 +18,7 @@ find_package_handle_standard_args(
     GLTK_LIBRARY
 )
 
-if(GLTK_FOUND)
+if(GLTK_FOUND AND NOT TARGET GLTK)
     # Create imported target GLTK
     add_library(GLTK INTERFACE IMPORTED)
 

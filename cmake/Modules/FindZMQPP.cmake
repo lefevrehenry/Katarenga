@@ -21,7 +21,7 @@ find_package_handle_standard_args(
     ZMQPP_LIBRARY
 )
 
-if(ZMQPP_FOUND)
+if(ZMQPP_FOUND AND NOT TARGET ZMQPP)
     # Create imported target ZMQPP
     add_library(ZMQPP INTERFACE IMPORTED)
 
