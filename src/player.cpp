@@ -2,8 +2,6 @@
 #include "katarenga.hpp"
 #include "player.hpp"
 #include "graphics.hpp"
-#include "Board.hpp"
-#include "server.hpp"
 #include "server_communication.hpp"
 
 #include <iostream>
