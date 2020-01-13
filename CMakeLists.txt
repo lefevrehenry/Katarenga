@@ -37,6 +37,9 @@ file(GLOB SOURCE_FILES
     "src/*.hpp"
 )
 
+# build the server executable (should be independent from this CMakeLists)
+add_subdirectory(src/server)
+
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

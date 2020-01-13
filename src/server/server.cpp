@@ -1,24 +1,62 @@
-#include "network_utils.hpp"
+//#include "network_utils.hpp"
 #include "server.hpp"
 #include "Board.hpp"
 
-#include <iostream>
+#include <zmqpp/zmqpp.hpp>
 
-using std::cout;        // At some point we'll
-using std::endl;        // Need to get rid of
-using std::string;      // These
-using std::to_string;   // Declarations
+#include <docopt/docopt.h>
 
-void server_function(const int socket_port, const bool verbose)
+#include <map>
+#include <string>
+
+struct ServerInfo ServerInfo;
+
+int parse_main_args(int argc, char * argv[])
 {
-//    // Open sockets for White and Black players
-//    zmqpp::context context;
-//    zmqpp::socket socket(context, zmqpp::socket_type::pull);
-//    socket.bind("tcp://*:" + to_string(socket_port));
+    static const char usage[] =
+R"(Katarenga-Server: A nice two-player board game!
 
-//    // Setup game
-//    string board_configuration = "";
-//    Board board(board_configuration, verbose);
+Usage:
+    server                      [options]
+    server -h | --help
+
+Input options:
+    --offset-port <port>        The offset on which socket port will be based on.
+                                [default: 28000]
+
+Other options:
+    -v, --verbose                  Makes katarenga verbose.
+    -h, --help                     Shows this help.
+)";
+
+    std::map<std::string, docopt::value> args = docopt::docopt(usage, {argv+1, argv+argc}, true);
+
+    int offset_port = args["--offset-port"].asLong();
+    bool verbose = args["--verbose"].asBool();
+
+    ServerInfo.server_white_port = offset_port;
+    ServerInfo.server_black_port = offset_port + 1;
+    ServerInfo.verbose = verbose;
+
+    return 0;
+}
+
+void server_function()
+{
+    zmqpp::context context;
+
+    int server_white_port = ServerInfo.server_white_port;
+    int server_black_port = ServerInfo.server_black_port;
+
+    // Open sockets for White and Black players
+    zmqpp::socket white_player_socket(context, zmqpp::socket_type::reply);
+    white_player_socket.bind("tcp://*:" + std::to_string(server_white_port));
+
+    zmqpp::socket black_player_socket(context, zmqpp::socket_type::reply);
+    black_player_socket.bind("tcp://*:" + std::to_string(server_black_port));
+
+    // Setup game
+    Board board;
 
 //    // Send the board configuration to players and recv ACKs
 //    if(verbose){ cout << "Sending board configuration to players" << endl; }
@@ -79,3 +117,13 @@ void server_function(const int socket_port, const bool verbose)
 //    cout << "Terminating server thread." << endl;
 }
 
+int main(int argc, char* argv[])
+{
+    // Let's parse the command-line arguments!
+    if (parse_main_args(argc, argv))
+        return 1;
+
+    server_function();
+
+    return 0;
+}
