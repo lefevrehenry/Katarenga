@@ -2,7 +2,7 @@
 
 RemoteServer::RemoteServer(const std::string& server_ip, const std::string& server_port) : AbstractServer(),
     m_context(),
-    m_socket(m_context, zmqpp::socket_type::pair),
+    m_socket(m_context, zmqpp::socket_type::request),
     m_poller()
 {
     m_socket.connect("tcp://" + server_ip + ":" + server_port);
