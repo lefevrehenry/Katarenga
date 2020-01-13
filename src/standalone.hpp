@@ -1,7 +1,7 @@
-#ifndef STANDALONE_HPP
-#define STANDALONE_HPP
+//#ifndef STANDALONE_HPP
+//#define STANDALONE_HPP
 
-void standalone_function(const int graphics_port, const bool verbose);
+//void standalone_function(const int graphics_port, const bool verbose);
 
-#endif // STANDALONE_HPP
+//#endif // STANDALONE_HPP
 
