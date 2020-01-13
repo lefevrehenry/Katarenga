@@ -1,6 +1,6 @@
 #include "network_utils.hpp"
 #include "graphics.hpp"
-#include "Board.hpp"
+#include "server/Board.hpp"
 
 #include <iostream>
 
@@ -43,7 +43,7 @@ void graphics_function(int this_player, int socket_port, bool verbose)
 
     cout << "GL received board config:\n" << board_configuration << endl;
 
-    Board board(board_configuration, verbose);
+//    Board board;
 
     cout << "GL thread ready to play!" << endl;
 
@@ -53,57 +53,57 @@ void graphics_function(int this_player, int socket_port, bool verbose)
     int has_won = 0;
     while(!end_game)
     {
-        if (board.getCurrentPlayer() == this_player)
-        {
-            // It's our turn
-            cout << "Enter your string move of the form \"m<src_cell_index>:<dest_cell_index>\" ";
-            cin >> move_str;
+//        if (board.getCurrentPlayer() == this_player)
+//        {
+//            // It's our turn
+//            cout << "Enter your string move of the form \"m<src_cell_index>:<dest_cell_index>\" ";
+//            cin >> move_str;
 
-            s_send(socket, move_str);
-            /*if(!polling(socket, 5))
-            {
-                // TODO throw an error
-                cout << "ERROR WHILE POLLING, terminating GL thread." << endl;
-                socket.close();
-                return;
-            }*/
-            string ret = s_recv(socket);
-            if (ret == "accept")
-            {
-                board.playMove(move_str);
-            }
-            else if (ret == "reject")
-            {
-                cout << "The move was not valid" << endl;
-            }
-            else
-            {
-                cout << "ERROR: Weird message received from player thread, terminating." << endl;
-                socket.close();
-                return;
-            }
-        }
-        else
-        {
-            // It's the opponent turn
-            /*if(!polling(socket, 5))
-            {
-                // TODO throw an error
-                cout << "ERROR WHILE POLLING, terminating GL thread." << endl;
-                socket.close();
-                return;
-            }*/
-            move_str = s_recv(socket);
-            board.playMove(move_str);
-            cout << "Other player just played " << move_str << endl;
-        }
+//            s_send(socket, move_str);
+//            /*if(!polling(socket, 5))
+//            {
+//                // TODO throw an error
+//                cout << "ERROR WHILE POLLING, terminating GL thread." << endl;
+//                socket.close();
+//                return;
+//            }*/
+//            string ret = s_recv(socket);
+//            if (ret == "accept")
+//            {
+//                board.playMove(move_str);
+//            }
+//            else if (ret == "reject")
+//            {
+//                cout << "The move was not valid" << endl;
+//            }
+//            else
+//            {
+//                cout << "ERROR: Weird message received from player thread, terminating." << endl;
+//                socket.close();
+//                return;
+//            }
+//        }
+//        else
+//        {
+//            // It's the opponent turn
+//            /*if(!polling(socket, 5))
+//            {
+//                // TODO throw an error
+//                cout << "ERROR WHILE POLLING, terminating GL thread." << endl;
+//                socket.close();
+//                return;
+//            }*/
+//            move_str = s_recv(socket);
+//            board.playMove(move_str);
+//            cout << "Other player just played " << move_str << endl;
+//        }
 
-        if ((has_won = board.gameFinished()) != 0)
-        {
-            end_game = true;
-            cout << "Woah! " << (has_won == 1?"White":"Black") << " player has won the game!"
-                                                                  "" << endl;
-        }
+//        if ((has_won = board.gameFinished()) != 0)
+//        {
+//            end_game = true;
+//            cout << "Woah! " << (has_won == 1?"White":"Black") << " player has won the game!"
+//                                                                  "" << endl;
+//        }
     }
 
 
@@ -125,7 +125,7 @@ void standalone_graphics_function(int socket_port, bool verbose)
 
     cout << "GL received board config:\n" << board_configuration << endl;
 
-    Board board(board_configuration, verbose);
+//    Board board;
 
     cout << "GL thread ready to play!" << endl;
 
@@ -136,35 +136,35 @@ void standalone_graphics_function(int socket_port, bool verbose)
     int has_won = 0;
     int current_player;
 
-    board.print();
+//    board.print();
     while(!end_game)
     {
-        ret = s_recv(socketS);
-        if (ret[0] == 'p')
-        {
-            // It's a player turn
-            current_player = (ret[1] == '1' ? 1 : -1);
+//        ret = s_recv(socketS);
+//        if (ret[0] == 'p')
+//        {
+//            // It's a player turn
+//            current_player = (ret[1] == '1' ? 1 : -1);
 
-            move_str = askNextMoveText(current_player);
+//            move_str = askNextMoveText(current_player);
 
-            s_send(socketS, move_str);
-            ret = s_recv(socketS);
+//            s_send(socketS, move_str);
+//            ret = s_recv(socketS);
 
-            if (ret[0] == 'm')
-            {
-                // The move has been accepted, apply it
-                board.playMove(ret);
-                board.print();
-            }
-        }
-        else if (ret[0] == 'w')
-        {
-            // A player has won
-            has_won = (ret[1] == '1' ? 1 : -1);
+//            if (ret[0] == 'm')
+//            {
+//                // The move has been accepted, apply it
+//                board.playMove(ret);
+//                board.print();
+//            }
+//        }
+//        else if (ret[0] == 'w')
+//        {
+//            // A player has won
+//            has_won = (ret[1] == '1' ? 1 : -1);
 
-            // Just stop the loop and terminate
-            end_game = true;
-        }
+//            // Just stop the loop and terminate
+//            end_game = true;
+//        }
     }
 
     socketS.close();
