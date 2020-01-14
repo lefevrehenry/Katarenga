@@ -1,6 +1,68 @@
 ﻿#include "utils.hpp"
 #include "Board.hpp"
 
+struct ServerInfo ServerInfo;
+
+using MessageType = MessageWrapper::MessageType;
+
+template< typename T >
+void toto(typename T::Request*, typename T::Reply*)
+{
+    throw std::runtime_error("missing template specialization");
+}
+
+template<>
+void toto<BoardConfiguration>(BoardConfiguration::Request*, BoardConfiguration::Reply* reply)
+{
+    std::string boardString = ServerInfo.board->getBoard();
+
+    reply->setConfiguration(boardString);
+}
+
+template< typename T >
+void construct_reply(zmqpp::message& request_message, zmqpp::message& reply_message)
+{
+    // reconstruct the request object from the input message
+    typename T::Request request;
+    request.fromMessage(request_message);
+
+    // construct the reply object for the output message
+    typename T::Reply reply;
+    toto<T>(&request, &reply);
+
+    // write the output message from the reply object
+    reply.toMessage(reply_message);
+}
+
+zmqpp::message process_request(zmqpp::message &request_message)
+{
+    // the message returned
+    zmqpp::message reply_message;
+
+    // read the header (correspond to the type of the request sent)
+    MessageType type = *request_message.get<const MessageType*>(0);
+
+    // according to the type of the request we construct the message_reply
+    switch (type) {
+    case MessageType::AskBoardConfiguration: {
+        construct_reply<BoardConfiguration>(request_message, reply_message);
+        break;
+    }
+    case MessageType::CheckConnectivity: {
+        construct_reply<CheckConnectivity>(request_message, reply_message);
+        break;
+    }
+    case MessageType::IsThisMoveValid: {
+        break;
+    }
+    case MessageType::ForgetItRageQuit: {
+        break;
+    }
+    }
+
+    return reply_message;
+}
+
 // TODO Implement rotations of the tiles
 const char bb[8][4][4] = {{{'R', 'B', 'K', 'N'}, // 0
                            {'N', 'R', 'N', 'K'},
@@ -38,19 +100,18 @@ const char bb[8][4][4] = {{{'R', 'B', 'K', 'N'}, // 0
 // Generates 4 different random values between 0 and 7.
 void pickRand(int *a, int *b, int *c, int *d)
 {
-	srand (time(NULL));
-	*a = rand()%8;
-	do {
-		*b = rand()%8;
-	} while(*b == *a);
-	do {
-		*c = rand()%8;
-	} while(*c == *a || *c == *b);
-	do {
-		*d = rand()%8;
-	} while(*d == *a || *d == *b || *d == *c);
+    srand (time(NULL));
+    *a = rand()%8;
+    do {
+        *b = rand()%8;
+    } while(*b == *a);
+    do {
+        *c = rand()%8;
+    } while(*c == *a || *c == *b);
+    do {
+        *d = rand()%8;
+    } while(*d == *a || *d == *b || *d == *c);
 }
-
 
 void generateBoard(Board* board)
 {
@@ -73,5 +134,3 @@ void generateBoard(Board* board)
     std::string boardString = s1 + s2;
     board->setBoard(boardString);
 }
-
-

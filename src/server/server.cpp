@@ -1,7 +1,6 @@
 #include "Board.hpp"
 #include "server.hpp"
 #include "utils.hpp"
-#include "message_utils.hpp"
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
@@ -12,70 +11,6 @@
 // Standard Library
 #include <map>
 #include <string>
-
-struct ServerInfo ServerInfo;
-Board* my_board = nullptr;
-
-using MessageType = MessageWrapper::MessageType;
-
-template< typename T >
-void toto(typename T::Request*, typename T::Reply*)
-{
-    throw std::runtime_error("missing template specialization");
-}
-
-template<>
-void toto<BoardConfiguration>(BoardConfiguration::Request*, BoardConfiguration::Reply* reply)
-{
-    std::string boardString = my_board->getBoard();
-
-    reply->setConfiguration(boardString);
-}
-
-template< typename T >
-void construct_reply(zmqpp::message& request_message, zmqpp::message& reply_message)
-{
-    // reconstruct the request object from the input message
-    typename T::Request request;
-    request.fromMessage(request_message);
-
-    // construct the reply object for the output message
-    typename T::Reply reply;
-    toto<T>(&request, &reply);
-
-    // write the output message from the reply object
-    reply.toMessage(reply_message);
-}
-
-///\brief return a zmqpp::message matching the corresponding reply of the request
-zmqpp::message process_request(zmqpp::message& request_message)
-{
-    // the message returned
-    zmqpp::message reply_message;
-
-    // read the header (correspond to the type of the request sent)
-    MessageType type = *request_message.get<const MessageType*>(0);
-
-    // according to the type of the request we construct the message_reply
-    switch (type) {
-        case MessageType::AskBoardConfiguration: {
-            construct_reply<BoardConfiguration>(request_message, reply_message);
-            break;
-        }
-        case MessageType::CheckConnectivity: {
-            construct_reply<CheckConnectivity>(request_message, reply_message);
-            break;
-        }
-        case MessageType::IsThisMoveValid: {
-            break;
-        }
-        case MessageType::ForgetItRageQuit: {
-            break;
-        }
-    }
-
-    return reply_message;
-}
 
 int parse_main_args(int argc, char * argv[])
 {
@@ -103,6 +38,7 @@ Other options:
     ServerInfo.server_white_port = offset_port;
     ServerInfo.server_black_port = offset_port + 1;
     ServerInfo.verbose = verbose;
+    ServerInfo.board = nullptr;
 
     return 0;
 }
@@ -130,7 +66,9 @@ void server_function()
     // Setup game
     Board board;
     generateBoard(&board);
-    my_board = &board;
+
+    // Give a global access to the board
+    ServerInfo.board = &board;
 
 
     bool end_game = board.gameFinished();
@@ -143,9 +81,11 @@ void server_function()
 
             // if a message is received from the white player
             if(poller.has_input(white_player_socket)) {
+                // pull the request message
                 zmqpp::message request_message;
                 white_player_socket.receive(request_message);
 
+                // construct and push the reply message
                 zmqpp::message message_reply = process_request(request_message);
                 white_player_socket.send(message_reply);
             }
