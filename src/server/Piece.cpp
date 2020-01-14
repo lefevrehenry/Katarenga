@@ -1,14 +1,10 @@
 #include "Piece.hpp"
 #include "Cell.hpp"
 
-Piece::Piece()
-{
-}
-
-Piece::Piece(int player, Cell* cell, std::vector<Move>* moveList) :
+Piece::Piece(int player, Cell* cell) :
     _player(player),
     _cell(cell),
-    _moveList(moveList)
+    _moveList(new std::vector<Move>())
 {
     _cell->setPiece(this);
 }
@@ -23,7 +19,7 @@ int Piece::getPlayer() const
     return _player;
 }
 
-std::vector<Move> *Piece::getMoveList()
+std::vector<Move>* Piece::getMoveList()
 {
     return _moveList;
 }

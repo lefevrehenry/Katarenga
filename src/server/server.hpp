@@ -11,4 +11,3 @@ struct ServerInfo
 extern ServerInfo ServerInfo;
 
 #endif // SERVER_HPP
-

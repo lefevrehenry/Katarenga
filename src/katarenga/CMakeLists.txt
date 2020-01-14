@@ -1,5 +1,8 @@
 ﻿cmake_minimum_required(VERSION 3.2)
-project(server)
+project(katarenga)
+
+## Threads dependency
+find_package(Threads REQUIRED)
 
 ## ZeroMQ dependency
 find_package(ZMQPP MODULE QUIET)
@@ -17,26 +20,25 @@ endif()
 get_target_property(_DOCOPT_DIR docopt INTERFACE_INCLUDE_DIRECTORIES)
 message("-- Found docopt: ${_DOCOPT_DIR}")
 
-set(HEADER_FILES
-    Board.hpp
-    Cell.hpp
-    Piece.hpp
-    server.hpp
-    utils.hpp
+## GLTK dependency
+find_package(GLTK MODULE QUIET)
+if(NOT GLTK_FOUND)
+    find_package(GLTK CONFIG REQUIRED)
+endif()
+get_target_property(_GLTK_DIR GLTK INTERFACE_INCLUDE_DIRECTORIES)
+message("-- Found GLTK: ${_GLTK_DIR}")
+
+file(GLOB SOURCE_FILES
+    "*.cpp"
+    "*.hpp"
 )
 
-set(SOURCE_FILES
-    Board.cpp
-    Cell.cpp
-    Piece.cpp
-    server.cpp
-    utils.cpp
-)
-
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
+    message_utils
+    Threads::Threads
     ZMQPP
     docopt
-    message_utils
+    GLTK
 )

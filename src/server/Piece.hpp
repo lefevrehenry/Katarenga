@@ -10,8 +10,7 @@ class Piece
 {
 
 public:
-    Piece();
-    Piece(int player, Cell* cell, std::vector<Move>* moveList);
+    Piece(int player, Cell* cell);
     ~Piece();
 
 public:

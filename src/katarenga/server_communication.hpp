@@ -1,7 +1,7 @@
 #ifndef SERVER_COMMUNICATION_HPP
 #define SERVER_COMMUNICATION_HPP
 
-#include "MessageWrapper.hpp"
+#include "../message_utils/MessageWrapper.hpp"
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
@@ -10,6 +10,9 @@
 #include <string>
 
 
+/**
+ * @brief The AbstractServer class
+ */
 class AbstractServer
 {
 
@@ -19,6 +22,9 @@ public:
 
 };
 
+/**
+ * @brief The RemoteServer class
+ */
 class RemoteServer : public AbstractServer
 {
     using MessageType = MessageWrapper::MessageType;
@@ -26,6 +32,10 @@ class RemoteServer : public AbstractServer
 public:
     RemoteServer(const std::string& server_ip, const std::string& server_port);
     virtual ~RemoteServer();
+
+public:
+    bool checkServerConnectivity() override;
+    std::string getBoardConfiguration() override;
 
 private:
     template< typename T >
@@ -38,11 +48,7 @@ private:
     typename T::Reply communicate(Args&& ...);
 
 private:
-    static constexpr unsigned int TimeOut = 5000;     // timeout in milliseconds
-
-public:
-    bool checkServerConnectivity() override;
-    std::string getBoardConfiguration() override;
+    static constexpr unsigned int TimeOut = 5000;     // timeout for the reply of the server (in milliseconds)
 
 private:
     zmqpp::context  m_context;
@@ -51,6 +57,9 @@ private:
 
 };
 
+/**
+ * @brief The LocalServer class
+ */
 class LocalServer : public AbstractServer
 {
 

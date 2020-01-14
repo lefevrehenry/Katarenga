@@ -37,14 +37,12 @@ Board::Board()
 	_piecesB.reserve(8);
     for(int j = 1; j <= 8; ++j)
 	{
-		// For White
-        std::vector<Move>* moveListW = new std::vector<Move>();
-        Piece* pieceW = new Piece(1, _plateau[1][j], moveListW);
+        // For White
+        Piece* pieceW = new Piece(1, _plateau[1][j]);
 		_piecesW.push_back(pieceW);
 
-		// For Black
-        std::vector<Move>* moveListB = new std::vector<Move>();
-        Piece* pieceB = new Piece(-1, _plateau[8][j], moveListB);
+        // For Black
+        Piece* pieceB = new Piece(-1, _plateau[8][j]);
 		_piecesB.push_back(pieceB);
 	}
 

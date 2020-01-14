@@ -77,7 +77,7 @@ Other options:
 //        MainArguments.graphics_port = offset_port;
 //    }
 
-    MainArguments.is_standalone = args["--server-ip"].asString().empty();
+    MainArguments.is_standalone = args["--server-ip"].asString() == "127.0.0.1";
 
     if(MainArguments.verbose)
     {

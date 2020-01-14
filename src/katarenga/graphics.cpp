@@ -1,6 +1,6 @@
 #include "network_utils.hpp"
 #include "graphics.hpp"
-#include "server/Board.hpp"
+#include "../server/Board.hpp"
 
 #include <iostream>
 

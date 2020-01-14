@@ -1,4 +1,5 @@
 #include "server_communication.hpp"
+#include "message_utils.hpp"
 
 RemoteServer::RemoteServer(const std::string& server_ip, const std::string& server_port) : AbstractServer(),
     m_context(),
@@ -12,6 +13,20 @@ RemoteServer::RemoteServer(const std::string& server_ip, const std::string& serv
 RemoteServer::~RemoteServer()
 {
     m_socket.close();
+}
+
+bool RemoteServer::checkServerConnectivity()
+{
+    CheckConnectivity::Reply reply = communicate<CheckConnectivity>();
+
+    return reply.getConnectivity();
+}
+
+std::string RemoteServer::getBoardConfiguration()
+{
+    BoardConfiguration::Reply reply = communicate<BoardConfiguration>();
+
+    return reply.getConfiguration();
 }
 
 template< typename T >
@@ -33,7 +48,7 @@ void RemoteServer::send(typename T::Request* request)
 template< typename T >
 void RemoteServer::receive(typename T::Reply* reply)
 {
-    // return if nothing is received within the next few seconds
+    // return if nothing is received within the next 5 seconds
     if(!m_poller.poll(RemoteServer::TimeOut))
         return;
 
@@ -58,20 +73,6 @@ typename T::Reply RemoteServer::communicate(Args&& ... args)
     receive<T>(&reply);
 
     return reply;
-}
-
-bool RemoteServer::checkServerConnectivity()
-{
-    CheckConnectivity::Reply reply = communicate<CheckConnectivity>();
-
-    return reply.getConnectivity();
-}
-
-std::string RemoteServer::getBoardConfiguration()
-{
-    BoardConfiguration::Reply reply = communicate<BoardConfiguration>();
-
-    return reply.getConfiguration();
 }
 
 LocalServer::LocalServer() : AbstractServer()

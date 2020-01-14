@@ -1,6 +1,7 @@
 #include "Cell.hpp"
 
 Cell::Cell(int row, int column) :
+    _piece(nullptr),
     _row(row),
     _column(column)
 {

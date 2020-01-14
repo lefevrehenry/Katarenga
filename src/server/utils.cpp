@@ -52,7 +52,7 @@ void pickRand(int *a, int *b, int *c, int *d)
 }
 
 
-void generateBoardString(Board* board)
+void generateBoard(Board* board)
 {
     int a, b, c, d;
     pickRand(&a, &b, &c, &d);
