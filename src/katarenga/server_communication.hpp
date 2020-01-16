@@ -1,7 +1,7 @@
 #ifndef SERVER_COMMUNICATION_HPP
 #define SERVER_COMMUNICATION_HPP
 
-#include "../message_utils/MessageWrapper.hpp"
+#include <message/MessageWrapper.hpp>
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>

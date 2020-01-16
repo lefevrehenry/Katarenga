@@ -1,7 +1,7 @@
 ﻿#include "server_utils.hpp"
 #include "Board.hpp"
 
-#include <message_utils.hpp>
+#include <message/message_utils.hpp>
 
 struct ServerInfo ServerInfo;
 

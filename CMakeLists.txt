@@ -9,7 +9,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # build common library
-add_subdirectory(src/message_utils)
+add_subdirectory(src/message)
 
 # build the server executable
 add_subdirectory(src/server)

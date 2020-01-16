@@ -1,5 +1,5 @@
 #include "server_communication.hpp"
-#include "message_utils.hpp"
+#include <message/message_utils.hpp>
 
 RemoteServer::RemoteServer(const std::string& server_ip, const std::string& server_port) : AbstractServer(),
     m_context(),
