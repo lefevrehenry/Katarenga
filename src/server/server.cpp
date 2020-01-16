@@ -1,5 +1,5 @@
-#include "Board.hpp"
 #include "server.hpp"
+#include "Board.hpp"
 #include "utils.hpp"
 
 // ZMQPP
@@ -9,6 +9,7 @@
 #include <docopt/docopt.h>
 
 // Standard Library
+#include <iostream>
 #include <map>
 #include <string>
 
@@ -57,6 +58,10 @@ void server_function()
     zmqpp::socket black_player_socket(context, zmqpp::socket_type::reply);
     black_player_socket.bind("tcp://*:" + std::to_string(server_black_port));
 
+    // Open socket for publish zmq message to client
+    zmqpp::socket server_publish_socket(context, zmqpp::socket_type::publish);
+    server_publish_socket.bind("tcp://*:" + std::to_string(server_publish_port));
+
     // Create a poller for any request received
     zmqpp::poller poller;
 
@@ -70,10 +75,12 @@ void server_function()
     // Give a global access to the board
     ServerInfo.board = &board;
 
-
     bool end_game = board.gameFinished();
+    int has_won = 0;
 
+    // loop until the game is finished
     while (!end_game) {
+
         board.print();
 
         // wait for a request
@@ -91,8 +98,21 @@ void server_function()
             }
 
             // if a message is received from the black player
-            if(poller.has_input(black_player_socket))
-                continue;
+            if(poller.has_input(black_player_socket)) {
+                // pull the request message
+                zmqpp::message request_message;
+                black_player_socket.receive(request_message);
+
+                // construct and push the reply message
+                zmqpp::message message_reply = process_request(request_message);
+                black_player_socket.send(message_reply);
+            }
+
+            // terminate the loop if someone has won
+            if ((has_won = board.gameFinished()) != 0) {
+                end_game = true;
+                std::cout << (has_won == 1 ? "White" : "Black") << " player has won the game." << std::endl;
+            }
         }
     }
 
@@ -150,9 +170,9 @@ void server_function()
 //        }
 //    }
 
-//    socket.close();
-//    socketB.close();
-//    cout << "Terminating server thread." << endl;
+    white_player_socket.close();
+    black_player_socket.close();
+    std::cout << "Terminating server thread." << std::endl;
 }
 
 int main(int argc, char* argv[])
