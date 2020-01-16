@@ -491,9 +491,7 @@ int Board::getCurrentPlayer()
 
 void Board::main_loop()
 {
-    int n = 0;
-    Move move
-            ;
+    Move move;
     print();
     while(true)
     {
