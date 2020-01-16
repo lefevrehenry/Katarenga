@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.2)
 project(message_utils)
 
 ### ZeroMQ dependency
@@ -14,12 +14,14 @@ set(HEADER_FILES
     CheckConnectivity.hpp
     MessageWrapper.hpp
     message_utils.hpp
+    PlayThisMove.hpp
 )
 
 set(SOURCE_FILES
     BoardConfiguration.cpp
     CheckConnectivity.cpp
     MessageWrapper.cpp
+    PlayThisMove.cpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})

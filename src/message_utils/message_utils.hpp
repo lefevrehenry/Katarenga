@@ -2,3 +2,4 @@
 
 #include "BoardConfiguration.hpp"
 #include "CheckConnectivity.hpp"
+#include "PlayThisMove.hpp"

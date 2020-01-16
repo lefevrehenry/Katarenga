@@ -14,6 +14,7 @@ struct MessageWrapper
         AskBoardConfiguration,
         CheckConnectivity,
         IsThisMoveValid,
+        PlayThisMove,
         ForgetItRageQuit
     };
 
