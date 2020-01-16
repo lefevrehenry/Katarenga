@@ -38,6 +38,7 @@ Other options:
 
     ServerInfo.server_white_port = offset_port;
     ServerInfo.server_black_port = offset_port + 1;
+    ServerInfo.server_publish_port = offset_port + 2;
     ServerInfo.verbose = verbose;
     ServerInfo.board = nullptr;
 
@@ -48,6 +49,7 @@ void server_function()
 {
     int server_white_port = ServerInfo.server_white_port;
     int server_black_port = ServerInfo.server_black_port;
+    int server_publish_port = ServerInfo.server_publish_port;
 
     zmqpp::context context;
 
@@ -58,7 +60,7 @@ void server_function()
     zmqpp::socket black_player_socket(context, zmqpp::socket_type::reply);
     black_player_socket.bind("tcp://*:" + std::to_string(server_black_port));
 
-    // Open socket for publish zmq message to client
+    // Open socket for publish zmq message to both client and spectators
     zmqpp::socket server_publish_socket(context, zmqpp::socket_type::publish);
     server_publish_socket.bind("tcp://*:" + std::to_string(server_publish_port));
 
@@ -93,8 +95,12 @@ void server_function()
                 white_player_socket.receive(request_message);
 
                 // construct and push the reply message
-                zmqpp::message message_reply = process_request(request_message);
-                white_player_socket.send(message_reply);
+                zmqpp::message reply_message = process_request(request_message);
+                white_player_socket.send(reply_message);
+
+                // construct and publish the broadcast message
+                zmqpp::message publish_message = process_broadcast(request_message, reply_message);
+                server_publish_socket.send(publish_message);
             }
 
             // if a message is received from the black player
@@ -104,8 +110,12 @@ void server_function()
                 black_player_socket.receive(request_message);
 
                 // construct and push the reply message
-                zmqpp::message message_reply = process_request(request_message);
-                black_player_socket.send(message_reply);
+                zmqpp::message reply_message = process_request(request_message);
+                black_player_socket.send(reply_message);
+
+                // construct and publish the broadcast message
+                zmqpp::message publish_message = process_broadcast(request_message, reply_message);
+                server_publish_socket.send(publish_message);
             }
 
             // terminate the loop if someone has won

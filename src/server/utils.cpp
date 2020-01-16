@@ -1,6 +1,8 @@
 ﻿#include "utils.hpp"
 #include "Board.hpp"
 
+#include <message_utils.hpp>
+
 struct ServerInfo ServerInfo;
 
 using MessageType = MessageWrapper::MessageType;
@@ -22,11 +24,11 @@ void toto<BoardConfiguration>(BoardConfiguration::Request*, BoardConfiguration::
 template< typename T >
 void construct_reply(zmqpp::message& request_message, zmqpp::message& reply_message)
 {
-    // reconstruct the request object from the input message
+    // reconstruct the request object from the (input) request message
     typename T::Request request;
     request.fromMessage(request_message);
 
-    // construct the reply object for the output message
+    // construct the reply object for the (output) reply message
     typename T::Reply reply;
     toto<T>(&request, &reply);
 
@@ -34,7 +36,7 @@ void construct_reply(zmqpp::message& request_message, zmqpp::message& reply_mess
     reply.toMessage(reply_message);
 }
 
-zmqpp::message process_request(zmqpp::message &request_message)
+zmqpp::message process_request(zmqpp::message& request_message)
 {
     // the message returned
     zmqpp::message reply_message;
@@ -42,7 +44,7 @@ zmqpp::message process_request(zmqpp::message &request_message)
     // read the header (correspond to the type of the request sent)
     MessageType type = *request_message.get<const MessageType*>(0);
 
-    // according to the type of the request we construct the message_reply
+    // according to the type of the request we construct the reply message
     switch (type) {
     case MessageType::AskBoardConfiguration: {
         construct_reply<BoardConfiguration>(request_message, reply_message);
@@ -55,12 +57,74 @@ zmqpp::message process_request(zmqpp::message &request_message)
     case MessageType::IsThisMoveValid: {
         break;
     }
+    case MessageType::PlayThisMove: {
+        break;
+    }
     case MessageType::ForgetItRageQuit: {
         break;
     }
     }
 
     return reply_message;
+}
+
+template< typename T >
+void titi(typename T::Request*, typename T::Reply*, typename T::Broadcast*)
+{
+    throw std::runtime_error("missing template specialization");
+}
+
+template<>
+void titi<PlayThisMove>(PlayThisMove::Request* request, PlayThisMove::Reply*, PlayThisMove::Broadcast* broadcast)
+{
+    broadcast->setMove(request->getMove());
+}
+
+template< typename T >
+zmqpp::message construct_publish(zmqpp::message& request_message, zmqpp::message& reply_message)
+{
+    zmqpp::message publish_message;
+
+    // reconstruct the request object from the (input) request message
+    typename T::Request request;
+    request.fromMessage(request_message);
+
+    // reconstruct the reply object from the (output) reply message
+    typename T::Reply reply;
+    reply.fromMessage(reply_message);
+
+    // construct the broadcast object for the (output) broadcast message
+    typename T::Broadcast broadcast;
+    titi<T>(&request, &reply, &broadcast);
+
+    // write the output message from the broadcast object
+    broadcast.toMessage(reply_message);
+
+    return publish_message;
+}
+
+zmqpp::message process_broadcast(zmqpp::message& request_message, zmqpp::message& reply_message)
+{
+    zmqpp::message publish_message;
+
+    // read the header (correspond to the type of the request sent)
+    MessageType type = *request_message.get<const MessageType*>(0);
+
+    // according to the type of the request we construct the publish message
+    switch (type) {
+    case MessageType::PlayThisMove: {
+        publish_message = construct_publish<PlayThisMove>(request_message, reply_message);
+        break;
+    }
+    case MessageType::ForgetItRageQuit: {
+        break;
+    }
+    default: {
+        break;
+    }
+    }
+
+    return publish_message;
 }
 
 // TODO Implement rotations of the tiles
