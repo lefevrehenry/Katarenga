@@ -1,7 +1,7 @@
 ﻿#ifndef BOARD_HPP
 #define BOARD_HPP
 
-#include "utils.hpp"
+#include "server_utils.hpp"
 #include "Cell.hpp"
 #include "Piece.hpp"
 

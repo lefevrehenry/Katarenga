@@ -1,6 +1,6 @@
 #include "server.hpp"
 #include "Board.hpp"
-#include "utils.hpp"
+#include "server_utils.hpp"
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>

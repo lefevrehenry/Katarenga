@@ -1,7 +1,7 @@
 ﻿#ifndef PIECE_HPP
 #define PIECE_HPP
 
-#include "utils.hpp"
+#include "server_utils.hpp"
 #include <vector>
 
 class Cell;

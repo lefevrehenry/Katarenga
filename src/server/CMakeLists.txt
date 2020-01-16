@@ -22,7 +22,7 @@ set(HEADER_FILES
     Cell.hpp
     Piece.hpp
     server.hpp
-    utils.hpp
+    server_utils.hpp
 )
 
 set(SOURCE_FILES
@@ -30,7 +30,7 @@ set(SOURCE_FILES
     Cell.cpp
     Piece.cpp
     server.cpp
-    utils.cpp
+    server_utils.cpp
 )
 
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
