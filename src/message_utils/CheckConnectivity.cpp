@@ -1,10 +1,5 @@
 #include "CheckConnectivity.hpp"
 
-MessageWrapper::MessageType CheckConnectivity::MessageType()
-{
-    return MessageWrapper::MessageType::CheckConnectivity;
-}
-
 CheckConnectivity::Reply::Reply() : MessageWrapper(),
     m_connectivity(false)
 {

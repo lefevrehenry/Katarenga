@@ -12,7 +12,10 @@
  */
 struct BoardConfiguration
 {
-    static MessageWrapper::MessageType MessageType();
+    static MessageWrapper::MessageType MessageType()
+    {
+        return MessageWrapper::MessageType::AskBoardConfiguration;
+    }
 
     class Request : public DefaultMessageWrapper
     {
@@ -35,6 +38,10 @@ struct BoardConfiguration
     private:
         std::string m_configuration;
 
+    };
+
+    class Broadcast : public DefaultMessageWrapper
+    {
     };
 };
 

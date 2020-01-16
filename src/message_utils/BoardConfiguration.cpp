@@ -1,10 +1,5 @@
 #include "BoardConfiguration.hpp"
 
-MessageWrapper::MessageType BoardConfiguration::MessageType()
-{
-    return MessageWrapper::MessageType::AskBoardConfiguration;
-}
-
 BoardConfiguration::Reply::Reply() : MessageWrapper(),
     m_configuration("")
 {

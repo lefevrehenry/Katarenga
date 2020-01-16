@@ -9,7 +9,10 @@
  */
 struct CheckConnectivity
 {
-    static MessageWrapper::MessageType MessageType();
+    static MessageWrapper::MessageType MessageType()
+    {
+        return MessageWrapper::MessageType::CheckConnectivity;
+    }
 
     class Request : public DefaultMessageWrapper
     {
@@ -32,6 +35,10 @@ struct CheckConnectivity
     private:
         bool m_connectivity;
 
+    };
+
+    class Broadcast : public DefaultMessageWrapper
+    {
     };
 };
 
