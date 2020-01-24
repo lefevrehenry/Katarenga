@@ -1,9 +1,8 @@
 #include "PlayThisMove.hpp"
 
-PlayThisMove::Request::Request() :
-    m_move()
+PlayThisMove::Request::Request(const std::string& move) :
+    m_move(move)
 {
-
 }
 
 void PlayThisMove::Request::toMessage(zmqpp::message& message)

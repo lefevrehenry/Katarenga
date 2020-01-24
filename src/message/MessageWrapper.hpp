@@ -10,6 +10,11 @@
  */
 struct MessageWrapper
 {   
+public:
+    MessageWrapper()
+    {
+    }
+
     enum class MessageType {
         AskBoardConfiguration,
         CheckConnectivity,

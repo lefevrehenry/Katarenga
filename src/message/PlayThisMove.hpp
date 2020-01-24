@@ -22,7 +22,8 @@ struct PlayThisMove
     {
 
     public:
-        Request();
+        Request() = default;
+        Request(const std::string& move);
 
     public:
         void toMessage(zmqpp::message& message) override;

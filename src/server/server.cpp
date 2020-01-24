@@ -66,7 +66,6 @@ void server_function()
 
     // Create a poller for any request received
     zmqpp::poller poller;
-
     poller.add(white_player_socket, zmqpp::poller::poll_in);
     poller.add(black_player_socket, zmqpp::poller::poll_in);
 
@@ -86,7 +85,7 @@ void server_function()
         board.print();
 
         // wait for a request
-        if(!poller.poll(zmqpp::poller::wait_forever)) {
+        if(poller.poll(zmqpp::poller::wait_forever)) {
 
             // if a message is received from the white player
             if(poller.has_input(white_player_socket)) {

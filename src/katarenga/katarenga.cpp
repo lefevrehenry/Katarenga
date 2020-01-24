@@ -94,6 +94,8 @@ int main(int argc, char * argv[])
     if (parse_main_args(argc, argv))
         return 1;
 
+    player_function();
+
 //    if(MainArguments.is_standalone)
 //    {
 //        // TODO Create a standalone version with server and graphics processes
@@ -104,7 +106,7 @@ int main(int argc, char * argv[])
 //        server_function(MainArguments.server_white_port, MainArguments.server_black_port, MainArguments.verbose);
 //    }
 //    else
-    {
+//    {
 //        std::string server_endpoint;
 //        if (MainArguments.player == 1)
 //        {
@@ -115,8 +117,7 @@ int main(int argc, char * argv[])
 //            server_endpoint = "tcp://" + MainArguments.server_ip + ":" + std::to_string(MainArguments.server_black_port);
 //        }
 //        player_function(MainArguments.player, MainArguments.graphics_port, server_endpoint, MainArguments.verbose);
-        player_function();
-    }
+//    }
 
     return 0;
 }
