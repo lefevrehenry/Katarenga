@@ -12,6 +12,7 @@ project(message_utils)
 set(HEADER_FILES
     BoardConfiguration.hpp
     CheckConnectivity.hpp
+    MessageReactor.hpp
     MessageWrapper.hpp
     message_utils.hpp
     PlayThisMove.hpp
@@ -20,6 +21,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
     BoardConfiguration.cpp
     CheckConnectivity.cpp
+    MessageReactor.cpp
     MessageWrapper.cpp
     PlayThisMove.cpp
 )

@@ -1,5 +1,5 @@
-#ifndef MESSAGE_HPP
-#define MESSAGE_HPP
+#ifndef MESSAGEWRAPPER_HPP
+#define MESSAGEWRAPPER_HPP
 
 // ZMQ
 #include <zmqpp/message.hpp>
@@ -15,7 +15,7 @@ public:
     {
     }
 
-    enum class MessageType {
+    enum class MessageType {    // throw it in a separate class
         AskBoardConfiguration,
         CheckConnectivity,
         IsThisMoveValid,

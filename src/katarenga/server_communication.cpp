@@ -13,52 +13,39 @@
 
 std::unique_ptr<AbstractServer> server_communication;
 
-zmqpp::socket* _socker_player = nullptr;
-
 using MessageType = MessageWrapper::MessageType;
 
 template< typename T >
-void construct_reply(zmqpp::message& request_message, zmqpp::message& reply_message)
-{
+void construct_reply(const MessageWrapper*, MessageWrapper*);
 
+template<>
+void construct_reply<BoardConfiguration>(const MessageWrapper*, MessageWrapper* reply)
+{
+    if(!server_communication)
+        return;
+
+    BoardConfiguration::Reply* object = dynamic_cast<BoardConfiguration::Reply*>(reply);
+
+    std::string boardConfig = server_communication->getBoardConfiguration();
+    object->setConfiguration(boardConfig);
 }
 
-bool process_player_thread_message(zmqpp::message& request_message)
+template<>
+void construct_reply<CheckConnectivity>(const MessageWrapper*, MessageWrapper* reply)
 {
-    // the message returned
-    zmqpp::message reply_message;
+    if(!server_communication)
+        return;
 
-    // read the header (correspond to the type of the request sent)
-    MessageType type = *request_message.get<const MessageType*>(0);
+    CheckConnectivity::Reply* object = dynamic_cast<CheckConnectivity::Reply*>(reply);
 
-    // according to the type of the request we construct the reply message
-    switch (type) {
-    case MessageType::AskBoardConfiguration: {
-        construct_reply<BoardConfiguration>(request_message, reply_message);
-        break;
-    }
-    case MessageType::CheckConnectivity: {
-        construct_reply<CheckConnectivity>(request_message, reply_message);
-        break;
-    }
-    case MessageType::IsThisMoveValid: {
-        break;
-    }
-    case MessageType::PlayThisMove: {
-        break;
-    }
-    case MessageType::ForgetItRageQuit: {
-        break;
-    }
-    }
-
-    _socker_player->send(reply_message);
-
-    return true;
+    bool connectivity = server_communication->checkServerConnectivity();
+    object->setConnectivity(connectivity);
 }
+
 
 void server_communication_function()
 {
+    // get the zmq context of the Player to be able to communicate through the 'inproc' protocol
     zmqpp::context* context = PlayerInfo.context;
 
     int this_player = MainArguments.player;
@@ -83,17 +70,19 @@ void server_communication_function()
 
 
     std::string player_binding_point = PlayerInfo.server_communication_binding_point;
-//    std::string player_binding_point = PlayerInfo.server_communication_binding_point;
 
     // Setup a pair socket to etablish a connection with the player socket
     zmqpp::socket socker_player(*context, zmqpp::socket_type::pair);
     socker_player.bind("inproc://" + player_binding_point);
 
-    // Setup the poller
+    // Setup the poller, listen to the socket_player
     zmqpp::poller poller;
     poller.add(socker_player, zmqpp::poller::poll_in);
-//    poller.add(socket_render_thread, zmqpp::poller::poll_in);
 
+    // Setup the message reactor, associates one callback with one request's type
+    MessageReactor reactor;
+    reactor.add(MessageType::AskBoardConfiguration, construct_reply<BoardConfiguration>);
+    reactor.add(MessageType::CheckConnectivity, construct_reply<CheckConnectivity>);
 
     bool end_game = false;
 
@@ -102,12 +91,13 @@ void server_communication_function()
         if(poller.poll(zmqpp::poller::wait_forever)) {
 
             if(poller.has_input(socker_player)) {
-                // receive the message
-                zmqpp::message message;
-                socker_player.receive(message);
+                // pull the request message
+                zmqpp::message request_message;
+                socker_player.receive(request_message);
 
-                if(!process_player_thread_message(message))
-                    end_game = false;
+                // construct and push the reply message
+                zmqpp::message reply_message = reactor.process_request(request_message);
+                socker_player.send(reply_message);
             }
         }
     }
