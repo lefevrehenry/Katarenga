@@ -7,66 +7,66 @@ struct ServerInfo ServerInfo;
 
 using MessageType = MessageWrapper::MessageType;
 
-template< typename T >
-void toto(typename T::Request*, typename T::Reply*)
-{
-    throw std::runtime_error("missing template specialization");
-}
+//template< typename T >
+//void toto(typename T::Request*, typename T::Reply*)
+//{
+//    throw std::runtime_error("missing template specialization");
+//}
 
-template<>
-void toto<BoardConfiguration>(BoardConfiguration::Request*, BoardConfiguration::Reply* reply)
-{
-    std::string boardString = ServerInfo.board->getBoard();
+//template<>
+//void toto<BoardConfiguration>(BoardConfiguration::Request*, BoardConfiguration::Reply* reply)
+//{
+//    std::string boardString = ServerInfo.board->getBoard();
 
-    reply->setConfiguration(boardString);
-}
+//    reply->setConfiguration(boardString);
+//}
 
-template< typename T >
-void construct_reply(zmqpp::message& request_message, zmqpp::message& reply_message)
-{
-    // reconstruct the request object from the (input) request message
-    typename T::Request request;
-    request.fromMessage(request_message);
+//template< typename T >
+//void construct_reply(zmqpp::message& request_message, zmqpp::message& reply_message)
+//{
+//    // reconstruct the request object from the (input) request message
+//    typename T::Request request;
+//    request.fromMessage(request_message);
 
-    // construct the reply object for the (output) reply message
-    typename T::Reply reply;
-    toto<T>(&request, &reply);
+//    // construct the reply object for the (output) reply message
+//    typename T::Reply reply;
+//    toto<T>(&request, &reply);
 
-    // write the output message from the reply object
-    reply.toMessage(reply_message);
-}
+//    // write the output message from the reply object
+//    reply.toMessage(reply_message);
+//}
 
-zmqpp::message process_request(zmqpp::message& request_message)
-{
-    // the message returned
-    zmqpp::message reply_message;
+//zmqpp::message process_request(zmqpp::message& request_message)
+//{
+//    // the message returned
+//    zmqpp::message reply_message;
 
-    // read the header (correspond to the type of the request sent)
-    MessageType type = *request_message.get<const MessageType*>(0);
+//    // read the header (correspond to the type of the request sent)
+//    MessageType type = *request_message.get<const MessageType*>(0);
 
-    // according to the type of the request we construct the reply message
-    switch (type) {
-    case MessageType::AskBoardConfiguration: {
-        construct_reply<BoardConfiguration>(request_message, reply_message);
-        break;
-    }
-    case MessageType::CheckConnectivity: {
-        construct_reply<CheckConnectivity>(request_message, reply_message);
-        break;
-    }
-    case MessageType::IsThisMoveValid: {
-        break;
-    }
-    case MessageType::PlayThisMove: {
-        break;
-    }
-    case MessageType::ForgetItRageQuit: {
-        break;
-    }
-    }
+//    // according to the type of the request we construct the reply message
+//    switch (type) {
+//    case MessageType::AskBoardConfiguration: {
+//        construct_reply<BoardConfiguration>(request_message, reply_message);
+//        break;
+//    }
+//    case MessageType::CheckConnectivity: {
+//        construct_reply<CheckConnectivity>(request_message, reply_message);
+//        break;
+//    }
+//    case MessageType::IsThisMoveValid: {
+//        break;
+//    }
+//    case MessageType::PlayThisMove: {
+//        break;
+//    }
+//    case MessageType::ForgetItRageQuit: {
+//        break;
+//    }
+//    }
 
-    return reply_message;
-}
+//    return reply_message;
+//}
 
 template< typename T >
 void titi(typename T::Request*, typename T::Reply*, typename T::Broadcast*)

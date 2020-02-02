@@ -1,14 +1,17 @@
-#include "network_utils.hpp"
 #include "graphics.hpp"
-#include "../server/Board.hpp"
+#include "player.hpp"
+
+#include <zmqpp/zmqpp.hpp>
 
 #include <iostream>
 
-using std::cout;        // At some point
-using std::cin;         // We'll need to
-using std::endl;        // Get rid of
-using std::string;      // These
-using std::to_string;   // Declarations
+#include <GLTK/GLFWApplication.h>
+
+//using std::std::cout;        // At some point
+//using std::cin;         // We'll need to
+//using std::std::endl;        // Get rid of
+//using std::string;      // These
+//using std::to_string;   // Declarations
 
 
 /*bool polling(socket_t & socket, int timeout)
@@ -31,39 +34,57 @@ using std::to_string;   // Declarations
     }
 }*/
 
-void graphics_function(int this_player, int socket_port, bool verbose)
+void msg1(const std::string& msg)
 {
-    string socket_endpoint = "tcp://127.0.0.1:" + to_string(socket_port);
-    zmqpp::context_t context;
-    zmqpp::socket_t socket(context, zmqpp::socket_type::pair);
-    socket.connect(socket_endpoint);
+    std::cout << "render thread(" << msg << ")" << std::endl;
+}
 
-    string board_configuration = s_recv(socket);
-    s_send(socket, "ACK");
+void graphics_function()
+{
+    zmqpp::context* context = PlayerInfo.context;
+    std::string render_binding_point = PlayerInfo.render_binding_point;
 
-    cout << "GL received board config:\n" << board_configuration << endl;
+    zmqpp::socket socket_main_thread(*context, zmqpp::socket_type::pair);
+    socket_main_thread.connect("inproc://" + render_binding_point);
+
+//    std::string board_configuration = s_recv(socket);
+//    s_send(socket, "ACK");
+
+//    std::cout << "GL received board config:\n" << board_configuration << std::endl;
 
 //    Board board;
 
-    cout << "GL thread ready to play!" << endl;
+    std::cout << "GL thread ready to play!" << std::endl;
 
     // Main loop
-    string move_str;
+    std::string move_str;
     bool end_game = false;
-    int has_won = 0;
+//    int has_won = 0;
+
     while(!end_game)
     {
 //        if (board.getCurrentPlayer() == this_player)
 //        {
 //            // It's our turn
-//            cout << "Enter your string move of the form \"m<src_cell_index>:<dest_cell_index>\" ";
-//            cin >> move_str;
+            std::cout << "Enter your string move of the form \"m<src_cell_index>:<dest_cell_index>\" ";
+            std::cin >> move_str;
+
+            zmqpp::message message;
+            message << move_str;
+
+            // envoie le coup
+            socket_main_thread.send(message);
+
+            if(move_str == "stop") {
+                end_game = true;
+                continue;
+            }
 
 //            s_send(socket, move_str);
 //            /*if(!polling(socket, 5))
 //            {
 //                // TODO throw an error
-//                cout << "ERROR WHILE POLLING, terminating GL thread." << endl;
+//                std::cout << "ERROR WHILE POLLING, terminating GL thread." << std::endl;
 //                socket.close();
 //                return;
 //            }*/
@@ -74,11 +95,11 @@ void graphics_function(int this_player, int socket_port, bool verbose)
 //            }
 //            else if (ret == "reject")
 //            {
-//                cout << "The move was not valid" << endl;
+//                std::cout << "The move was not valid" << std::endl;
 //            }
 //            else
 //            {
-//                cout << "ERROR: Weird message received from player thread, terminating." << endl;
+//                std::cout << "ERROR: Weird message received from player thread, terminating." << std::endl;
 //                socket.close();
 //                return;
 //            }
@@ -89,87 +110,87 @@ void graphics_function(int this_player, int socket_port, bool verbose)
 //            /*if(!polling(socket, 5))
 //            {
 //                // TODO throw an error
-//                cout << "ERROR WHILE POLLING, terminating GL thread." << endl;
+//                std::cout << "ERROR WHILE POLLING, terminating GL thread." << std::endl;
 //                socket.close();
 //                return;
 //            }*/
 //            move_str = s_recv(socket);
 //            board.playMove(move_str);
-//            cout << "Other player just played " << move_str << endl;
+//            std::cout << "Other player just played " << move_str << std::endl;
 //        }
 
 //        if ((has_won = board.gameFinished()) != 0)
 //        {
 //            end_game = true;
-//            cout << "Woah! " << (has_won == 1?"White":"Black") << " player has won the game!"
-//                                                                  "" << endl;
+//            std::cout << "Woah! " << (has_won == 1?"White":"Black") << " player has won the game!"
+//                                                                  "" << std::endl;
 //        }
     }
 
+    socket_main_thread.close();
 
-    socket.close();
-    cout << "Terminating GL thread." << endl;
+    std::cout << "Terminating render thread." << std::endl;
 }
 
 
 
-void standalone_graphics_function(int socket_port, bool verbose)
-{
-    string socket_endpoint = "tcp://127.0.0.1:" + to_string(socket_port);
-    zmqpp::context_t context;
-    zmqpp::socket_t socketS(context, zmqpp::socket_type::pair);
-    socketS.connect(socket_endpoint);
+//void standalone_graphics_function(int socket_port, bool verbose)
+//{
+//    string socket_endpoint = "tcp://127.0.0.1:" + to_string(socket_port);
+//    zmqpp::context_t context;
+//    zmqpp::socket_t socketS(context, zmqpp::socket_type::pair);
+//    socketS.connect(socket_endpoint);
 
-    string board_configuration = s_recv(socketS);
-    s_send(socketS, "ACK");
+//    string board_configuration = s_recv(socketS);
+//    s_send(socketS, "ACK");
 
-    cout << "GL received board config:\n" << board_configuration << endl;
+//    std::cout << "GL received board config:\n" << board_configuration << std::endl;
 
-//    Board board;
+////    Board board;
 
-    cout << "GL thread ready to play!" << endl;
+//    std::cout << "GL thread ready to play!" << std::endl;
 
-    // Main loop
-    string move_str;
-    string ret;
-    bool end_game = false;
-    int has_won = 0;
-    int current_player;
+//    // Main loop
+//    string move_str;
+//    string ret;
+//    bool end_game = false;
+//    int has_won = 0;
+//    int current_player;
 
-//    board.print();
-    while(!end_game)
-    {
-//        ret = s_recv(socketS);
-//        if (ret[0] == 'p')
-//        {
-//            // It's a player turn
-//            current_player = (ret[1] == '1' ? 1 : -1);
+////    board.print();
+//    while(!end_game)
+//    {
+////        ret = s_recv(socketS);
+////        if (ret[0] == 'p')
+////        {
+////            // It's a player turn
+////            current_player = (ret[1] == '1' ? 1 : -1);
 
-//            move_str = askNextMoveText(current_player);
+////            move_str = askNextMoveText(current_player);
 
-//            s_send(socketS, move_str);
-//            ret = s_recv(socketS);
+////            s_send(socketS, move_str);
+////            ret = s_recv(socketS);
 
-//            if (ret[0] == 'm')
-//            {
-//                // The move has been accepted, apply it
-//                board.playMove(ret);
-//                board.print();
-//            }
-//        }
-//        else if (ret[0] == 'w')
-//        {
-//            // A player has won
-//            has_won = (ret[1] == '1' ? 1 : -1);
+////            if (ret[0] == 'm')
+////            {
+////                // The move has been accepted, apply it
+////                board.playMove(ret);
+////                board.print();
+////            }
+////        }
+////        else if (ret[0] == 'w')
+////        {
+////            // A player has won
+////            has_won = (ret[1] == '1' ? 1 : -1);
 
-//            // Just stop the loop and terminate
-//            end_game = true;
-//        }
-    }
+////            // Just stop the loop and terminate
+////            end_game = true;
+////        }
+//    }
 
-    socketS.close();
-    cout << "Terminating GL thread." << endl;
-}
+//    socketS.close();
+//    std::cout << "Terminating GL thread." << std::endl;
+//}
 
 
 std::string askNextMoveText(int current_player)

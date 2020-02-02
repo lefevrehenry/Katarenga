@@ -2,6 +2,8 @@
 #include "Board.hpp"
 #include "server_utils.hpp"
 
+#include <message/message_utils.hpp>
+
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
 
@@ -12,6 +14,8 @@
 #include <iostream>
 #include <map>
 #include <string>
+
+using MessageType = MessageWrapper::MessageType;
 
 int parse_main_args(int argc, char * argv[])
 {
@@ -45,12 +49,28 @@ Other options:
     return 0;
 }
 
+template< typename T >
+void construct_reply(const MessageWrapper*, MessageWrapper*)
+{
+    throw std::runtime_error("missing template specialization");
+}
+
+template<>
+void construct_reply<BoardConfiguration>(const MessageWrapper*, MessageWrapper* reply)
+{
+    std::string boardString = ServerInfo.board->getBoard();
+
+    BoardConfiguration::Reply* object = dynamic_cast<BoardConfiguration::Reply*>(reply);
+    object->setConfiguration(boardString);
+}
+
 void server_function()
 {
     int server_white_port = ServerInfo.server_white_port;
     int server_black_port = ServerInfo.server_black_port;
     int server_publish_port = ServerInfo.server_publish_port;
 
+    // Create a zmqpp context for the server thread
     zmqpp::context context;
 
     // Open sockets for White and Black players
@@ -76,49 +96,56 @@ void server_function()
     // Give a global access to the board
     ServerInfo.board = &board;
 
+    // Setup the message reactor
+    // Associates one callback with one type of request
+    MessageReactor reactor;
+//    reactor.add(MessageType::AskBoardConfiguration, construct_reply<BoardConfiguration>);
+
     bool end_game = board.gameFinished();
     int has_won = 0;
 
     // loop until the game is finished
-    while (!end_game) {
-
+    while (!end_game)
+    {
         board.print();
 
         // wait for a request
-        if(poller.poll(zmqpp::poller::wait_forever)) {
-
+        if(poller.poll(zmqpp::poller::wait_forever))
+        {
             // if a message is received from the white player
             if(poller.has_input(white_player_socket)) {
                 // pull the request message
                 zmqpp::message request_message;
                 white_player_socket.receive(request_message);
 
-                // construct and push the reply message
-                zmqpp::message reply_message = process_request(request_message);
-                white_player_socket.send(reply_message);
+//                // construct and push the reply message
+//                zmqpp::message reply_message = reactor.process_request(request_message);
+//                white_player_socket.send(reply_message);
 
-                // construct and publish the broadcast message
-                zmqpp::message publish_message = process_broadcast(request_message, reply_message);
-                server_publish_socket.send(publish_message);
+//                // construct and publish the broadcast message
+//                zmqpp::message publish_message = process_broadcast(request_message, reply_message);
+//                server_publish_socket.send(publish_message);
             }
 
             // if a message is received from the black player
-            if(poller.has_input(black_player_socket)) {
+            if(poller.has_input(black_player_socket))
+            {
                 // pull the request message
                 zmqpp::message request_message;
                 black_player_socket.receive(request_message);
 
-                // construct and push the reply message
-                zmqpp::message reply_message = process_request(request_message);
-                black_player_socket.send(reply_message);
+//                // construct and push the reply message
+//                zmqpp::message reply_message = reactor.process_request(request_message);
+//                black_player_socket.send(reply_message);
 
-                // construct and publish the broadcast message
-                zmqpp::message publish_message = process_broadcast(request_message, reply_message);
-                server_publish_socket.send(publish_message);
+//                // construct and publish the broadcast message
+//                zmqpp::message publish_message = process_broadcast(request_message, reply_message);
+//                server_publish_socket.send(publish_message);
             }
 
             // terminate the loop if someone has won
-            if ((has_won = board.gameFinished()) != 0) {
+            if ((has_won = board.gameFinished()) != 0)
+            {
                 end_game = true;
                 std::cout << (has_won == 1 ? "White" : "Black") << " player has won the game." << std::endl;
             }
