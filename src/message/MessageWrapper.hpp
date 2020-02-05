@@ -20,7 +20,9 @@ public:
         CheckConnectivity,
         IsThisMoveValid,
         PlayThisMove,
-        ForgetItRageQuit
+        ForgetItRageQuit,
+        PrintBoard,
+        StopGame
     };
 
 public:

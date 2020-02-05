@@ -1,5 +1,6 @@
 #include "graphics.hpp"
 #include "player.hpp"
+#include <message/message_utils.hpp>
 
 #include <zmqpp/zmqpp.hpp>
 
@@ -12,7 +13,7 @@
 //using std::std::endl;        // Get rid of
 //using std::string;      // These
 //using std::to_string;   // Declarations
-
+using MessageType = MessageWrapper::MessageType;
 
 /*bool polling(socket_t & socket, int timeout)
 {
@@ -57,67 +58,62 @@ void graphics_function()
     std::cout << "GL thread ready to play!" << std::endl;
 
     // Main loop
-    std::string move_str;
     bool end_game = false;
 //    int has_won = 0;
 
     while(!end_game)
     {
-//        if (board.getCurrentPlayer() == this_player)
-//        {
-//            // It's our turn
-            std::cout << "Enter your string move of the form \"m<src_cell_index>:<dest_cell_index>\" ";
+        std::cout << "Enter a command: " << std::endl;
+
+        std::string command = "";
+        std::cin >> command;
+
+        if(command == "h" || command == "help")
+        {
+            std::cout << "h,help for help" << std::endl;
+            std::cout << "c,click for click in a case" << std::endl;
+            std::cout << "p,print to print the board" << std::endl;
+            std::cout << "s,stop for quit" << std::endl;
+        }
+        else if(command == "c" || command == "click")
+        {
+            std::cout << "Enter your string as the index of the cell '<src_cell_index>' ";
+
+            std::string move_str;
             std::cin >> move_str;
-
+        }
+        else if(command == "p" || command == "print")
+        {
             zmqpp::message message;
-            message << move_str;
 
-            // envoie le coup
-            socket_main_thread.send(message);
+            MessageType type = MessageType::PrintBoard;
+            message.add(&type, sizeof(MessageType));
 
-            if(move_str == "stop") {
+            // envoie le coup (non bloquant)
+            bool ret = socket_main_thread.send(message, true);
+
+            if(!ret)
+                std::cout << "(print) error, message not sent" << std::endl;
+        }
+        else if(command == "s" || command == "stop")
+        {
+            zmqpp::message message;
+
+            MessageType type = MessageType::StopGame;
+            message.add(&type, sizeof(MessageType));
+
+            // envoie le message (non bloquant)
+            bool ret = socket_main_thread.send(message, true);
+
+            if(!ret)
+                std::cout << "(stop) error, message not sent" << std::endl;
+            else
                 end_game = true;
-                continue;
-            }
-
-//            s_send(socket, move_str);
-//            /*if(!polling(socket, 5))
-//            {
-//                // TODO throw an error
-//                std::cout << "ERROR WHILE POLLING, terminating GL thread." << std::endl;
-//                socket.close();
-//                return;
-//            }*/
-//            string ret = s_recv(socket);
-//            if (ret == "accept")
-//            {
-//                board.playMove(move_str);
-//            }
-//            else if (ret == "reject")
-//            {
-//                std::cout << "The move was not valid" << std::endl;
-//            }
-//            else
-//            {
-//                std::cout << "ERROR: Weird message received from player thread, terminating." << std::endl;
-//                socket.close();
-//                return;
-//            }
-//        }
-//        else
-//        {
-//            // It's the opponent turn
-//            /*if(!polling(socket, 5))
-//            {
-//                // TODO throw an error
-//                std::cout << "ERROR WHILE POLLING, terminating GL thread." << std::endl;
-//                socket.close();
-//                return;
-//            }*/
-//            move_str = s_recv(socket);
-//            board.playMove(move_str);
-//            std::cout << "Other player just played " << move_str << std::endl;
-//        }
+        }
+        else
+        {
+            std::cout << "unknow command '" << command << "'" << std::endl;
+        }
 
 //        if ((has_won = board.gameFinished()) != 0)
 //        {

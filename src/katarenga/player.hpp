@@ -11,8 +11,8 @@ namespace zmqpp {
 struct PlayerInfo {
     zmqpp::context* context;
 
-    const std::string server_communication_binding_point = "server_communication";
-    const std::string render_binding_point = "render_thread";
+    const std::string server_binding_point = "katarenga-server-thread";
+    const std::string render_binding_point = "katarenga-render-thread";
 
 };
 

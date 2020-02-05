@@ -1,8 +1,8 @@
 #include "player.hpp"
 
-//#include "katarenga.hpp"
+#include "katarenga.hpp"
 #include "graphics.hpp"
-#include "server_communication.hpp"
+//#include "server_communication.hpp"
 //#include "AbstractServer.hpp"
 //#include "LocalServer.hpp"
 //#include "RemoteServer.hpp"
@@ -11,14 +11,16 @@
 
 #include <zmqpp/zmqpp.hpp>
 
-//#include <iostream>
+#include <iostream>
+#include <string>
 #include <thread>
 #include <memory>
 
 struct PlayerInfo PlayerInfo;
 
-zmqpp::socket* _socket_server_communication = nullptr;
+zmqpp::socket* _socket_server_thread = nullptr;
 zmqpp::socket* _socket_render_thread = nullptr;
+bool end_game = false;
 
 template< typename T >
 void proccess_message_from_server_communication(zmqpp::message&);
@@ -33,17 +35,19 @@ void proccess_message_from_server_communication<BoardConfiguration>(zmqpp::messa
     zmqpp::message reply_message = MessageReactor::ConstructReply<BoardConfiguration>(input_message, call);
 }
 
-template< typename T >
-void proccess_message_from_render_thread(zmqpp::message&);
-
-template<>
-void proccess_message_from_render_thread<BoardConfiguration>(zmqpp::message& input_message)
+void print_board_please(zmqpp::message&)
 {
-    auto call = [=](BoardConfiguration::Request*, BoardConfiguration::Reply*) {
-        return std::string();
-    };
+    // ask board string to server
+    std::cout << "print_board" << std::endl;
+    zmqpp::message message;
 
-    zmqpp::message reply_message = MessageReactor::ConstructReply<BoardConfiguration>(input_message, call);
+    bool ret = _socket_server_thread->send(message, true);
+}
+
+void stop_game(zmqpp::message&)
+{
+    std::cout << "stop_game" << std::endl;
+    end_game = true;
 }
 
 void player_function()
@@ -51,62 +55,72 @@ void player_function()
     // Create a zmqpp context for the main thread
     zmqpp::context context;
 
-//    int this_player = MainArguments.player;
+    bool is_standalone = MainArguments.is_standalone;
+    int this_player = MainArguments.player;
 //    int graphics_port = MainArguments.graphics_port;
 //    std::string server_ip = MainArguments.server_ip;
-//    int server_white_port = MainArguments.server_white_port;
-//    int server_black_port = MainArguments.server_black_port;
+    int server_white_port = MainArguments.server_white_port;
+    int server_black_port = MainArguments.server_black_port;
 //    bool verbose = MainArguments.verbose;
 
-    std::string server_communication_binding_point = PlayerInfo.server_communication_binding_point;
+    std::string server_scheme;
+    std::string server_ip;
+    std::string server_port;
+
+    if (is_standalone) {
+        server_scheme = "inproc://";
+        server_ip = PlayerInfo.server_binding_point;
+        server_port = "";
+    } else {
+        server_scheme = "tcp://";
+        server_ip = MainArguments.server_ip;
+        server_port = std::to_string(this_player == 1 ? server_white_port : server_black_port);
+    }
+
+    std::string server_binding_point = server_scheme + server_ip + server_port;
     std::string render_binding_point = PlayerInfo.render_binding_point;
 
     // Give global access to the player's context
     PlayerInfo.context = &context;
 
     // Setup a pair socket to etablish a connection with the server_communication thread
-    zmqpp::socket socket_server_communication(context, zmqpp::socket_type::pair);
-    socket_server_communication.bind("inproc://" + server_communication_binding_point);
-    _socket_server_communication = &socket_server_communication;
+    zmqpp::socket socket_server_thread(context, zmqpp::socket_type::pair);
+    socket_server_thread.bind("inproc://" + server_binding_point);
+    _socket_server_thread = &socket_server_thread;
 
     // Setup a pair socket to etablish a connection with the render thread
     zmqpp::socket socket_render_thread(context, zmqpp::socket_type::pair);
     socket_render_thread.bind("inproc://" + render_binding_point);
     _socket_render_thread = &socket_render_thread;
 
-    // Setup the poller, we want to listen to the two sockets at a time
+    // Setup the poller, we want to listen to the two sockets at the same time
     zmqpp::poller poller;
-    poller.add(socket_server_communication, zmqpp::poller::poll_in);
+    poller.add(socket_server_thread, zmqpp::poller::poll_in);
     poller.add(socket_render_thread, zmqpp::poller::poll_in);
 
-    // Create the 2 threads
-    std::thread server_communication_thread(server_communication_function);
+    // Create the render thread
     std::thread render_thread(graphics_function);
 
-    MessageReactor server_communication_reactor;
-    server_communication_reactor.add(MessageWrapper::MessageType::AskBoardConfiguration, proccess_message_from_server_communication<BoardConfiguration>);
+    MessageReactor server_thread_reactor;
+    server_thread_reactor.add(MessageWrapper::MessageType::AskBoardConfiguration, proccess_message_from_server_communication<BoardConfiguration>);
 
     MessageReactor render_thread_reactor;
-    render_thread_reactor.add(MessageWrapper::MessageType::AskBoardConfiguration, proccess_message_from_render_thread<BoardConfiguration>);
+    render_thread_reactor.add(MessageWrapper::MessageType::PrintBoard, print_board_please);
+    render_thread_reactor.add(MessageWrapper::MessageType::StopGame, stop_game);
 
 //    std::cout << "Client process ready to play!" << std::endl;
-
-    bool end_game = false;
 
     while(!end_game)
     {
         if(poller.poll(zmqpp::poller::wait_forever))
         {
-            if(poller.has_input(socket_server_communication)) {
+            if(poller.has_input(socket_server_thread)) {
                 // receive the message
                 zmqpp::message input_message;
-                socket_server_communication.receive(input_message);
+                socket_server_thread.receive(input_message);
 
                 // proccess the message
-                server_communication_reactor.process_message(input_message);
-
-//                // forward the message
-//                socket_render_thread.send(message);
+                server_thread_reactor.process_message(input_message);
             }
 
             if(poller.has_input(socket_render_thread)) {
@@ -116,18 +130,16 @@ void player_function()
 
                 // proccess the message
                 render_thread_reactor.process_message(input_message);
-
-//                // forward the message
-//                socker_server_communication.send(message);
             }
         }
     }
 
     // Clean up and terminate
-    server_communication_thread.join();
     render_thread.join();
 
     // Close the 2 sockets
-    socket_server_communication.close();
+    socket_server_thread.close();
     socket_render_thread.close();
+
+    std::cout << "Terminating main thread." << std::endl;
 }

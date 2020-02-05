@@ -1,3 +1,23 @@
+le main thread (player_function):
+    * fait le communication entre le render_thread et le server
+    * est notifié par le render_thread qu'une case est cliquée
+    * gère une sorte de machine à état et réagit en fonction des messages reçus
+        - retient le joueur courant (= variable current_player)
+        - garde en mémoire les cases cliquées pour envoyer une requête au serveur
+          pour jouer un coup si c'est au tour du joueur courant
+        - ignore les cases cliquées par le render_thread si ce n'est pas au
+          tour du joueur courant
+        - etc ...
+    * communique en mode PAIR socket avec le render_thread
+        reception message de type CaseClicked
+        envoie de message de type BoardConfig, MovePlayed
+    * communique en mode PAIR socket avec le server_communication_thread
+    * pour l'instant tout le Board est localisé sur le serveur. Dans le futur
+    on imagine que le main thread contient une copie du jeu en local pour
+    précalculer et communiquer avec le render_thread sans être obligé
+    d'envoyer des requêtes sur le réseau
+        - mettre des cases en surbrillance etc ...
+
 TODOs
 - thread server sends the configuration of the board to the graphics thread (sends a string containing the 64 types of cells of the board).
 - the graphics thread is the main thread. In the standalone version of Katarenga it spawns a child thread which will hold the server. In the "network" version it will spawn a child thread that will communicate with the server and forward the events to the graphics thread (maybe there is a solution where the graphics thread listens directly to a socket to communicate with the server).
@@ -7,4 +27,3 @@ TODOs
 TODO Network :
 - besoin de gérer si problème réseau, connexion au socket perdu -> besoin de terminer le thread GL.
 - besoin de gérer les déconnexion des clients.
-
