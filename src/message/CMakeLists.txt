@@ -10,20 +10,24 @@ project(message_utils)
 #message("-- Found ZMQPP: ${_ZMQPP_DIR}")
 
 set(HEADER_FILES
-    BoardConfiguration.hpp
-    CheckConnectivity.hpp
+    message_utils.hpp
     MessageReactor.hpp
     MessageWrapper.hpp
-    message_utils.hpp
-    PlayThisMove.hpp
+    #CheckConnectivity.hpp
+    BoardConfigMessage.hpp
+    MoveMessage.hpp
+    QuitMessage.hpp
+    OtherMessage.hpp
 )
 
 set(SOURCE_FILES
-    BoardConfiguration.cpp
-    CheckConnectivity.cpp
     MessageReactor.cpp
     MessageWrapper.cpp
-    PlayThisMove.cpp
+    #CheckConnectivity.cpp
+    BoardConfigMessage.cpp
+    MoveMessage.cpp
+    QuitMessage.cpp
+    OtherMessage.cpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})

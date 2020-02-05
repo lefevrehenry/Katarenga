@@ -16,13 +16,16 @@ public:
     }
 
     enum class MessageType {    // throw it in a separate class
-        AskBoardConfiguration,
-        CheckConnectivity,
-        IsThisMoveValid,
-        PlayThisMove,
-        ForgetItRageQuit,
-        PrintBoard,
-        StopGame
+        AskBoardConfiguration,      // In BoardConfigMessage
+        AnswerBoardConfiguration,   // In BoardConfigMessage
+        //CheckConnectivity,
+        PlayThisMove,               // In MoveMessage
+        MovePlayed,                 // In MoveMessage
+        PlayerWon,                  // In OtherMessage
+        PrintBoard,                 // In OtherMessage
+        //ForgetItRageQuit,
+        StopGame,                   // In QuitMessage
+        GameStopped                 // In QuitMessage
     };
 
 public:

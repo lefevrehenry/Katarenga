@@ -7,7 +7,7 @@
 /**
  * @brief The CheckConnectivity struct
  */
-struct CheckConnectivity
+/*struct CheckConnectivity
 {
     static MessageWrapper::MessageType MessageType()
     {
@@ -40,6 +40,6 @@ struct CheckConnectivity
     class Broadcast : public DefaultMessageWrapper
     {
     };
-};
+};*/
 
 #endif

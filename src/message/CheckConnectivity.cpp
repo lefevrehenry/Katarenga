@@ -1,5 +1,5 @@
 #include "CheckConnectivity.hpp"
-
+/*
 CheckConnectivity::Reply::Reply() : MessageWrapper(),
     m_connectivity(false)
 {
@@ -24,3 +24,4 @@ void CheckConnectivity::Reply::setConnectivity(bool connectivity)
 {
     m_connectivity = connectivity;
 }
+*/
