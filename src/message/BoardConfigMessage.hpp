@@ -9,14 +9,11 @@
 
 class AskBoardConfiguration : DefaultMessageWrapper
 {
+public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::AskBoardConfiguration;
     }
-
-public:
-    void toMessage(zmqpp::message& message) override;
-    void fromMessage(zmqpp::message& message) override;
 };
 
 class AnswerBoardConfiguration : MessageWrapper

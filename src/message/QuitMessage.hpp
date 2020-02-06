@@ -10,12 +10,12 @@
 
 class StopGame : MessageWrapper
 {
+public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::StopGame;
     }
 
-public:
     StopGame(std::string& reason);
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
@@ -30,13 +30,13 @@ private:
 
 class GameStopped : MessageWrapper
 {
+public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::GameStopped;
     }
 
-public:
-    GameStopped(std::string& move);
+    GameStopped(std::string& reason);
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 

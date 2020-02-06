@@ -10,12 +10,12 @@
 
 class PlayThisMove : MessageWrapper
 {
+public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::PlayThisMove;
     }
 
-public:
     PlayThisMove(std::string& move);
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
@@ -30,12 +30,12 @@ private:
 
 class MovePlayed : MessageWrapper
 {
+public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::MovePlayed;
     }
 
-public:
     MovePlayed(std::string& move);
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;

@@ -10,12 +10,12 @@
 
 class PlayerWon : MessageWrapper
 {
+public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::PlayerWon;
     }
 
-public:
     PlayerWon(int player);
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
@@ -30,14 +30,11 @@ private:
 
 class PrintBoard : DefaultMessageWrapper
 {
+public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::PrintBoard;
     }
-
-public:
-    void toMessage(zmqpp::message& message) override;
-    void fromMessage(zmqpp::message& message) override;
 
 };
 
