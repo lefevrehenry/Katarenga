@@ -1,7 +1,7 @@
 #include "OtherMessage.hpp"
 
 
-PlayerWon::PlayerWon(int player) : MessageWrapper(), m_player(player) {}
+PlayerWon::PlayerWon(zmqpp::message& message) : MessageWrapper() {fromMessage(message);}
 
 void PlayerWon::toMessage(zmqpp::message& message)
 {

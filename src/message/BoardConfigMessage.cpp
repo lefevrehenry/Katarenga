@@ -1,6 +1,6 @@
 #include "BoardConfigMessage.hpp"
 
-AnswerBoardConfiguration::AnswerBoardConfiguration(std::string& configuration) : MessageWrapper(), m_configuration(configuration) {}
+AnswerBoardConfiguration::AnswerBoardConfiguration(zmqpp::message& message) : MessageWrapper() {fromMessage(message);}
 
 void AnswerBoardConfiguration::toMessage(zmqpp::message& message)
 {

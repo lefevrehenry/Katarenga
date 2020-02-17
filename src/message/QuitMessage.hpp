@@ -16,7 +16,7 @@ public:
         return MessageWrapper::MessageType::StopGame;
     }
 
-    StopGame(std::string& reason);
+    StopGame(zmqpp::message& message);
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 
@@ -36,7 +36,7 @@ public:
         return MessageWrapper::MessageType::GameStopped;
     }
 
-    GameStopped(std::string& reason);
+    GameStopped(zmqpp::message& message);
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 

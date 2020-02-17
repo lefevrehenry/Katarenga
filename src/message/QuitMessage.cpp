@@ -1,7 +1,7 @@
 #include "QuitMessage.hpp"
 
 
-StopGame::StopGame(std::string& reason) : MessageWrapper(), m_reason(reason) {}
+StopGame::StopGame(zmqpp::message& message) : MessageWrapper() {fromMessage(message);}
 
 void StopGame::toMessage(zmqpp::message& message)
 {
@@ -26,7 +26,7 @@ void StopGame::setReason(const std::string& move)
 
 
 
-GameStopped::GameStopped(std::string& reason) : MessageWrapper(), m_reason(reason) {}
+GameStopped::GameStopped(zmqpp::message& message) : MessageWrapper() {fromMessage(message);}
 
 void GameStopped::toMessage(zmqpp::message& message)
 {

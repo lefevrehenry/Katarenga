@@ -55,7 +55,7 @@ void graphics_function()
         {
             zmqpp::message message;
 
-            MessageType type = MessageType::PrintBoard;
+            MessageType type = MessageType::AskBoardConfiguration;
             message.add(&type, sizeof(MessageType));
 
             // envoie le coup (non bloquant)

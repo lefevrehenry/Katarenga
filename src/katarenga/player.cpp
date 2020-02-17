@@ -43,6 +43,94 @@ void stop_game(zmqpp::message&)
     std::cout << "stop_game" << std::endl;
     end_game = true;
 }*/
+
+void process_server_board_configuration(zmqpp::message& message)
+{
+    AnswerBoardConfiguration m(message);
+    //m.fromMessage(message);
+    std::string configuration = m.getConfiguration();
+    size_t size = configuration.size();
+
+    // Update PlayerInfo
+    if (configuration[size-1] == '+')
+    {
+        PlayerInfo.current_player = 1;
+    }
+    else if (configuration[size-1] == '-')
+    {
+        PlayerInfo.current_player = -1;
+    }
+    else
+    {
+        std::string err = "Wrong current player sent in BoardConfiguration message: " + configuration.at(size-1);
+        player_msg(err);
+        std::terminate();
+    }
+
+    // TODO at some point we'll need to update the Board informations kept by the client as well
+
+    // Then forward it to the render thread
+    _render_socket->send(message);
+}
+
+void process_server_move_message(zmqpp::message& message)
+{
+    MoveMessage m(message);
+    //m.fromMessage(message);
+    std::string move = m.getMove();
+    int move_player;
+
+    switch(m.getType())
+    {
+    case MoveType::MovePlayed:
+        move_player = (move.at(0) == '+' ? 1 : -1);
+        if (move_player != PlayerInfo.current_player)
+        {
+            throw std::runtime_error("Move received from a player not in his turn.");
+            // TODO need to ask the correct board configuration to the server instead of throwing an error
+        }
+        else
+        {
+            PlayerInfo.current_player = -PlayerInfo.current_player;
+
+            // TODO at some point we'll need to update the Board informations
+        }
+        break;
+    case MoveType::InvalidMove:
+        // TODO check if it's the same as the pending move
+        break;
+    case MoveType::PlayThisMove:
+        throw std::runtime_error("PlayThisMove received from the server, this should not happen");
+    }
+
+    // Forward it to the render thread
+    _render_socket->send(message);
+}
+
+void process_server_player_won(zmqpp::message& message)
+{
+    PlayerWon m(message);
+    //m.fromMessage(message);
+
+    PlayerInfo.game_finished = true;
+    PlayerInfo.current_player = m.getPlayer();
+    //player_msg((PlayerInfo.current_player == 1 ? "White" : "Black") + " player won the game!");
+
+    // Forward it to the render thread
+    _render_socket->send(message);
+}
+
+void process_server_game_stopped(zmqpp::message& message)
+{
+    GameStopped m(message);
+    //m.fromMessage(message);
+
+    PlayerInfo.game_finished = true;
+    PlayerInfo.current_player = 0;
+    //player_msg("The game stopped: " + m.getReason());
+
+    // Forward it to the render thread
+    _render_socket->send(message);
 }
 
 void player_function()
@@ -55,12 +143,17 @@ void player_function()
     // Create the render thread
     std::thread render_thread(graphics_function);
 
+    // Add callback functions to react to messages received from the server
     MessageReactor server_thread_reactor;
-    server_thread_reactor.add(MessageWrapper::MessageType::AskBoardConfiguration, proccess_message_from_server_communication<BoardConfiguration>);
+    server_thread_reactor.add(MessageWrapper::MessageType::AnswerBoardConfiguration, process_server_board_configuration);
+    server_thread_reactor.add(MessageWrapper::MessageType::MoveMessage, process_server_move_message);
+    server_thread_reactor.add(MessageWrapper::MessageType::PlayerWon, process_server_player_won);
+    server_thread_reactor.add(MessageWrapper::MessageType::GameStopped, process_server_game_stopped);
 
     MessageReactor render_thread_reactor;
-    render_thread_reactor.add(MessageWrapper::MessageType::PrintBoard, print_board_please);
-    render_thread_reactor.add(MessageWrapper::MessageType::StopGame, stop_game);
+    // TODO see what kind of message the render thread will send
+    //render_thread_reactor.add(MessageWrapper::MessageType::PrintBoard, print_board_please);
+    //render_thread_reactor.add(MessageWrapper::MessageType::StopGame, stop_game);
 
     player_msg("Player entering the main loop!");
 

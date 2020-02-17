@@ -19,10 +19,9 @@ public:
         AskBoardConfiguration,      // In BoardConfigMessage
         AnswerBoardConfiguration,   // In BoardConfigMessage
         //CheckConnectivity,
-        PlayThisMove,               // In MoveMessage
-        MovePlayed,                 // In MoveMessage
+        MoveMessage,                // In MoveMessage
         PlayerWon,                  // In OtherMessage
-        PrintBoard,                 // In OtherMessage
+        //PrintBoard,                 // In OtherMessage
         //ForgetItRageQuit,
         StopGame,                   // In QuitMessage
         GameStopped                 // In QuitMessage

@@ -16,7 +16,7 @@ public:
         return MessageWrapper::MessageType::PlayerWon;
     }
 
-    PlayerWon(int player);
+    PlayerWon(zmqpp::message& message);
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 
@@ -28,7 +28,7 @@ private:
 
 };
 
-class PrintBoard : DefaultMessageWrapper
+/*class PrintBoard : DefaultMessageWrapper
 {
 public:
     static MessageWrapper::MessageType MessageType()
@@ -36,6 +36,6 @@ public:
         return MessageWrapper::MessageType::PrintBoard;
     }
 
-};
+};*/
 
 #endif
