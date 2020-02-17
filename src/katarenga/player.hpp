@@ -6,12 +6,14 @@
 
 namespace zmqpp {
     class context;
+    class poller;
 }
 
 struct PlayerInfo {
-    zmqpp::context* context;
-
-    const std::string server_binding_point = "katarenga-server-thread";
+    zmqpp::context* zmq_context;
+    int self_player; // 1 for White, -1 for Black
+    int current_player; // Which turn is it
+    bool game_finished;
     const std::string render_binding_point = "katarenga-render-thread";
 
 };
@@ -20,6 +22,8 @@ extern PlayerInfo PlayerInfo;
 
 /* function executed in its own thread */
 void player_function();
+
+void init_sockets_and_poller(zmqpp::poller& poller);
 
 
 #endif // PLAYER_HPP

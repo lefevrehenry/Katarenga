@@ -1,52 +1,21 @@
 #include "graphics.hpp"
 #include "player.hpp"
+#include "utils.hpp"
 #include <message/message_utils.hpp>
 
 #include <zmqpp/zmqpp.hpp>
 
-#include <iostream>
-
 #include <GLTK/GLFWApplication.h>
 
-//using std::std::cout;        // At some point
-//using std::cin;         // We'll need to
-//using std::std::endl;        // Get rid of
-//using std::string;      // These
-//using std::to_string;   // Declarations
 using MessageType = MessageWrapper::MessageType;
 
-/*bool polling(socket_t & socket, int timeout)
-{
-    zmqpp::pollitem_t items [] = {{ socket, 0, ZMQ_POLLIN, 0}};
-    int n = 0;
-    while (1)
-    {
-        zmqpp::poll(&items[0], 1, timeout);
-        if (items[0].revents & ZMQ_POLLIN)
-        {
-            return true;
-        }
-
-        // just a little guard for debugging
-        if (++n == 6)
-        {
-            return false;
-        }
-    }
-}*/
-
-void msg1(const std::string& msg)
-{
-    std::cout << "render thread(" << msg << ")" << std::endl;
-}
 
 void graphics_function()
 {
-    zmqpp::context* context = PlayerInfo.context;
-    std::string render_binding_point = PlayerInfo.render_binding_point;
+    zmqpp::context* context = PlayerInfo.zmq_context;
 
     zmqpp::socket socket_main_thread(*context, zmqpp::socket_type::pair);
-    socket_main_thread.connect("inproc://" + render_binding_point);
+    socket_main_thread.connect("inproc://katarenga-render-thread");
 
 //    std::string board_configuration = s_recv(socket);
 //    s_send(socket, "ACK");
@@ -55,7 +24,7 @@ void graphics_function()
 
 //    Board board;
 
-    std::cout << "GL thread ready to play!" << std::endl;
+    render_msg("GL thread ready to play!");
 
     // Main loop
     bool end_game = false;
@@ -125,7 +94,7 @@ void graphics_function()
 
     socket_main_thread.close();
 
-    std::cout << "Terminating render thread." << std::endl;
+    render_msg("Terminating");
 }
 
 
