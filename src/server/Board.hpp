@@ -16,42 +16,42 @@ public:
     ~Board();
 
 public:
-    std::string getBoard() const;
-    void setBoard(const std::string& boardString);
+    std::string getBoardConfiguration() const;
+    void setBoardCellTypes(const std::string& boardString);
 
 public:
-    bool isValidMove(const Move& m, int player);
-    bool isValidMove(const std::string& move_str, int player);
+    bool isValidMove(const Move& m, int player) const;
+    bool isValidMove(const std::string& move_str, int player) const;
 
-    Move askNextValidMove();
+    Move askNextValidMove() const;
 
     void playMove(const Move& move);
     void playMove(const std::string& move_str);
 
     // Fills the list with possible Moves of the Piece in the cell (row,col)
-    void fillAllMoves(int row, int col, std::vector<Move>* moveList);
+    void fillAllMoves(int row, int col, std::vector<Move>* moveList) const;
 
 public:
     // Return 0 if not finished, 1 if White won, -1 if Black won.
-    int gameFinished();
+    int gameFinished() const;
     // 1 if White, -1 if Black
-    int getCurrentPlayer();
+    int getCurrentPlayer() const;
 
 public:
     void main_loop();
-	void print();
+    void print() const;
 
 private:
     void removePiece(Piece* p);
-    Cell* indexToCell(int cell_index);
+    Cell* indexToCell(int cell_index) const;
     // Internal function to populate the vector of Moves, called in getAllMoves.
     // Returns false if the while loop calling this function has to break.
-    bool checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<Move>* plist);
+    bool checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<Move>* plist) const;
 
     // Converts a Move to a string representation of that Move
-    std::string moveToString(const Move& move);
+    std::string moveToString(const Move& move) const;
     // Converts a string representation of a Move to a Move
-    Move stringToMove(const std::string& move_str);
+    Move stringToMove(const std::string& move_str) const;
 
 private:
     Cell *** _plateau;                  // The Board containing the 8*8 BoardCells and the 4 CampCells

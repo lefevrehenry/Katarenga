@@ -30,7 +30,7 @@ extern ServerInfo ServerInfo;
  * @param input request_message from which the reply is constructed
  * @return reply excepted for the request_message
  */
-zmqpp::message process_request(zmqpp::message& request_message);
+//zmqpp::message process_request(zmqpp::message& request_message);
 
 /**
  * @brief return a zmqpp::message matching the corresponding broadcast of the request
@@ -38,7 +38,7 @@ zmqpp::message process_request(zmqpp::message& request_message);
  * @param input reply_message from which the broadcast is constructed
  * @return broadcast expected for the request_message
  */
-zmqpp::message process_broadcast(zmqpp::message& request_message, zmqpp::message& reply_message);
+//zmqpp::message process_broadcast(zmqpp::message& request_message, zmqpp::message& reply_message);
 
 // Generates a Sring containing the cell types of the board, row by row.
 void generateBoard(Board* board);

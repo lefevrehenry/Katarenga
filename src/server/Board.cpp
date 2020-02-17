@@ -92,13 +92,81 @@ Board::~Board()
     _plateau = nullptr;   // that?
 }
 
-std::string Board::getBoard() const
+/* Returns the current configuration of the board with for each cell
+ * its type and whether there is a piece on that cell,
+ * for each camp cell whether there is a piece on that cell,
+ * the current player and whether the game is finished or not
+ */
+std::string Board::getBoardConfiguration() const
 {
-    // TODO implement
-    return "";
+    std::string s = "";
+
+    // Populate the cells of the board
+    for(int i = 1; i <= 8; ++i)
+    {
+        for (int j = 1; j <= 8; ++j)
+        {
+            BoardCell* cell = dynamic_cast<BoardCell*>(_plateau[i][j]);
+            switch(cell->getType())
+            {
+            case CellType::KING:
+                s+= "K";
+                break;
+            case CellType::BISHOP:
+                s+="B";
+                break;
+            case CellType::KNIGHT:
+                s+="N";
+                break;
+            case CellType::ROCK:
+                s+="R";
+                break;
+            default:
+                s+=" ";
+            }
+
+            Piece* piece = cell->getPiece();
+            if (piece)
+            {
+                if (piece->getPlayer() == 1)
+                {
+                    s+="+";
+                }
+                else
+                {
+                    s+="-";
+                }
+            }
+            else
+            {
+                s+=" ";
+            }
+        }
+    }
+
+    // Populate the camp cells
+    s+= (_plateau[0][0]->isEmpty() ? " " : "-"); // White
+    s+= (_plateau[0][1]->isEmpty() ? " " : "-");
+    s+= (_plateau[9][0]->isEmpty() ? " " : "+"); // Black
+    s+= (_plateau[9][1]->isEmpty() ? " " : "+");
+
+    // Then put the current player and whether the game is finished
+    s+= (_currentPlayer == 1 ? "+" : "-");
+
+    int finished = gameFinished();
+    if (finished)
+    {
+        s+= (finished == 1 ? "+" : "-");
+    }
+    else
+    {
+        s+=" ";
+    }
+
+    return s;
 }
 
-void Board::setBoard(const std::string& boardString)
+void Board::setBoardCellTypes(const std::string& boardString)
 {
     int index = 0;
 
@@ -133,7 +201,7 @@ void Board::setBoard(const std::string& boardString)
     }
 }
 
-bool Board::isValidMove(const Move& m, int player)
+bool Board::isValidMove(const Move& m, int player) const
 {
 //    if(_verbose)
 //    {
@@ -160,13 +228,13 @@ bool Board::isValidMove(const Move& m, int player)
     return false;
 }
 
-bool Board::isValidMove(const std::string& move_str, int player)
+bool Board::isValidMove(const std::string& move_str, int player) const
 {
     Move m = stringToMove(move_str);
     return isValidMove(m, player);
 }
 
-Move Board::askNextValidMove()
+Move Board::askNextValidMove() const
 {
     int srci, desti;
     bool flag = true;
@@ -222,7 +290,7 @@ void Board::playMove(const std::string& move_str)
     playMove(m);
 }
 
-void Board::fillAllMoves(int row, int col, std::vector<Move>* list)
+void Board::fillAllMoves(int row, int col, std::vector<Move>* list) const
 {
     list->clear();
     Cell* cell = _plateau[row][col];
@@ -469,7 +537,7 @@ void Board::fillAllMoves(int row, int col, std::vector<Move>* list)
     }
 }
 
-int Board::gameFinished()
+int Board::gameFinished() const
 {
     // Check if White won
     if (!_plateau[9][0]->isEmpty() && !_plateau[9][1]->isEmpty())
@@ -484,7 +552,7 @@ int Board::gameFinished()
     return 0;
 }
 
-int Board::getCurrentPlayer()
+int Board::getCurrentPlayer() const
 {
     return _currentPlayer;
 }
@@ -509,7 +577,7 @@ void Board::main_loop()
     }
 }
 
-void Board::print()
+void Board::print() const
 {
     std::string s = "   1    2    3    4    5    6    7    8\n";
     s+= (_plateau[0][0]->isEmpty() ? " " : "X");
@@ -576,7 +644,7 @@ void Board::removePiece(Piece* p)
     delete p;
 }
 
-Cell* Board::indexToCell(int cell_index)
+Cell* Board::indexToCell(int cell_index) const
 {
     switch(cell_index)
     {
@@ -599,7 +667,7 @@ Cell* Board::indexToCell(int cell_index)
     }
 }
 
-bool Board::checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<Move>* plist)
+bool Board::checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<Move>* plist) const
 {
     BoardCell* dst_cell = (BoardCell*)_plateau[row][col];
     if(dst_cell->isEmpty())
@@ -622,19 +690,21 @@ bool Board::checkCellAddMove(BoardCell* src_cell, int row, int col, int player, 
 }
 
 // Converts a Move to a string representation of that Move
-std::string Board::moveToString(const Move& move)
+std::string Board::moveToString(const Move& move) const
 {
     int src_index = move.first->getIndex();
     int dest_index = move.second->getIndex();
     std::string s;
 
+    // TODO add the current player at the beginning of this move string
+
     if (src_index == 1 || src_index == 2)
     {
-        s = "+" + std::to_string(src_index);
+        s = "+" + std::to_string(src_index); // A CampCell
     }
     else if (src_index == -1 || src_index == -2)
     {
-        s = "-" + std::to_string(src_index);
+        s = std::to_string(src_index); // A CampCell
     }
     else if (src_index < 10)
     {
@@ -647,11 +717,11 @@ std::string Board::moveToString(const Move& move)
     s += ":";
     if (dest_index == 1 || dest_index == 2)
     {
-        s += "+" + std::to_string(dest_index);
+        s += "+" + std::to_string(dest_index); // A CampCell
     }
     else if (dest_index == -1 || dest_index == -2)
     {
-        s += std::to_string(dest_index);
+        s += std::to_string(dest_index); // A CampCell
     }
     else if (dest_index < 10)
     {
@@ -673,7 +743,7 @@ std::string Board::moveToString(const Move& move)
 }
 
 // Converts a string representation of a Move to a Move
-Move Board::stringToMove(const std::string& move_str)
+Move Board::stringToMove(const std::string& move_str) const
 {
     /* A string move is of the form:
      * m<src_cell_index>:<dest_cell_index>

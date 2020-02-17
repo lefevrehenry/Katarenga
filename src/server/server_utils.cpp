@@ -68,7 +68,7 @@ using MessageType = MessageWrapper::MessageType;
 //    return reply_message;
 //}
 
-template< typename T >
+/*template< typename T >
 void titi(typename T::Request*, typename T::Reply*, typename T::Broadcast*)
 {
     throw std::runtime_error("missing template specialization");
@@ -125,7 +125,7 @@ zmqpp::message process_broadcast(zmqpp::message& request_message, zmqpp::message
     }
 
     return publish_message;
-}
+}*/
 
 // TODO Implement rotations of the tiles
 const char bb[8][4][4] = {{{'R', 'B', 'K', 'N'}, // 0
@@ -196,5 +196,5 @@ void generateBoard(Board* board)
     }
 
     std::string boardString = s1 + s2;
-    board->setBoard(boardString);
+    board->setBoardCellTypes(boardString);
 }

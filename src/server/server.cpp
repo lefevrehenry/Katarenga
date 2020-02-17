@@ -55,14 +55,14 @@ void construct_reply(const MessageWrapper*, MessageWrapper*)
     throw std::runtime_error("missing template specialization");
 }
 
-template<>
+/*template<>
 void construct_reply<BoardConfiguration>(const MessageWrapper*, MessageWrapper* reply)
 {
     std::string boardString = ServerInfo.board->getBoard();
 
     BoardConfiguration::Reply* object = dynamic_cast<BoardConfiguration::Reply*>(reply);
     object->setConfiguration(boardString);
-}
+}*/
 
 void server_function()
 {
