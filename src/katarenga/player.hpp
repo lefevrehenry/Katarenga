@@ -14,7 +14,7 @@ struct PlayerInfo {
     int self_player; // 1 for White, -1 for Black
     int current_player; // Which turn is it
     bool game_finished;
-    const std::string render_binding_point = "katarenga-render-thread";
+    const std::string render_binding_point = "inproc://katarenga-render-thread";
 
 };
 

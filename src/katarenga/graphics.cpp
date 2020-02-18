@@ -15,7 +15,7 @@ void graphics_function()
     zmqpp::context* context = PlayerInfo.zmq_context;
 
     zmqpp::socket socket_main_thread(*context, zmqpp::socket_type::pair);
-    socket_main_thread.connect("inproc://katarenga-render-thread");
+    socket_main_thread.connect(PlayerInfo.render_binding_point);
 
 //    std::string board_configuration = s_recv(socket);
 //    s_send(socket, "ACK");

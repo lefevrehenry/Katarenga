@@ -202,7 +202,7 @@ void init_sockets_and_poller(zmqpp::poller& poller)
     //int graphics_port = MainArguments.graphics_port;
 
     std::string server_binding_point = "tcp://" + server_ip + ":" + server_port;
-    std::string render_binding_point = "inproc://katarenga-render-thread";
+    std::string render_binding_point = PlayerInfo.render_binding_point;
 
     // Give global access to the player's context
     PlayerInfo.zmq_context = &zmq_context;
