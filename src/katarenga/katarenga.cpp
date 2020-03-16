@@ -94,9 +94,10 @@ int main(int argc, char * argv[])
     }
     else
     {
-        if(MainArguments.verbose)
-            player_msg("Starting the main function");
-        player_function();
+        player_msg("Starting the main function");
+
+        Player player;
+        player.loop();
     }
 
     return 0;

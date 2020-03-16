@@ -1,20 +1,18 @@
 #include "player.hpp"
-#include "katarenga.hpp"
-#include "graphics.hpp"
+//#include "katarenga.hpp"
+//#include "graphics.hpp"
 #include "utils.hpp"
-#include <message/message_utils.hpp>
+//#include <message/message_utils.hpp>
 
-#include <zmqpp/zmqpp.hpp>
+//#include <zmqpp/zmqpp.hpp>
 
 //#include <iostream>
-#include <string>
-#include <thread>
-#include <memory>
+//#include <string>
+//#include <thread>
+//#include <memory>
+#include <functional>
 
-struct PlayerInfo PlayerInfo;
-
-zmqpp::socket* _server_socket = nullptr;
-zmqpp::socket* _render_socket = nullptr;
+//struct PlayerInfo PlayerInfo;
 
 /*template< typename T >
 void proccess_message_from_server(zmqpp::message&);
@@ -44,7 +42,7 @@ void stop_game(zmqpp::message&)
     end_game = true;
 }*/
 
-void process_server_board_configuration(zmqpp::message& message)
+void Player::process_server_board_configuration(zmqpp::message& message)
 {
     AnswerBoardConfiguration m(message);
     //m.fromMessage(message);
@@ -70,10 +68,10 @@ void process_server_board_configuration(zmqpp::message& message)
     // TODO at some point we'll need to update the Board informations kept by the client as well
 
     // Then forward it to the render thread
-    _render_socket->send(message);
+    m_render_thread_socket.send(message);
 }
 
-void process_server_move_message(zmqpp::message& message)
+void Player::process_server_move_message(zmqpp::message& message)
 {
     MoveMessage m(message);
     //m.fromMessage(message);
@@ -104,10 +102,10 @@ void process_server_move_message(zmqpp::message& message)
     }
 
     // Forward it to the render thread
-    _render_socket->send(message);
+    m_render_thread_socket.send(message);
 }
 
-void process_server_player_won(zmqpp::message& message)
+void Player::process_server_player_won(zmqpp::message& message)
 {
     PlayerWon m(message);
     //m.fromMessage(message);
@@ -117,10 +115,10 @@ void process_server_player_won(zmqpp::message& message)
     //player_msg((PlayerInfo.current_player == 1 ? "White" : "Black") + " player won the game!");
 
     // Forward it to the render thread
-    _render_socket->send(message);
+    m_render_thread_socket.send(message);
 }
 
-void process_server_game_stopped(zmqpp::message& message)
+void Player::process_server_game_stopped(zmqpp::message& message)
 {
     GameStopped m(message);
     //m.fromMessage(message);
@@ -130,48 +128,85 @@ void process_server_game_stopped(zmqpp::message& message)
     //player_msg("The game stopped: " + m.getReason());
 
     // Forward it to the render thread
-    _render_socket->send(message);
+    m_render_thread_socket.send(message);
 }
 
-void player_function()
+Player::Player() :
+    m_zmq_context(),
+    m_poller(),
+    m_server_thread_socket(m_zmq_context, zmqpp::socket_type::pair),
+    m_render_thread_socket(m_zmq_context, zmqpp::socket_type::pair),
+    m_render_thread(graphics_function),
+    m_server_thread_reactor(),
+    m_render_thread_reactor()
 {
-    PlayerInfo.self_player = MainArguments.self_player;
+    // Create a zmqpp context for the main thread
+    //zmqpp::context zmq_context;
 
-    zmqpp::poller poller;
-    init_sockets_and_poller(poller);
+    std::string server_ip = MainArguments.server_ip;
+    std::string server_port = std::to_string(MainArguments.server_port);
+    //int graphics_port = MainArguments.graphics_port;
 
-    // Create the render thread
-    std::thread render_thread(graphics_function);
+    std::string server_binding_point = "tcp://" + server_ip + ":" + server_port;
+    std::string render_binding_point = PlayerInfo.render_binding_point;
+
+    m_server_thread_socket.bind(server_binding_point);
+    m_render_thread_socket.bind(render_binding_point);
+
+    // Give global access to the player's context
+    PlayerInfo.zmq_context = &m_zmq_context;
+
+    // We want to listen to the two sockets at the same time
+    m_poller.add(m_server_thread_socket, zmqpp::poller::poll_in);
+    m_poller.add(m_render_thread_socket, zmqpp::poller::poll_in);
+
+    using Callback = MessageReactor::Callback;
+
+    Callback process_server_board_configuration = std::bind(&Player::process_server_board_configuration, this, std::placeholders::_1);
+    Callback process_server_move_message        = std::bind(&Player::process_server_move_message, this, std::placeholders::_1);
+    Callback process_server_player_won          = std::bind(&Player::process_server_player_won, this, std::placeholders::_1);
+    Callback process_server_game_stopped        = std::bind(&Player::process_server_game_stopped, this, std::placeholders::_1);
 
     // Add callback functions to react to messages received from the server
-    MessageReactor server_thread_reactor;
-    server_thread_reactor.add(MessageWrapper::MessageType::AnswerBoardConfiguration, process_server_board_configuration);
-    server_thread_reactor.add(MessageWrapper::MessageType::MoveMessage, process_server_move_message);
-    server_thread_reactor.add(MessageWrapper::MessageType::PlayerWon, process_server_player_won);
-    server_thread_reactor.add(MessageWrapper::MessageType::GameStopped, process_server_game_stopped);
+    m_server_thread_reactor.add(MessageWrapper::MessageType::AnswerBoardConfiguration, process_server_board_configuration);
+    m_server_thread_reactor.add(MessageWrapper::MessageType::MoveMessage, process_server_move_message);
+    m_server_thread_reactor.add(MessageWrapper::MessageType::PlayerWon, process_server_player_won);
+    m_server_thread_reactor.add(MessageWrapper::MessageType::GameStopped, process_server_game_stopped);
 
-    MessageReactor render_thread_reactor;
     // TODO see what kind of message the render thread will send
-    //render_thread_reactor.add(MessageWrapper::MessageType::PrintBoard, print_board_please);
-    //render_thread_reactor.add(MessageWrapper::MessageType::StopGame, stop_game);
+    //m_render_thread_reactor.add(MessageWrapper::MessageType::PrintBoard, print_board_please);
+    //m_render_thread_reactor.add(MessageWrapper::MessageType::StopGame, stop_game);
+}
 
+Player::~Player()
+{
+    m_server_thread_socket.close();
+    m_render_thread_socket.close();
+}
+
+void Player::loop()
+{
     player_msg("Player entering the main loop!");
 
-    zmqpp::message input_message;
     while(!PlayerInfo.game_finished)
     {
-        if(poller.poll(zmqpp::poller::wait_forever))
-        {
-            // receive the message
-            _render_socket->receive(input_message);
+        zmqpp::message input_message;
 
-            if(poller.has_input(*_server_socket)) {
+        if(m_poller.poll(zmqpp::poller::wait_forever))
+        {
+            if(m_poller.has_input(m_server_thread_socket)) {
+                // receive the message
+                m_server_thread_socket.receive(input_message);
+
                 // Will call the callback corresponding to the message type
-                server_thread_reactor.process_message(input_message);
+                m_server_thread_reactor.process_message(input_message);
             }
-            else if(poller.has_input(*_render_socket)) {
+            else if(m_poller.has_input(m_render_thread_socket)) {
+                // receive the message
+                m_render_thread_socket.receive(input_message);
+
                 // Will call the callback corresponding to the message type
-                render_thread_reactor.process_message(input_message);
+                m_render_thread_reactor.process_message(input_message);
             }
             else
             {
@@ -182,42 +217,7 @@ void player_function()
     }
 
     // Clean up and terminate
-    render_thread.join();
-
-    // Close the 2 sockets
-    _server_socket->close();
-    _render_socket->close();
+    m_render_thread.join();
 
     player_msg("Terminating.");
-}
-
-
-void init_sockets_and_poller(zmqpp::poller& poller)
-{
-    // Create a zmqpp context for the main thread
-    zmqpp::context zmq_context;
-
-    std::string server_ip = MainArguments.server_ip;
-    std::string server_port = std::to_string(MainArguments.server_port);
-    //int graphics_port = MainArguments.graphics_port;
-
-    std::string server_binding_point = "tcp://" + server_ip + ":" + server_port;
-    std::string render_binding_point = PlayerInfo.render_binding_point;
-
-    // Give global access to the player's context
-    PlayerInfo.zmq_context = &zmq_context;
-
-    // Setup a pair socket to etablish a connection with the server
-    zmqpp::socket socket_server_thread(zmq_context, zmqpp::socket_type::pair);
-    socket_server_thread.bind(server_binding_point);
-    _server_socket = &socket_server_thread;
-
-    // Setup a pair socket to etablish a connection with the render thread
-    zmqpp::socket socket_render_thread(zmq_context, zmqpp::socket_type::pair);
-    socket_render_thread.bind(render_binding_point);
-    _render_socket = &socket_render_thread;
-
-    // We want to listen to the two sockets at the same time
-    poller.add(socket_server_thread, zmqpp::poller::poll_in);
-    poller.add(socket_render_thread, zmqpp::poller::poll_in);
 }
