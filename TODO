@@ -1,10 +1,52 @@
+le main thread (player_function):
+    * fait la communication entre le render_thread et le server
+
+    * est notifié par le render_thread qu'une case est cliquée
+
+    * gère une sorte de machine à état et réagit en fonction des messages reçus
+        - retient le joueur courant (= variable current_player)
+        - garde en mémoire les cases cliquées pour envoyer une requête au serveur
+          pour jouer un coup si c'est au tour du joueur courant
+        - ignore les cases cliquées par le render_thread si ce n'est pas au
+          tour du joueur courant
+        - etc ...
+
+    * communique en mode PAIR socket avec le render_thread
+        reception de messages de type CaseClicked
+        envoi de message de type BoardConfig, MovePlayed
+
+    * communique en mode PAIR socket avec le server_communication_thread
+        reception de messages de type BoardConfig, MovePlayed, et autres infos venant du serveur
+        envoi de messages de type AskBoardConfig, PlayThisMove, et autres demandes au serveur
+
+    * pour l'instant tout le Board est localisé sur le serveur. Dans le futur
+    on imagine que le main thread contient une copie du jeu en local pour
+    précalculer et communiquer avec le render_thread sans être obligé
+    d'envoyer des requêtes sur le réseau
+        - pour ne pas spam le serveur en cas d'essai d'un coup invalide
+        - pour afficher la liste des coups valides lorsqu'un pion est sélectionné par exemple
+
+
+    * pour l'instant le choix de la couleur du joueur est en CLI
+    Il faudra trouver comment faire pour que ce soit le serveur qui donne cette information.
+
+
+
+TODO It could be convenient to have utils functions to extract the player number from a move string, and to convert a player number to a string for output
+
+
+TODO Stop putting every variable as global and use correctly PlayerInfo
+    (+ pass a pointer of it to all functions instead)
+    (+ merge it with the MainArguments and call everything GameContext or PlayerContext or something)
+
+TODO Verbosity
+- At some point we would like to correctly handle verbosity
+ This is related to having a correct way of handling logs and exceptions.
+
+
 TODOs
 - thread server sends the configuration of the board to the graphics thread (sends a string containing the 64 types of cells of the board).
-- the graphics thread is the main thread. In the standalone version of Katarenga it spawns a child thread which will hold the server. In the "network" version it will spawn a child thread that will communicate with the server and forward the events to the graphics thread (maybe there is a solution where the graphics thread listens directly to a socket to communicate with the server).
-- put the resources of the chess pieces + board tilings in a resources directory of Katarenga (and not GLTK)
-
 
 TODO Network :
 - besoin de gérer si problème réseau, connexion au socket perdu -> besoin de terminer le thread GL.
 - besoin de gérer les déconnexion des clients.
-

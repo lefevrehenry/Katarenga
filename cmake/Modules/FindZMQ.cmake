@@ -18,7 +18,7 @@ find_package_handle_standard_args(
     ZMQ_LIBRARY
 )
 
-if(ZMQ_FOUND)
+if(ZMQ_FOUND AND NOT TARGET ZMQ)
     # Create imported target ZMQ
     add_library(ZMQ INTERFACE IMPORTED)
 
