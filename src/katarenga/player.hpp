@@ -29,6 +29,7 @@ public:
     void loop();    // function executed in the main thread
 
 private:
+    void process_server_game_init(zmqpp::message& message);
     void process_server_board_configuration(zmqpp::message& message);
     void process_server_move_message(zmqpp::message& message);
     void process_server_player_won(zmqpp::message& message);

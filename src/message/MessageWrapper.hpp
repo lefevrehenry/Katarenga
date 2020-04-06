@@ -16,6 +16,7 @@ public:
     }
 
     enum class MessageType {    // throw it in a separate class
+        GameInit,                   // In BoardConfigMessage
         AskBoardConfiguration,      // In BoardConfigMessage
         AnswerBoardConfiguration,   // In BoardConfigMessage
         //CheckConnectivity,

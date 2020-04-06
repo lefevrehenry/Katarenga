@@ -4,33 +4,17 @@
 #include <functional>
 
 
-/*template< typename T >
-void proccess_message_from_server(zmqpp::message&);
-
-template<>
-void proccess_message_from_server<BoardConfiguration>(zmqpp::message& input_message)
+void Player::process_server_game_init(zmqpp::message& message)
 {
-    auto call = [=](BoardConfiguration::Request*, BoardConfiguration::Reply*) {
-        return std::string();
-    };
+    GameInit m(message);
+    m_current_player = m.getCurrentPlayer();
+    //m_self_player = m.getSelfPlayer();
 
-    zmqpp::message reply_message = MessageReactor::ConstructReply<BoardConfiguration>(input_message, call);
+    // TODO at some point we'll need to update the Board information kept by the client as well
+
+    // Then forward to the render thread
+    m_render_thread_socket.send(message);
 }
-
-void print_board_please(zmqpp::message&)
-{
-    // ask board string to server
-    std::cout << "print_board" << std::endl;
-    zmqpp::message message;
-
-    bool ret = _server_socket->send(message, true);
-}
-
-void stop_game(zmqpp::message&)
-{
-    std::cout << "stop_game" << std::endl;
-    end_game = true;
-}*/
 
 void Player::process_server_board_configuration(zmqpp::message& message)
 {
@@ -153,12 +137,14 @@ Player::Player(MainArguments &main_args) :
 
     using Callback = MessageReactor::Callback;
 
+    Callback process_server_game_init           = std::bind(&Player::process_server_game_init, this, std::placeholders::_1);
     Callback process_server_board_configuration = std::bind(&Player::process_server_board_configuration, this, std::placeholders::_1);
     Callback process_server_move_message        = std::bind(&Player::process_server_move_message, this, std::placeholders::_1);
     Callback process_server_player_won          = std::bind(&Player::process_server_player_won, this, std::placeholders::_1);
     Callback process_server_game_stopped        = std::bind(&Player::process_server_game_stopped, this, std::placeholders::_1);
 
     // Add callback functions to react to messages received from the server
+    m_server_thread_reactor.add(MessageWrapper::MessageType::GameInit, process_server_game_init);
     m_server_thread_reactor.add(MessageWrapper::MessageType::AnswerBoardConfiguration, process_server_board_configuration);
     m_server_thread_reactor.add(MessageWrapper::MessageType::MoveMessage, process_server_move_message);
     m_server_thread_reactor.add(MessageWrapper::MessageType::PlayerWon, process_server_player_won);
