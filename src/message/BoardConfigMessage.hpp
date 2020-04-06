@@ -18,12 +18,12 @@ public:
 
 class AnswerBoardConfiguration : MessageWrapper
 {
+public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::AnswerBoardConfiguration;
     }
 
-public:
     AnswerBoardConfiguration(zmqpp::message& message);
 
     void toMessage(zmqpp::message& message) override;

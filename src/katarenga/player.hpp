@@ -1,6 +1,7 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
+#include "utils.hpp"
 #include <message/message_utils.hpp>
 
 #include <zmqpp/zmqpp.hpp>
@@ -14,25 +15,14 @@ namespace zmqpp {
     class poller;
 }
 
-//struct PlayerInfo {
-//    zmqpp::context* zmq_context;
-//    int self_player; // 1 for White, -1 for Black
-//    int current_player; // Which turn is it
-//    bool game_finished;
-//    const std::string render_binding_point = "inproc://katarenga-render-thread";
-
-//};
-
-//extern PlayerInfo PlayerInfo;
-
 /**
- * @brief The Player class live in the main thread
+ * @brief The Player class lives in the main thread
  */
 class Player
 {
 
 public:
-    Player();
+    Player(MainArguments &main_args);
     virtual ~Player();
 
 public:
@@ -45,9 +35,9 @@ private:
     void process_server_game_stopped(zmqpp::message& message);
 
 private:
+    // Socket-related content
     zmqpp::context  m_zmq_context;
     zmqpp::poller   m_poller;
-
     zmqpp::socket   m_server_thread_socket;
     zmqpp::socket   m_render_thread_socket;
 
@@ -56,6 +46,10 @@ private:
     MessageReactor  m_server_thread_reactor;
     MessageReactor  m_render_thread_reactor;
 
+    // Game-related content
+    bool m_game_finished = false;
+    int m_self_player;
+    int m_current_player;
 };
 
 /* function executed in its own thread */

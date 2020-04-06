@@ -3,26 +3,15 @@
 #include "utils.hpp"
 #include <message/message_utils.hpp>
 
-#include <zmqpp/zmqpp.hpp>
-
 #include <GLTK/GLFWApplication.h>
 
 using MessageType = MessageWrapper::MessageType;
 
 
-void graphics_function()
+void graphics_function(zmqpp::context &zmq_context, std::string render_binding_point)
 {
-    zmqpp::context* context = PlayerInfo.zmq_context;
-
-    zmqpp::socket socket_main_thread(*context, zmqpp::socket_type::pair);
-    socket_main_thread.connect(PlayerInfo.render_binding_point);
-
-//    std::string board_configuration = s_recv(socket);
-//    s_send(socket, "ACK");
-
-//    std::cout << "GL received board config:\n" << board_configuration << std::endl;
-
-//    Board board;
+    zmqpp::socket socket_main_thread(zmq_context, zmqpp::socket_type::pair);
+    socket_main_thread.connect(render_binding_point);
 
     render_msg("GL thread ready to play!");
 

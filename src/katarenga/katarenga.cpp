@@ -1,7 +1,6 @@
 #include "katarenga.hpp"
 #include "player.hpp"
 #include "standalone.hpp"
-#include "utils.hpp"
 
 #include <iostream>
 #include <map>
@@ -9,9 +8,9 @@
 #include "docopt/docopt.h"
 #include <GLFW/glfw3.h>
 
-struct MainArguments MainArguments;
+bool verbose; // UGLY hack for now...
 
-int parse_main_args(int argc, char * argv[])
+int parse_main_args(int argc, char * argv[], MainArguments &main_args)
 {
     static const char usage[] =
 R"(Katarenga: A nice two-player board game!
@@ -20,14 +19,13 @@ Usage:
     katarenga --white | --black    [--server-ip <ip>]
                                    [--offset-port <port>]
                                    [options]
+    katarenga --standalone         [options]
     katarenga -h | --help
 
 Input options:
     --server-ip <ip>               The IP address of the server.
-                                   If the default value is chosen, this will launch
-                                   a standalone version of the game.
                                    [default: 127.0.0.1]
-    --offset-port <port>           The offset on which socket ports will be based on.
+    --server-port <port>           The server port for the socket.
                                    [default: 28000]
 
 Other options:
@@ -37,31 +35,30 @@ Other options:
 
     std::map<std::string, docopt::value> args = docopt::docopt(usage, {argv+1, argv+argc}, true);
 
-    int offset_port = args["--offset-port"].asLong();
-    MainArguments.graphics_port = offset_port;
-    MainArguments.server_port = offset_port + 1;
+    main_args.server_ip = args["--server-ip"].asString();
+    main_args.server_port = args["--server-port"].asLong();
 
-    MainArguments.verbose = args["--verbose"].asBool();
-    MainArguments.is_standalone = args["--server-ip"].asString() == "127.0.0.1";
+    main_args.verbose = args["--verbose"].asBool();
 
-    if (args["--white"].asBool())
+    if (args["--standalone"].asBool())
     {
-        MainArguments.self_player = 1;
+        main_args.is_standalone = true;
+        main_args.self_player = 1;
+    }
+    else if (args["--white"].asBool())
+    {
+        main_args.is_standalone = false;
+        main_args.self_player = 1;
     }
     else if (args["--black"].asBool())
     {
-        MainArguments.self_player = -1;
+        main_args.is_standalone = false;
+        main_args.self_player = -1;
     }
     else
     {
-        player_msg("Error: This should not happen");
+        std::cout << "Error while parsing arguments, this should not happen" << std::endl;
         return 1;
-    }
-
-
-    if(MainArguments.verbose)
-    {
-        player_msg("Arguments successfully parsed!");
     }
 
     return 0;
@@ -71,32 +68,36 @@ Other options:
 int main(int argc, char * argv[])
 {
     // Let's parse the command-line arguments!
-    if (parse_main_args(argc, argv))
+    MainArguments main_args;
+    if (parse_main_args(argc, argv, main_args))
         return 1;
 
-    if(MainArguments.is_standalone)
+    verbose = main_args.verbose;
+    player_msg("Arguments successfully parsed!");
+
+    if(main_args.is_standalone)
     {
         // Create a thread running the server process
-        /*if(MainArguments.verbose)
+        /*if(main_args.verbose)
             player_msg("Starting the server thread");
 
         std::thread server_thread(server_function);
 
         // Then launch the standalone function
-        if(MainArguments.verbose)
+        if(main_args.verbose)
             player_msg("Starting the main function as standalone");
-        standalone_function();
+        standalone_function(main_args);
 
-        if(MainArguments.verbose)
+        if(main_args.verbose)
             player_msg("Waiting termination of the server thread");
-        server_thread.join();*/
+        server_thread.join(main_args);*/
         throw std::runtime_error("Standalone feature not implemented yet");
     }
     else
     {
-        player_msg("Starting the main function");
+        player_msg("Creating Player and starting main loop");
 
-        Player player;
+        Player player(main_args);
         player.loop();
     }
 

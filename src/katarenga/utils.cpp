@@ -37,13 +37,13 @@ bool s_send(zmqpp::socket& socket, const char* cstring)
 /* Misc functions */
 void render_msg(const std::string& msg)
 {
-    if (MainArguments.verbose)
+    if (verbose)
         std::cout << "[render thread]" << msg << std::endl;
 }
 
 void player_msg(const std::string& msg)
 {
-    if (MainArguments.verbose)
+    if (verbose)
         std::cout << "[player thread]" << msg << std::endl;
 }
 

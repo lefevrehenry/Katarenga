@@ -15,16 +15,7 @@ struct MainArguments
     int self_player;                // 1 for White; -1 for Black;
 };
 
-extern MainArguments MainArguments;
-
-/* Network-related functions */
-//  Receive message from socket and convert into string
-std::string s_recv(zmqpp::socket& socket);
-
-//  Convert string to message and send to socket
-//bool s_send(zmqpp::socket& socket, const std::string& string);
-//bool s_send(zmqpp::socket& socket, const char* cstring);
-
+extern bool verbose; // UGLY hack for now...
 
 /* Misc functions */
 void render_msg(const std::string& msg);
