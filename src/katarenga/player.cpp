@@ -108,7 +108,7 @@ void Player::process_server_game_stopped(zmqpp::message& message)
 
 void Player::process_graphics_case_clicked(zmqpp::message& message)
 {
-    CaseClicked c(message);
+    CaseClicked c = ConstructObject<CaseClicked>(message);
 
     std::cout << " '(main thread) case clicked ' " << c.getCase() << std::endl;
 }

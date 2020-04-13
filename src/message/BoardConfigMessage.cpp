@@ -49,14 +49,23 @@ void GameInit::setSelfPlayer(const int player)
 
 
 
-AskBoardConfiguration::AskBoardConfiguration(zmqpp::message &message) : MessageWrapper() {fromMessage(message);}
+AskBoardConfiguration::AskBoardConfiguration() : MessageWrapper()
+{
 
-void AskBoardConfiguration::toMessage(zmqpp::message &message)
+}
+
+AskBoardConfiguration::AskBoardConfiguration(const int player) : MessageWrapper(),
+    m_player(player)
+{
+
+}
+
+void AskBoardConfiguration::toMessage(zmqpp::message& message)
 {
     message << m_player;
 }
 
-void AskBoardConfiguration::fromMessage(zmqpp::message &message)
+void AskBoardConfiguration::fromMessage(zmqpp::message& message)
 {
     message >> m_player;
 }
