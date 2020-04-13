@@ -22,8 +22,9 @@ public:
         //CheckConnectivity,
         MoveMessage,                // In MoveMessage
         PlayerWon,                  // In OtherMessage
-        //PrintBoard,                 // In OtherMessage
+        //PrintBoard,               // In OtherMessage
         //ForgetItRageQuit,
+        CaseClicked,                // In CaseClicked
         StopGame,                   // In QuitMessage
         GameStopped                 // In QuitMessage
     };
