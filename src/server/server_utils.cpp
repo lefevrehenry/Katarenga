@@ -3,6 +3,8 @@
 
 #include <message/message_utils.hpp>
 
+#include <iostream>
+
 struct ServerInfo ServerInfo;
 
 using MessageType = MessageWrapper::MessageType;

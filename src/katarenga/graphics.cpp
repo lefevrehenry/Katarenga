@@ -5,6 +5,8 @@
 
 #include <GLTK/GLFWApplication.h>
 
+#include <iostream>
+
 using MessageType = MessageWrapper::MessageType;
 
 
