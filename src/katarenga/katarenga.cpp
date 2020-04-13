@@ -1,5 +1,4 @@
 #include "player.hpp"
-#include "standalone.hpp"
 #include "utils.hpp"
 
 #include <iostream>
@@ -7,11 +6,10 @@
 #include <string>
 
 #include "docopt/docopt.h"
-#include <GLFW/glfw3.h>
 
 bool verbose; // UGLY hack for now...
 
-int parse_arguments(int argc, char * argv[], GameSettings &game_settings)
+bool parse_arguments(int argc, char * argv[], GameSettings& game_settings)
 {
     static const char usage[] =
 R"(Katarenga: A nice two-player board game!
@@ -37,8 +35,6 @@ Other options:
 )";
 
     std::map<std::string, docopt::value> args = docopt::docopt(usage, {argv+1, argv+argc}, true);
-
-
 
     game_settings.verbose = args["--verbose"].asBool();
 
@@ -69,8 +65,7 @@ Other options:
 
     game_settings.render_binding_point = "inproc://katarenga-render-thread";
 
-
-    return 0;
+    return false;
 }
 
 
@@ -78,7 +73,7 @@ int main(int argc, char * argv[])
 {
     // Let's parse the command-line arguments!
     GameSettings game_settings;
-    if (parse_arguments(argc, argv, game_settings))
+    if(parse_arguments(argc, argv, game_settings))
         return 1;
 
     verbose = game_settings.verbose;
