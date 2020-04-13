@@ -49,13 +49,11 @@ void Player::process_server_move_message(zmqpp::message& message)
 {
     MoveMessage m(message);
     //m.fromMessage(message);
-    std::string move = m.getMove();
-    int move_player;
+    int move_player = m.getPlayer();
 
     switch(m.getType())
     {
     case MoveType::MovePlayed:
-        move_player = (move.at(0) == '+' ? 1 : -1);
         if (move_player != m_current_player)
         {
             throw std::runtime_error("Move received from a player not in his turn.");

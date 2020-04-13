@@ -25,19 +25,25 @@ public:
         return MessageWrapper::MessageType::MoveMessage;
     }
 
+    MoveMessage(const MoveType& type, const std::string& move, const int player) :
+        m_type(type), m_move(move), m_player(player) {}
     MoveMessage(zmqpp::message& message);
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 
-    std::string getMove() const;
-    void setMove(const std::string& move);
-
     MoveType getType() const;
     void setType(const MoveType& type);
 
+    std::string getMove() const;
+    void setMove(const std::string& move);
+
+    int getPlayer() const;
+    void setPlayer(const int player);
+
 private:
-    std::string m_move; // A move string is of the form "current_player:src_index:dest_index" and should be of size 7
-    MoveType m_type;
+    MoveType m_type;    // The type of the move
+    std::string m_move; // A move string is of the form "src_index:dest_index" and should be of size 5
+    int m_player;       // The player who performed the move
 };
 
 #endif
