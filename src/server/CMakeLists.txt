@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.2)
-project(server)
+project(katarenga_server)
 
 ## ZeroMQ dependency
 find_package(ZMQPP MODULE QUIET)
@@ -31,6 +31,7 @@ set(SOURCE_FILES
     Piece.cpp
     server.cpp
     server_utils.cpp
+    katarenga_server.cpp
 )
 
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})

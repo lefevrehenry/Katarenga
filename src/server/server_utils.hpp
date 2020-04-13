@@ -16,12 +16,14 @@ struct ServerInfo
 {
     int server_white_port;          // The server socket port for the white player
     int server_black_port;          // The server socket port for the black player
-    int server_publish_port;        // The server socket port to publish message
+    //int server_publish_port;        // The server socket port to publish message
+
+    std::string white_binding_point; // The binding point to communicate with white player
+    std::string black_binding_point; // The binding point to communicate with black player
+
     bool verbose;                   // Whether to be verbose or not
-    Board* board;                   // pointer to the Board used for the game
 };
 
-extern ServerInfo ServerInfo;
 
 /////////////////////////////////////////////////
 
@@ -41,6 +43,8 @@ extern ServerInfo ServerInfo;
 //zmqpp::message process_broadcast(zmqpp::message& request_message, zmqpp::message& reply_message);
 
 // Generates a Sring containing the cell types of the board, row by row.
-void generateBoard(Board* board);
+std::string generateBoardCellTypes();
+
+void server_msg(const std::string& msg);
 
 #endif // UTILS_HPP

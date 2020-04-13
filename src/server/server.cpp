@@ -1,223 +1,70 @@
 #include "server.hpp"
 #include "Board.hpp"
-#include "server_utils.hpp"
 
-#include <message/message_utils.hpp>
-
-// ZMQPP
-#include <zmqpp/zmqpp.hpp>
-
-// docopt
-#include <docopt/docopt.h>
-
-// Standard Library
-#include <iostream>
-#include <map>
-#include <string>
-
-using MessageType = MessageWrapper::MessageType;
-
-int parse_main_args(int argc, char * argv[])
+Server::Server(ServerInfo &server_info) :
+    m_zmq_context(),
+    m_poller(),
+    m_white_player_socket(m_zmq_context, zmqpp::socket_type::pair),
+    m_black_player_socket(m_zmq_context, zmqpp::socket_type::pair),
+    m_player_reactor()
 {
-    static const char usage[] =
-R"(Katarenga-Server: A nice two-player board game!
+    m_white_player_socket.bind(server_info.white_binding_point);
+    m_black_player_socket.bind(server_info.black_binding_point);
 
-Usage:
-    server                      [options]
-    server -h | --help
+    m_poller.add(m_white_player_socket, zmqpp::poller::poll_in);
+    m_poller.add(m_black_player_socket, zmqpp::poller::poll_in);
 
-Input options:
-    --offset-port <port>        The offset on which socket port will be based on.
-                                [default: 28000]
-
-Other options:
-    -v, --verbose                  Makes katarenga verbose.
-    -h, --help                     Shows this help.
-)";
-
-    std::map<std::string, docopt::value> args = docopt::docopt(usage, {argv+1, argv+argc}, true);
-
-    int offset_port = args["--offset-port"].asLong();
-    bool verbose = args["--verbose"].asBool();
-
-    ServerInfo.server_white_port = offset_port;
-    ServerInfo.server_black_port = offset_port + 1;
-    ServerInfo.server_publish_port = offset_port + 2;
-    ServerInfo.verbose = verbose;
-    ServerInfo.board = nullptr;
-
-    return 0;
+    //using Callback = MessageReactor::Callback;
+    /* Create the function callback here and add them to the player_reactor */
 }
 
-template< typename T >
-void construct_reply(const MessageWrapper*, MessageWrapper*)
+Server::~Server()
 {
-    throw std::runtime_error("missing template specialization");
+    m_white_player_socket.close();
+    m_black_player_socket.close();
 }
 
-/*template<>
-void construct_reply<BoardConfiguration>(const MessageWrapper*, MessageWrapper* reply)
+void Server::new_game()
 {
-    std::string boardString = ServerInfo.board->getBoard();
+    if (m_board != nullptr)
+        delete m_board;
 
-    BoardConfiguration::Reply* object = dynamic_cast<BoardConfiguration::Reply*>(reply);
-    object->setConfiguration(boardString);
-}*/
+    m_board = new Board();
+    m_board->setBoardCellTypes(generateBoardCellTypes());
+    m_game_finished = false;
+    m_current_player = 1;
 
-void server_function()
+    server_msg("New game created");
+}
+
+void Server::loop()
 {
-    int server_white_port = ServerInfo.server_white_port;
-    int server_black_port = ServerInfo.server_black_port;
-    int server_publish_port = ServerInfo.server_publish_port;
+    server_msg("Starting main loop of the game");
 
-    // Create a zmqpp context for the server thread
-    zmqpp::context context;
-
-    // Open sockets for White and Black players
-    zmqpp::socket white_player_socket(context, zmqpp::socket_type::reply);
-    white_player_socket.bind("tcp://*:" + std::to_string(server_white_port));
-
-    zmqpp::socket black_player_socket(context, zmqpp::socket_type::reply);
-    black_player_socket.bind("tcp://*:" + std::to_string(server_black_port));
-
-    // Open socket for publish zmq message to both client and spectators
-    zmqpp::socket server_publish_socket(context, zmqpp::socket_type::publish);
-    server_publish_socket.bind("tcp://*:" + std::to_string(server_publish_port));
-
-    // Create a poller for any request received
-    zmqpp::poller poller;
-    poller.add(white_player_socket, zmqpp::poller::poll_in);
-    poller.add(black_player_socket, zmqpp::poller::poll_in);
-
-    // Setup game
-    Board board;
-    generateBoard(&board);
-
-    // Give a global access to the board
-    ServerInfo.board = &board;
-
-    // Setup the message reactor
-    // Associates one callback with one type of request
-    MessageReactor reactor;
-//    reactor.add(MessageType::AskBoardConfiguration, construct_reply<BoardConfiguration>);
-
-    bool end_game = board.gameFinished();
-    int has_won = 0;
-
-    // loop until the game is finished
-    while (!end_game)
+    while(!m_game_finished)
     {
-        board.print();
+        zmqpp::message input_message;
 
-        // wait for a request
-        if(poller.poll(zmqpp::poller::wait_forever))
+        if(m_poller.poll(zmqpp::poller::wait_forever))
         {
-            // if a message is received from the white player
-            if(poller.has_input(white_player_socket)) {
-                // pull the request message
-                zmqpp::message request_message;
-                white_player_socket.receive(request_message);
-
-//                // construct and push the reply message
-//                zmqpp::message reply_message = reactor.process_request(request_message);
-//                white_player_socket.send(reply_message);
-
-//                // construct and publish the broadcast message
-//                zmqpp::message publish_message = process_broadcast(request_message, reply_message);
-//                server_publish_socket.send(publish_message);
-            }
-
-            // if a message is received from the black player
-            if(poller.has_input(black_player_socket))
+            // First receive the message
+            if(m_poller.has_input(m_white_player_socket))
             {
-                // pull the request message
-                zmqpp::message request_message;
-                black_player_socket.receive(request_message);
-
-//                // construct and push the reply message
-//                zmqpp::message reply_message = reactor.process_request(request_message);
-//                black_player_socket.send(reply_message);
-
-//                // construct and publish the broadcast message
-//                zmqpp::message publish_message = process_broadcast(request_message, reply_message);
-//                server_publish_socket.send(publish_message);
+                m_white_player_socket.receive(input_message);
             }
-
-            // terminate the loop if someone has won
-            if ((has_won = board.gameFinished()) != 0)
+            else if (m_poller.has_input(m_black_player_socket))
             {
-                end_game = true;
-                std::cout << (has_won == 1 ? "White" : "Black") << " player has won the game." << std::endl;
+                m_black_player_socket.receive(input_message);
             }
+            else
+            {
+                server_msg("This should not happen, terminating");
+                // TODO send a message to the players that something went wrong before terminating
+                std::terminate();
+            }
+
+            // Then handle it
+            m_player_reactor.process_message(input_message);
         }
     }
-
-//    // Send the board configuration to players and recv ACKs
-//    if(verbose){ cout << "Sending board configuration to players" << endl; }
-////    s_send(socket, board_configuration);
-////    s_send(socketB, board_configuration);
-////    s_recv(socket);
-////    s_recv(socketB);
-
-//    // Main loop
-//    string move_str;
-//    bool end_game = false;
-//    int has_won = 0;
-//    while (!end_game)
-//    {
-//        board.print();
-
-//        // TODO put all this in a generic function depending on the current player?
-//        if(board.getCurrentPlayer() == 1)
-//        {
-//            // Waiting for White to send his move
-//            move_str = s_recv(socket);
-//            if(!board.isValidMove(move_str, 1))
-//            {
-//                s_send(socket, "reject");
-//            }
-//            else
-//            {
-//                board.playMove(move_str);
-//                s_send(socket, move_str);
-//                s_send(socketB, move_str);
-//            }
-//        }
-//        else
-//        {
-//            move_str = s_recv(socketB);
-//            if(!board.isValidMove(move_str, -1))
-//            {
-//                s_send(socketB, "reject");
-//            }
-//            else
-//            {
-//                board.playMove(move_str);
-//                s_send(socket, move_str);
-//                s_send(socketB, move_str);
-//            }
-//        }
-
-//        cout << "Server just treated the move " << move_str << endl;
-//        if ((has_won = board.gameFinished()) != 0)
-//        {
-//            end_game = true;
-//            cout << (has_won == 1?"White":"Black") << " player has won the game." << endl;
-//        }
-//    }
-
-    white_player_socket.close();
-    black_player_socket.close();
-    std::cout << "Terminating server thread." << std::endl;
-}
-
-int main(int argc, char* argv[])
-{
-    // Let's parse the command-line arguments!
-    if (parse_main_args(argc, argv))
-        return 1;
-
-    server_function();
-
-    return 0;
 }

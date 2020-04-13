@@ -177,7 +177,7 @@ void pickRand(int *a, int *b, int *c, int *d)
     } while(*d == *a || *d == *b || *d == *c);
 }
 
-void generateBoard(Board* board)
+std::string generateBoardCellTypes()
 {
     int a, b, c, d;
     pickRand(&a, &b, &c, &d);
@@ -196,5 +196,10 @@ void generateBoard(Board* board)
     }
 
     std::string boardString = s1 + s2;
-    board->setBoardCellTypes(boardString);
+    return boardString;
+}
+
+void server_msg(const std::string& msg)
+{
+    std::cout << "[server]" << msg << std::endl;
 }
