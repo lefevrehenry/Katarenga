@@ -1,7 +1,10 @@
 #include "player.hpp"
 #include "graphics.hpp"
 
+#include <message/message_utils.hpp>
+
 #include <functional>
+#include <iostream>
 
 
 void Player::process_server_game_init(zmqpp::message& message)
@@ -103,6 +106,22 @@ void Player::process_server_game_stopped(zmqpp::message& message)
     m_render_thread_socket.send(message);
 }
 
+void Player::process_graphics_case_clicked(zmqpp::message& message)
+{
+    CaseClicked c(message);
+
+    std::cout << " '(main thread) case clicked ' " << c.getCase() << std::endl;
+}
+
+void Player::process_graphics_game_stopped(zmqpp::message& message)
+{
+    GameStopped m(message);
+
+    m_game_finished = true;
+
+    //TODO: envoyer un message au serveur ?
+}
+
 Player::Player(GameSettings& game_settings) :
     m_zmq_context(),
     m_poller(),
@@ -143,9 +162,12 @@ Player::Player(GameSettings& game_settings) :
     m_server_thread_reactor.add(MessageType::PlayerWon, process_server_player_won);
     m_server_thread_reactor.add(MessageType::GameStopped, process_server_game_stopped);
 
-    // TODO see what kind of message the render thread will send
-    //m_render_thread_reactor.add(MessageWrapper::MessageType::PrintBoard, print_board_please);
-    //m_render_thread_reactor.add(MessageWrapper::MessageType::StopGame, stop_game);
+    Callback process_graphics_case_clicked = std::bind(&Player::process_graphics_case_clicked, this, std::placeholders::_1);
+    Callback process_graphics_game_stopped = std::bind(&Player::process_graphics_game_stopped, this, std::placeholders::_1);
+
+    // Add callback functions to react to messages received from the render thread
+    m_render_thread_reactor.add(MessageType::CaseClicked, process_graphics_case_clicked);
+    m_render_thread_reactor.add(MessageType::StopGame, process_graphics_game_stopped);
 }
 
 Player::~Player()

@@ -36,6 +36,10 @@ private:
     void process_server_game_stopped(zmqpp::message& message);
 
 private:
+    void process_graphics_case_clicked(zmqpp::message& message);
+    void process_graphics_game_stopped(zmqpp::message& message);
+
+private:
     // Socket-related content
     zmqpp::context  m_zmq_context;
     zmqpp::poller   m_poller;
