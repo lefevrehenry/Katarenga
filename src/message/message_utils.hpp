@@ -6,3 +6,4 @@
 #include "MoveMessage.hpp"
 #include "QuitMessage.hpp"
 #include "OtherMessage.hpp"
+#include "CaseClicked.hpp"

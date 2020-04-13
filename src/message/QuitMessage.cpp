@@ -1,7 +1,10 @@
 #include "QuitMessage.hpp"
 
 
-StopGame::StopGame(zmqpp::message& message) : MessageWrapper() {fromMessage(message);}
+StopGame::StopGame(zmqpp::message& message) : MessageWrapper()
+{
+    fromMessage(message);
+}
 
 void StopGame::toMessage(zmqpp::message& message)
 {
@@ -36,7 +39,10 @@ void StopGame::setPlayer(const int player)
 }
 
 
-GameStopped::GameStopped(zmqpp::message& message) : MessageWrapper() {fromMessage(message);}
+GameStopped::GameStopped(zmqpp::message& message) : MessageWrapper()
+{
+    fromMessage(message);
+}
 
 void GameStopped::toMessage(zmqpp::message& message)
 {

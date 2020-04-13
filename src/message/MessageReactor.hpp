@@ -27,29 +27,29 @@ private:
 public:
     MessageReactor();
 
-public:
-    template< typename T >
-    static zmqpp::message ConstructReply(zmqpp::message& request_message, std::function<void(typename T::Request*, typename T::Reply*)> function)
-    {
-        // the message returned
-        zmqpp::message reply_message;
+//public:
+//    template< typename T >
+//    static zmqpp::message ConstructReply(zmqpp::message& request_message, std::function<void(typename T::Request*, typename T::Reply*)> function)
+//    {
+//        // the message returned
+//        zmqpp::message reply_message;
 
-        // reconstruct the request object from the (input) request message
-        typename T::Request request;
-        request.fromMessage(request_message);
+//        // reconstruct the request object from the (input) request message
+//        typename T::Request request;
+//        request.fromMessage(request_message);
 
-        // construct the reply object for the (output) reply message
-        typename T::Reply reply;
+//        // construct the reply object for the (output) reply message
+//        typename T::Reply reply;
 
-        // call the callback
-        // the callback is responsible to fulfill the reply object
-        function(&request, &reply);
+//        // call the callback
+//        // the callback is responsible to fulfill the reply object
+//        function(&request, &reply);
 
-        // write the output message from the reply object
-        reply.toMessage(reply_message);
+//        // write the output message from the reply object
+//        reply.toMessage(reply_message);
 
-        return reply_message;
-    }
+//        return reply_message;
+//    }
 
 public:
     void add(MessageType type, Callback callback);

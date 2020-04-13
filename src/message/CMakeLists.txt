@@ -18,6 +18,7 @@ set(HEADER_FILES
     MoveMessage.hpp
     QuitMessage.hpp
     OtherMessage.hpp
+    CaseClicked.hpp
 )
 
 set(SOURCE_FILES
@@ -28,6 +29,7 @@ set(SOURCE_FILES
     MoveMessage.cpp
     QuitMessage.cpp
     OtherMessage.cpp
+    CaseClicked.cpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})
