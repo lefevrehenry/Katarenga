@@ -6,11 +6,13 @@ GameInit::GameInit(zmqpp::message& message) : MessageWrapper() {fromMessage(mess
 void GameInit::toMessage(zmqpp::message& message)
 {
     message << m_configuration;
+    message << m_current_player;
 }
 
 void GameInit::fromMessage(zmqpp::message& message)
 {
     message >> m_configuration;
+    message >> m_current_player;
 }
 
 std::string GameInit::getConfiguration() const
@@ -42,6 +44,32 @@ void GameInit::setSelfPlayer(const int player)
 {
     m_self_player = player;
 }*/
+
+
+
+
+
+AskBoardConfiguration::AskBoardConfiguration(zmqpp::message &message) : MessageWrapper() {fromMessage(message);}
+
+void AskBoardConfiguration::toMessage(zmqpp::message &message)
+{
+    message << m_player;
+}
+
+void AskBoardConfiguration::fromMessage(zmqpp::message &message)
+{
+    message >> m_player;
+}
+
+int AskBoardConfiguration::getPlayer() const
+{
+    return m_player;
+}
+
+void AskBoardConfiguration::setPlayer(const int player)
+{
+    m_player = player;
+}
 
 
 

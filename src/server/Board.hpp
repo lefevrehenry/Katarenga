@@ -16,7 +16,7 @@ public:
     ~Board();
 
 public:
-    std::string getBoardConfiguration() const;
+    const std::string getBoardConfiguration() const;
     void setBoardCellTypes(const std::string& boardString);
 
 public:
@@ -33,12 +33,13 @@ public:
 
 public:
     // Return 0 if not finished, 1 if White won, -1 if Black won.
-    int gameFinished() const;
-    // 1 if White, -1 if Black
+    int whoWon() const;
+    bool isGameFinished() const;
+    void updateGameFinished();
     int getCurrentPlayer() const;
 
 public:
-    void main_loop();
+    //void main_loop();
     void print() const;
 
 private:
@@ -59,8 +60,9 @@ private:
 	std::vector<Piece*> _piecesB;		// The list of Black Pieces
 
 //    bool _verbose;                      // Whether to talk a lot or not
-    int _currentPlayer = 1;				// 1 if White, -1 if Black
-    int _isWin = 0;						// 0 if not win, 1 if White wins, -1 if Black wins
+    int _currentPlayer = 1;			      // 1 if White, -1 if Black
+    int _winningPlayer = 0;				  // 0 if not win, 1 if White wins, -1 if Black wins
+    bool _gameFinished = false;
 
 };
 

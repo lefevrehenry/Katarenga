@@ -6,11 +6,13 @@ StopGame::StopGame(zmqpp::message& message) : MessageWrapper() {fromMessage(mess
 void StopGame::toMessage(zmqpp::message& message)
 {
     message << m_reason;
+    message << m_player;
 }
 
 void StopGame::fromMessage(zmqpp::message& message)
 {
     message >> m_reason;
+    message >> m_player;
 }
 
 std::string StopGame::getReason() const
@@ -18,12 +20,20 @@ std::string StopGame::getReason() const
     return m_reason;
 }
 
-void StopGame::setReason(const std::string& move)
+void StopGame::setReason(const std::string& reason)
 {
-    m_reason = move;
+    m_reason = reason;
 }
 
+int StopGame::getPlayer() const
+{
+    return m_player;
+}
 
+void StopGame::setPlayer(const int player)
+{
+    m_player = player;
+}
 
 
 GameStopped::GameStopped(zmqpp::message& message) : MessageWrapper() {fromMessage(message);}

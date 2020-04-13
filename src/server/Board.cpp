@@ -97,7 +97,7 @@ Board::~Board()
  * for each camp cell whether there is a piece on that cell,
  * the current player and whether the game is finished or not
  */
-std::string Board::getBoardConfiguration() const
+const std::string Board::getBoardConfiguration() const
 {
     std::string s = "";
 
@@ -153,7 +153,7 @@ std::string Board::getBoardConfiguration() const
     // Then put the current player and whether the game is finished
     s+= (_currentPlayer == 1 ? "+" : "-");
 
-    int finished = gameFinished();
+    int finished = whoWon();
     if (finished)
     {
         s+= (finished == 1 ? "+" : "-");
@@ -199,6 +199,8 @@ void Board::setBoardCellTypes(const std::string& boardString)
             index++;
         }
     }
+
+    updateGameFinished();
 }
 
 bool Board::isValidMove(const Move& m, int player) const
@@ -282,6 +284,8 @@ void Board::playMove(const Move& move)
     piece->setCell(dst_cell);
     fillAllMoves(dst_cell->getRow(), dst_cell->getColumn(), piece->getMoveList());
     _currentPlayer = -_currentPlayer;
+
+    updateGameFinished();
 }
 
 void Board::playMove(const std::string& move_str)
@@ -537,19 +541,32 @@ void Board::fillAllMoves(int row, int col, std::vector<Move>* list) const
     }
 }
 
-int Board::gameFinished() const
+
+void Board::updateGameFinished()
 {
     // Check if White won
     if (!_plateau[9][0]->isEmpty() && !_plateau[9][1]->isEmpty())
     {
-        return 1;
+        _winningPlayer = 1;
+        _gameFinished = true;
     }
     // Check if Black won
-    if (!_plateau[0][0]->isEmpty() && !_plateau[0][1]->isEmpty())
+    else if (!_plateau[0][0]->isEmpty() && !_plateau[0][1]->isEmpty())
     {
-        return -1;
+        _winningPlayer -1;
+        _gameFinished = true;
     }
-    return 0;
+}
+
+bool Board::isGameFinished() const
+{
+
+    return _gameFinished;
+}
+
+int Board::whoWon() const
+{
+    return _winningPlayer;
 }
 
 int Board::getCurrentPlayer() const
@@ -557,7 +574,7 @@ int Board::getCurrentPlayer() const
     return _currentPlayer;
 }
 
-void Board::main_loop()
+/*void Board::main_loop()
 {
     Move move;
     print();
@@ -569,13 +586,13 @@ void Board::main_loop()
 
         print();
 
-        if(gameFinished())
+        if(isGameFinished())
         {
-            std::cout << "Congrats! " << ((-_currentPlayer)==1?"White (+)":"Black (-)") << " player won the game!" << std::endl;
+            std::cout << "Congrats! " << ((_winningPlayer==1)?"White (+)":"Black (-)") << " player won the game!" << std::endl;
             break;
         }
     }
-}
+}*/
 
 void Board::print() const
 {

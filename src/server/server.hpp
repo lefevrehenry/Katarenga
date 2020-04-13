@@ -31,8 +31,16 @@ public:
 
 private:
     /* Put here functions reacting to player messages */
+    void process_player_move_message(zmqpp::message& message);
+    void process_player_ask_board_configuration(zmqpp::message& message);
+    void process_player_stop_game(zmqpp::message& message);
 
 private:
+    void sendToBoth(zmqpp::message& message);
+    void sendToPlayer(zmqpp::message& message, int player);
+    void rejectMove(MoveMessage& move_msg);
+    void sendWonMessage();
+
     // Socket-related content
     zmqpp::context  m_zmq_context;
     zmqpp::poller   m_poller;
@@ -43,8 +51,8 @@ private:
 
     // Game-related content
     Board *m_board = nullptr;
-    bool m_game_finished;
     int m_current_player;
+    bool m_game_stopped;
 };
 
 #endif // SERVER_HPP

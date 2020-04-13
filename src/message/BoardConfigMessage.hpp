@@ -14,6 +14,8 @@ public:
         return MessageWrapper::MessageType::GameInit;
     }
 
+    GameInit(const std::string &board_config, int current_player) :
+        m_configuration(board_config), m_current_player(current_player) {}
     GameInit(zmqpp::message& message);
 
     void toMessage(zmqpp::message& message) override;
@@ -34,13 +36,25 @@ private:
     //int m_self_player;
 };
 
-class AskBoardConfiguration : DefaultMessageWrapper
+class AskBoardConfiguration : MessageWrapper
 {
 public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::AskBoardConfiguration;
     }
+
+    AskBoardConfiguration(const int player) : m_player(player) {}
+    AskBoardConfiguration(zmqpp::message& message);
+    void toMessage(zmqpp::message& message) override;
+    void fromMessage(zmqpp::message& message) override;
+
+    int getPlayer() const;
+    void setPlayer(const int player);
+
+private:
+    int m_player;
+
 };
 
 class AnswerBoardConfiguration : MessageWrapper
@@ -51,6 +65,7 @@ public:
         return MessageWrapper::MessageType::AnswerBoardConfiguration;
     }
 
+    AnswerBoardConfiguration(const std::string& configuration) : m_configuration(configuration) {}
     AnswerBoardConfiguration(zmqpp::message& message);
 
     void toMessage(zmqpp::message& message) override;
