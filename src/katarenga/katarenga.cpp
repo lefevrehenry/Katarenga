@@ -10,7 +10,7 @@
 
 bool verbose; // UGLY hack for now...
 
-int parse_main_args(int argc, char * argv[], MainArguments &main_args)
+int parse_arguments(int argc, char * argv[], GameSettings &game_settings)
 {
     static const char usage[] =
 R"(Katarenga: A nice two-player board game!
@@ -24,42 +24,50 @@ Usage:
 
 Input options:
     --server-ip <ip>               The IP address of the server.
+                                   Ignored in standalone mode.
                                    [default: 127.0.0.1]
     --server-port <port>           The server port for the socket.
+                                   Ignored in standalone mode.
                                    [default: 28000]
 
 Other options:
-    -v, --verbose                  Makes katarenga verbose.
+    -v, --verbose                  Makes Katarenga verbose.
     -h, --help                     Shows this help.
 )";
 
     std::map<std::string, docopt::value> args = docopt::docopt(usage, {argv+1, argv+argc}, true);
 
-    main_args.server_ip = args["--server-ip"].asString();
-    main_args.server_port = args["--server-port"].asLong();
 
-    main_args.verbose = args["--verbose"].asBool();
+
+    game_settings.verbose = args["--verbose"].asBool();
 
     if (args["--standalone"].asBool())
     {
-        main_args.is_standalone = true;
-        main_args.self_player = 1;
-    }
-    else if (args["--white"].asBool())
-    {
-        main_args.is_standalone = false;
-        main_args.self_player = 1;
-    }
-    else if (args["--black"].asBool())
-    {
-        main_args.is_standalone = false;
-        main_args.self_player = -1;
+        game_settings.is_standalone = true;
+        game_settings.self_player = 0;
+        game_settings.server_binding_point = "inproc://katarenga-server-thread";
     }
     else
     {
-        std::cout << "Error while parsing arguments, this should not happen" << std::endl;
-        return 1;
+        if (args["--white"].asBool())
+        {
+            game_settings.is_standalone = false;
+            game_settings.self_player = 1;
+        }
+        else if (args["--black"].asBool())
+        {
+            game_settings.is_standalone = false;
+            game_settings.self_player = -1;
+        }
+
+        game_settings.server_ip = args["--server-ip"].asString();
+        game_settings.server_port = args["--server-port"].asLong();
+
+        game_settings.server_binding_point = "tcp://" + game_settings.server_ip + ":" + std::to_string(game_settings.server_port);
     }
+
+    game_settings.render_binding_point = "inproc://katarenga-render-thread";
+
 
     return 0;
 }
@@ -68,36 +76,36 @@ Other options:
 int main(int argc, char * argv[])
 {
     // Let's parse the command-line arguments!
-    MainArguments main_args;
-    if (parse_main_args(argc, argv, main_args))
+    GameSettings game_settings;
+    if (parse_arguments(argc, argv, game_settings))
         return 1;
 
-    verbose = main_args.verbose;
+    verbose = game_settings.verbose;
     player_msg("Arguments successfully parsed!");
 
-    if(main_args.is_standalone)
+    if(game_settings.is_standalone)
     {
         // Create a thread running the server process
-        /*if(main_args.verbose)
+        /*if(game_settings.verbose)
             player_msg("Starting the server thread");
 
         std::thread server_thread(server_function);
 
         // Then launch the standalone function
-        if(main_args.verbose)
+        if(game_settings.verbose)
             player_msg("Starting the main function as standalone");
-        standalone_function(main_args);
+        standalone_function(game_settings);
 
-        if(main_args.verbose)
+        if(game_settings.verbose)
             player_msg("Waiting termination of the server thread");
-        server_thread.join(main_args);*/
+        server_thread.join(game_settings);*/
         throw std::runtime_error("Standalone feature not implemented yet");
     }
     else
     {
         player_msg("Creating Player and starting main loop");
 
-        Player player(main_args);
+        Player player(game_settings);
         player.loop();
     }
 

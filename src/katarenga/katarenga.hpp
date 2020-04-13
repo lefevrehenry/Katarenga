@@ -6,6 +6,6 @@
 // Standard Library
 #include <string>
 
-int parse_main_args(int argc, char * argv[], MainArguments &main_args);
+int parse_arguments(int argc, char * argv[], GameSettings &game_settings);
 
 #endif // KATARENGA_HPP

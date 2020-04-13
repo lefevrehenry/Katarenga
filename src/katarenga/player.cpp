@@ -105,30 +105,25 @@ void Player::process_server_game_stopped(zmqpp::message& message)
     m_render_thread_socket.send(message);
 }
 
-Player::Player(MainArguments &main_args) :
+Player::Player(GameSettings &game_settings) :
     m_zmq_context(),
     m_poller(),
     m_server_thread_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_render_thread_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_server_thread_reactor(),
     m_render_thread_reactor(),
-    m_self_player(main_args.self_player)
+    m_self_player(game_settings.self_player)
 {
     // Create a zmqpp context for the main thread
     //zmqpp::context zmq_context;
 
-    std::string server_ip = main_args.server_ip;
-    std::string server_port = std::to_string(main_args.server_port);
-    //int graphics_port = main_args.graphics_port;
-
-    std::string server_binding_point = "tcp://" + server_ip + ":" + server_port;
-    std::string render_binding_point = "inproc://katarenga-render-thread";
-
-    m_server_thread_socket.bind(server_binding_point);
-    m_render_thread_socket.bind(render_binding_point);
+    m_server_thread_socket.bind(game_settings.server_binding_point);
+    m_render_thread_socket.bind(game_settings.render_binding_point);
 
     // Create the render thread and
-    m_render_thread = std::thread(graphics_function, std::ref(m_zmq_context), render_binding_point);
+    m_render_thread = std::thread(graphics_function,
+                                  std::ref(m_zmq_context),
+                                  game_settings.render_binding_point);
 
 
     // We want to listen to the two sockets at the same time

@@ -22,7 +22,7 @@ class Player
 {
 
 public:
-    Player(MainArguments &main_args);
+    Player(GameSettings &game_settings);
     virtual ~Player();
 
 public:
