@@ -103,14 +103,16 @@ void Player::process_server_game_stopped(zmqpp::message& message)
     m_render_thread_socket.send(message);
 }
 
-Player::Player(GameSettings &game_settings) :
+Player::Player(GameSettings& game_settings) :
     m_zmq_context(),
     m_poller(),
     m_server_thread_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_render_thread_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_server_thread_reactor(),
     m_render_thread_reactor(),
-    m_self_player(game_settings.self_player)
+    m_game_finished(false),
+    m_self_player(game_settings.self_player),
+    m_current_player(0)
 {
     m_server_thread_socket.bind(game_settings.server_binding_point);
     m_render_thread_socket.bind(game_settings.render_binding_point);
@@ -125,6 +127,7 @@ Player::Player(GameSettings &game_settings) :
     m_poller.add(m_server_thread_socket, zmqpp::poller::poll_in);
     m_poller.add(m_render_thread_socket, zmqpp::poller::poll_in);
 
+    using MessageType = MessageWrapper::MessageType;
     using Callback = MessageReactor::Callback;
 
     Callback process_server_game_init           = std::bind(&Player::process_server_game_init, this, std::placeholders::_1);
@@ -134,11 +137,11 @@ Player::Player(GameSettings &game_settings) :
     Callback process_server_game_stopped        = std::bind(&Player::process_server_game_stopped, this, std::placeholders::_1);
 
     // Add callback functions to react to messages received from the server
-    m_server_thread_reactor.add(MessageWrapper::MessageType::GameInit, process_server_game_init);
-    m_server_thread_reactor.add(MessageWrapper::MessageType::AnswerBoardConfiguration, process_server_board_configuration);
-    m_server_thread_reactor.add(MessageWrapper::MessageType::MoveMessage, process_server_move_message);
-    m_server_thread_reactor.add(MessageWrapper::MessageType::PlayerWon, process_server_player_won);
-    m_server_thread_reactor.add(MessageWrapper::MessageType::GameStopped, process_server_game_stopped);
+    m_server_thread_reactor.add(MessageType::GameInit, process_server_game_init);
+    m_server_thread_reactor.add(MessageType::AnswerBoardConfiguration, process_server_board_configuration);
+    m_server_thread_reactor.add(MessageType::MoveMessage, process_server_move_message);
+    m_server_thread_reactor.add(MessageType::PlayerWon, process_server_player_won);
+    m_server_thread_reactor.add(MessageType::GameStopped, process_server_game_stopped);
 
     // TODO see what kind of message the render thread will send
     //m_render_thread_reactor.add(MessageWrapper::MessageType::PrintBoard, print_board_please);

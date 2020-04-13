@@ -22,7 +22,7 @@ class Player
 {
 
 public:
-    Player(GameSettings &game_settings);
+    Player(GameSettings& game_settings);
     virtual ~Player();
 
 public:
@@ -48,7 +48,7 @@ private:
     MessageReactor  m_render_thread_reactor;
 
     // Game-related content
-    bool m_game_finished = false;
+    bool m_game_finished;
     int m_self_player;
     int m_current_player;
 };
