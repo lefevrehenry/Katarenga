@@ -9,7 +9,7 @@
  * @brief Base class for serialization/deserialize a zmqpp::message into a specific object
  */
 struct MessageWrapper
-{   
+{
 public:
     MessageWrapper()
     {

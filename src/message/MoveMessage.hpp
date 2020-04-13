@@ -14,9 +14,6 @@ enum class MoveType {
     InvalidMove
 };
 
-static std::string moveTypeToString(const MoveType& type);
-static MoveType stringToMoveType(const std::string& type_str);
-
 class MoveMessage: MessageWrapper
 {
 public:
