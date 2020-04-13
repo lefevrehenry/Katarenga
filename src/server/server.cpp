@@ -22,6 +22,7 @@ Server::~Server()
 {
     m_white_player_socket.close();
     m_black_player_socket.close();
+    delete m_board;
 }
 
 void Server::new_game()
