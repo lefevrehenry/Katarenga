@@ -9,7 +9,7 @@
 
 void Player::process_server_game_init(zmqpp::message& message)
 {
-    GameInit m(message);
+    GameInit m = ConstructObject<GameInit>(message);
     m_current_player = m.getCurrentPlayer();
     //m_self_player = m.getSelfPlayer();
 
@@ -21,7 +21,7 @@ void Player::process_server_game_init(zmqpp::message& message)
 
 void Player::process_server_board_configuration(zmqpp::message& message)
 {
-    AnswerBoardConfiguration m(message);
+    AnswerBoardConfiguration m = ConstructObject<AnswerBoardConfiguration>(message);
     //m.fromMessage(message);
     std::string configuration = m.getConfiguration();
     size_t size = configuration.size();
@@ -37,7 +37,7 @@ void Player::process_server_board_configuration(zmqpp::message& message)
     }
     else
     {
-        std::string err = "Wrong current player sent in BoardConfiguration message: " + configuration.at(size-1);
+        std::string err = "Wrong current player sent in BoardConfiguration message: " + std::string(1, configuration.at(size-1));
         player_msg(err);
         std::terminate();
     }
@@ -50,7 +50,7 @@ void Player::process_server_board_configuration(zmqpp::message& message)
 
 void Player::process_server_move_message(zmqpp::message& message)
 {
-    MoveMessage m(message);
+    MoveMessage m = ConstructObject<MoveMessage>(message);
     //m.fromMessage(message);
     int move_player = m.getPlayer();
 
@@ -82,7 +82,7 @@ void Player::process_server_move_message(zmqpp::message& message)
 
 void Player::process_server_player_won(zmqpp::message& message)
 {
-    PlayerWon m(message);
+    PlayerWon m = ConstructObject<PlayerWon>(message);
     //m.fromMessage(message);
 
     m_game_finished = true;
@@ -95,7 +95,7 @@ void Player::process_server_player_won(zmqpp::message& message)
 
 void Player::process_server_game_stopped(zmqpp::message& message)
 {
-    GameStopped m(message);
+    GameStopped m = ConstructObject<GameStopped>(message);
     //m.fromMessage(message);
 
     m_game_finished = true;
@@ -115,7 +115,7 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
 
 void Player::process_graphics_game_stopped(zmqpp::message& message)
 {
-    GameStopped m(message);
+    GameStopped m = ConstructObject<GameStopped>(message);
 
     m_game_finished = true;
 

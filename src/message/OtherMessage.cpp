@@ -1,7 +1,16 @@
 #include "OtherMessage.hpp"
 
 
-PlayerWon::PlayerWon(zmqpp::message& message) : MessageWrapper() {fromMessage(message);}
+PlayerWon::PlayerWon() : MessageWrapper()
+{
+
+}
+
+PlayerWon::PlayerWon(int player) : MessageWrapper(),
+    m_player(player)
+{
+
+}
 
 void PlayerWon::toMessage(zmqpp::message& message)
 {
@@ -18,7 +27,7 @@ int PlayerWon::getPlayer() const
     return m_player;
 }
 
-void PlayerWon::setPlayer(const int player)
+void PlayerWon::setPlayer(int player)
 {
     m_player = player;
 }

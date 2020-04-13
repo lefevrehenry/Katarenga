@@ -16,8 +16,11 @@ public:
         return MessageWrapper::MessageType::StopGame;
     }
 
-    StopGame(const std::string& reason, const int player) : m_reason(reason), m_player(player) {}
-    StopGame(zmqpp::message& message);
+public:
+    StopGame();
+    StopGame(const std::string& reason, int player);
+
+public:
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 
@@ -25,7 +28,7 @@ public:
     void setReason(const std::string& reason);
 
     int getPlayer() const;
-    void setPlayer(const int player);
+    void setPlayer(int player);
 
 private:
     std::string m_reason;
@@ -41,8 +44,11 @@ public:
         return MessageWrapper::MessageType::GameStopped;
     }
 
-    GameStopped(const std::string& reason) : m_reason(reason) {}
-    GameStopped(zmqpp::message& message);
+public:
+    GameStopped();
+    GameStopped(const std::string& reason);
+
+public:
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 

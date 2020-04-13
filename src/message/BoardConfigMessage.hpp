@@ -14,10 +14,11 @@ public:
         return MessageWrapper::MessageType::GameInit;
     }
 
-    GameInit(const std::string &board_config, int current_player) :
-        m_configuration(board_config), m_current_player(current_player) {}
-    GameInit(zmqpp::message& message);
+public:
+    GameInit();
+    GameInit(const std::string& board_config, int current_player);
 
+public:
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 
@@ -25,10 +26,10 @@ public:
     void setConfiguration(const std::string& configuration);
 
     int getCurrentPlayer() const;
-    void setCurrentPlayer(const int player);
+    void setCurrentPlayer(int player);
 
     //int getSelfPlayer() const;
-    //void setSelfPlayer(const int player);
+    //void setSelfPlayer(int player);
 
 private:
     std::string m_configuration;
@@ -44,13 +45,16 @@ public:
         return MessageWrapper::MessageType::AskBoardConfiguration;
     }
 
+public:
     AskBoardConfiguration();
-    AskBoardConfiguration(const int player);
+    AskBoardConfiguration(int player);
+
+public:
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 
     int getPlayer() const;
-    void setPlayer(const int player);
+    void setPlayer(int player);
 
 private:
     int m_player;
@@ -65,9 +69,11 @@ public:
         return MessageWrapper::MessageType::AnswerBoardConfiguration;
     }
 
+public:
+    AnswerBoardConfiguration();
     AnswerBoardConfiguration(const std::string& configuration) : m_configuration(configuration) {}
-    AnswerBoardConfiguration(zmqpp::message& message);
 
+public:
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 

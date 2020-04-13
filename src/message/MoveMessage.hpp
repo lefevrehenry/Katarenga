@@ -22,9 +22,11 @@ public:
         return MessageWrapper::MessageType::MoveMessage;
     }
 
-    MoveMessage(const MoveType& type, const std::string& move, const int player) :
-        m_type(type), m_move(move), m_player(player) {}
-    MoveMessage(zmqpp::message& message);
+public:
+    MoveMessage();
+    MoveMessage(const MoveType& type, const std::string& move, int player);
+
+public:
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 
@@ -35,7 +37,7 @@ public:
     void setMove(const std::string& move);
 
     int getPlayer() const;
-    void setPlayer(const int player);
+    void setPlayer(int player);
 
 private:
     MoveType m_type;    // The type of the move

@@ -36,7 +36,10 @@ static MoveType stringToMoveType(const std::string& move_str)
     return type;
 }
 
-MoveMessage::MoveMessage(zmqpp::message& message) : MessageWrapper() {fromMessage(message);}
+MoveMessage::MoveMessage() : MessageWrapper()
+{
+
+}
 
 void MoveMessage::toMessage(zmqpp::message& message)
 {
@@ -79,7 +82,7 @@ int MoveMessage::getPlayer() const
     return m_player;
 }
 
-void MoveMessage::setPlayer(const int player)
+void MoveMessage::setPlayer(int player)
 {
     m_player = player;
 }

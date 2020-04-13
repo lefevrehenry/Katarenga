@@ -16,13 +16,16 @@ public:
         return MessageWrapper::MessageType::PlayerWon;
     }
 
-    PlayerWon(const int player) : m_player(player) {}
-    PlayerWon(zmqpp::message& message);
+public:
+    PlayerWon();
+    PlayerWon(int player);
+
+public:
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 
     int getPlayer() const;
-    void setPlayer(const int player);
+    void setPlayer(int player);
 
 private:
     int m_player;

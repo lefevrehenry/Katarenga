@@ -4,7 +4,7 @@
 
 void Server::process_player_move_message(zmqpp::message& message)
 {
-    MoveMessage move_msg(message);
+    MoveMessage move_msg = ConstructObject<MoveMessage>(message);
     MoveType move_type = move_msg.getType();
     if (move_type == MoveType::PlayThisMove)
     {
@@ -82,7 +82,7 @@ void Server::process_player_ask_board_configuration(zmqpp::message& message)
 
 void Server::process_player_stop_game(zmqpp::message& message)
 {
-    StopGame m(message);
+    StopGame m = ConstructObject<StopGame>(message);
     int player = m.getPlayer();
 
     if (player == 1)
