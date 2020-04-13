@@ -9,6 +9,7 @@
 // Standard Library
 #include <string>
 #include <thread>
+#include <utility>
 
 namespace zmqpp {
     class context;
@@ -20,6 +21,7 @@ namespace zmqpp {
  */
 class Player
 {
+    using Memo = std::pair<int,int>;
 
 public:
     Player(GameSettings& game_settings);
@@ -55,6 +57,8 @@ private:
     bool m_game_finished;
     int m_self_player;
     int m_current_player;
+
+    Memo m_memo;        // memo for case clicked by the player <src,dst>
 };
 
 #endif // PLAYER_HPP

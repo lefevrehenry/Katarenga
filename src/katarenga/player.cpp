@@ -110,7 +110,43 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
 {
     CaseClicked c = ConstructObject<CaseClicked>(message);
 
-    std::cout << " '(main thread) case clicked ' " << c.getCase() << std::endl;
+    int id = stoi(c.getCase());
+
+    bool state0 = (m_memo.first == -1 && m_memo.second == -1);
+    bool state1 = (m_memo.first != -1 && m_memo.second == -1);
+
+    throw std::runtime_error("todo");
+    bool is_case_own_by_player = true;//std::find(m_piece_locations.begin(), m_piece_locations.end(), id) != m_piece_locations.end();
+
+    if(state0)
+    {
+        if(is_case_own_by_player)
+            m_memo.first = id;
+    }
+    else if(state1)
+    {
+        if(is_case_own_by_player)
+            m_memo.first = id;
+        else
+            m_memo.second = id;
+    }
+
+    bool state2 = (m_memo.first != -1 && m_memo.second != -1);
+
+    if(state2)
+    {
+        // envoie le coup au serveur
+        std::string move_str = std::to_string(m_memo.first) + ":" + std::to_string(m_memo.second);
+        zmqpp::message play_message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, move_str, m_self_player);
+
+        m_server_thread_socket.send(play_message);
+
+        // re-init
+        m_memo.first = -1;
+        m_memo.second = -1;
+    }
+
+    std::cout << " '(main thread) case clicked ' " << id << std::endl;
 }
 
 void Player::process_graphics_game_stopped(zmqpp::message& message)
@@ -131,7 +167,8 @@ Player::Player(GameSettings& game_settings) :
     m_render_thread_reactor(),
     m_game_finished(false),
     m_self_player(game_settings.self_player),
-    m_current_player(0)
+    m_current_player(0),
+    m_memo({-1,-1})
 {
     m_server_thread_socket.bind(game_settings.server_binding_point);
     m_render_thread_socket.bind(game_settings.render_binding_point);
