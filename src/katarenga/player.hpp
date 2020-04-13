@@ -9,6 +9,7 @@
 // Standard Library
 #include <string>
 #include <thread>
+#include <vector>
 
 namespace zmqpp {
     class context;
@@ -35,11 +36,12 @@ private:
     void process_server_player_won(zmqpp::message& message);
     void process_server_game_stopped(zmqpp::message& message);
 
-private:
     void process_graphics_case_clicked(zmqpp::message& message);
     void process_graphics_game_stopped(zmqpp::message& message);
 
 private:
+    void retrieve_piece_locations(const std::string& board_configuration);
+
     // Socket-related content
     zmqpp::context  m_zmq_context;
     zmqpp::poller   m_poller;
@@ -52,9 +54,12 @@ private:
     MessageReactor  m_render_thread_reactor;
 
     // Game-related content
+    std::vector<int> m_piece_locations; // The list of cell ids where my pieces are
     bool m_game_finished;
     int m_self_player;
+    char m_self_player_sign;
     int m_current_player;
+    bool m_game_stopped;
 };
 
 #endif // PLAYER_HPP
