@@ -41,6 +41,20 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
 
             std::string move_str;
             std::cin >> move_str;
+
+            zmqpp::message message;
+
+            MessageType type = MessageType::CaseClicked;
+            message.add(&type, sizeof(MessageType));
+
+            CaseClicked m(move_str);
+            m.toMessage(message);
+
+            // envoie le message (non bloquant)
+            bool ret = socket_main_thread.send(message, true);
+
+            if(!ret)
+                std::cout << "(click) error, message not sent" << std::endl;
         }
         else if(command == "p" || command == "print")
         {
