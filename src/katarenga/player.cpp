@@ -173,6 +173,7 @@ Player::Player(GameSettings& game_settings) :
     m_server_thread_reactor(),
     m_render_thread_reactor(),
     m_game_finished(false),
+    m_game_stopped(false),
     m_self_player(game_settings.self_player),
     m_current_player(0)
 {
@@ -192,23 +193,23 @@ Player::Player(GameSettings& game_settings) :
     using MessageType = MessageWrapper::MessageType;
     using Callback = MessageReactor::Callback;
 
+    // Add callback functions to react to messages received from the server
     Callback process_server_game_init           = std::bind(&Player::process_server_game_init, this, std::placeholders::_1);
     Callback process_server_board_configuration = std::bind(&Player::process_server_board_configuration, this, std::placeholders::_1);
     Callback process_server_move_message        = std::bind(&Player::process_server_move_message, this, std::placeholders::_1);
     Callback process_server_player_won          = std::bind(&Player::process_server_player_won, this, std::placeholders::_1);
     Callback process_server_game_stopped        = std::bind(&Player::process_server_game_stopped, this, std::placeholders::_1);
 
-    // Add callback functions to react to messages received from the server
     m_server_thread_reactor.add(MessageType::GameInit, process_server_game_init);
     m_server_thread_reactor.add(MessageType::AnswerBoardConfiguration, process_server_board_configuration);
     m_server_thread_reactor.add(MessageType::MoveMessage, process_server_move_message);
     m_server_thread_reactor.add(MessageType::PlayerWon, process_server_player_won);
     m_server_thread_reactor.add(MessageType::GameStopped, process_server_game_stopped);
 
+    // Add callback functions to react to messages received from the render thread
     Callback process_graphics_case_clicked = std::bind(&Player::process_graphics_case_clicked, this, std::placeholders::_1);
     Callback process_graphics_game_stopped = std::bind(&Player::process_graphics_game_stopped, this, std::placeholders::_1);
 
-    // Add callback functions to react to messages received from the render thread
     m_render_thread_reactor.add(MessageType::CaseClicked, process_graphics_case_clicked);
     m_render_thread_reactor.add(MessageType::StopGame, process_graphics_game_stopped);
 

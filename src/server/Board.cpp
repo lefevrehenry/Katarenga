@@ -153,10 +153,9 @@ const std::string Board::getBoardConfiguration() const
     // Then put the current player and whether the game is finished
     s+= (_currentPlayer == 1 ? "+" : "-");
 
-    int finished = whoWon();
-    if (finished)
+    if (isGameFinished())
     {
-        s+= (finished == 1 ? "+" : "-");
+        s+= (whoWon() == 1 ? "+" : "-");
     }
     else
     {
