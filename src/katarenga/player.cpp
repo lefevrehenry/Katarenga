@@ -114,9 +114,6 @@ Player::Player(GameSettings &game_settings) :
     m_render_thread_reactor(),
     m_self_player(game_settings.self_player)
 {
-    // Create a zmqpp context for the main thread
-    //zmqpp::context zmq_context;
-
     m_server_thread_socket.bind(game_settings.server_binding_point);
     m_render_thread_socket.bind(game_settings.render_binding_point);
 
@@ -166,14 +163,16 @@ void Player::loop()
 
         if(m_poller.poll(zmqpp::poller::wait_forever))
         {
-            if(m_poller.has_input(m_server_thread_socket)) {
+            if(m_poller.has_input(m_server_thread_socket))
+            {
                 // receive the message
                 m_server_thread_socket.receive(input_message);
 
                 // Will call the callback corresponding to the message type
                 m_server_thread_reactor.process_message(input_message);
             }
-            else if(m_poller.has_input(m_render_thread_socket)) {
+            else if(m_poller.has_input(m_render_thread_socket))
+            {
                 // receive the message
                 m_render_thread_socket.receive(input_message);
 

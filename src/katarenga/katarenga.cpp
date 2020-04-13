@@ -1,9 +1,10 @@
-#include "katarenga.hpp"
 #include "player.hpp"
 #include "standalone.hpp"
+#include "utils.hpp"
 
 #include <iostream>
 #include <map>
+#include <string>
 
 #include "docopt/docopt.h"
 #include <GLFW/glfw3.h>

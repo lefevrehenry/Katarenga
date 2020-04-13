@@ -53,8 +53,5 @@ private:
     int m_current_player;
 };
 
-/* function executed in its own thread */
-//void player_function();
-
 #endif // PLAYER_HPP
 
