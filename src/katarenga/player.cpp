@@ -4,7 +4,7 @@
 #include <message/message_utils.hpp>
 
 #include <functional>
-#include <iostream>
+#include <algorithm>
 
 #include <iostream> // FOR DEBUGGING PURPOSE, TODO REMOVE IT
 
@@ -70,17 +70,13 @@ void Player::process_server_move_message(zmqpp::message& message)
                 bool found = false;
                 int src, dest;
                 convert_move_str(m.getMove(), src, dest);
-                for (auto it = m_piece_locations.begin(); it != m_piece_locations.end(); ++it)
+                auto it = std::find(m_piece_locations.begin(), m_piece_locations.end(), src);
+                if (it != m_piece_locations.end())
                 {
-                    if (*it == src)
-                    {
-                        *it = dest;
-                        found = true;
-                        std::cout << "Updating piece location from " << src << "to" << dest << std::endl;
-                    }
+                    *it = dest;
+                    std::cout << "Updating piece location from " << src << "to" << dest << std::endl;
                 }
-
-                if (!found)
+                else
                 {
                     throw std::runtime_error("Bad internal state: Did not find piece location for move received");
                     // TODO need to ask the correct board configuration to the server instead of throwing an error
