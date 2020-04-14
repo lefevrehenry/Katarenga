@@ -553,7 +553,7 @@ void Board::updateGameFinished()
     // Check if Black won
     else if (!_plateau[0][0]->isEmpty() && !_plateau[0][1]->isEmpty())
     {
-        _winningPlayer -1;
+        _winningPlayer = -1;
         _gameFinished = true;
     }
 }
