@@ -173,7 +173,7 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
         std::string move_str = create_move_str(m_memo.first, m_memo.second);
         zmqpp::message play_message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, move_str, m_self_player);
 
-        m_server_thread_socket.send(play_message);
+        m_server_thread_socket.send(play_message, true);
 
         // re-init
         m_memo.first = -1;
@@ -183,16 +183,12 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     std::cout << " '(main thread) case clicked ' " << id << std::endl;
 }
 
-void Player::process_graphics_stop_game(zmqpp::message& message)
+void Player::process_graphics_stop_game(zmqpp::message&)
 {
-    StopGame m = ConstructObject<StopGame>(message);
-
     m_game_finished = true;
-    m.setPlayer(m_self_player);
-    m.setReason("Game stopped by the graphical interface");
 
-    zmqpp::message zmq_message = ConstructMessage<StopGame>(m);
-    m_server_thread_socket.send(zmq_message);
+    zmqpp::message message = ConstructMessage<StopGame>("Game stopped by the graphical interface", m_self_player);
+    m_server_thread_socket.send(message, true);
 }
 
 
