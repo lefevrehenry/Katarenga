@@ -41,6 +41,14 @@ MoveMessage::MoveMessage() : MessageWrapper()
 
 }
 
+MoveMessage::MoveMessage(const MoveType& type, const std::string& move, int player) : MessageWrapper(),
+    m_type(type),
+    m_move(move),
+    m_player(player)
+{
+
+}
+
 void MoveMessage::toMessage(zmqpp::message& message)
 {
     message << moveTypeToString(m_type);
