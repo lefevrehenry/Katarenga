@@ -142,13 +142,16 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     std::cout << " '(main thread) case clicked ' " << id << std::endl;
 }
 
-void Player::process_graphics_game_stopped(zmqpp::message& message)
+void Player::process_graphics_stop_game(zmqpp::message& message)
 {
-    GameStopped m = ConstructObject<GameStopped>(message);
+    StopGame m = ConstructObject<StopGame>(message);
 
     m_game_finished = true;
+    m.setPlayer(m_self_player);
+    m.setReason("Game stopped by the graphical interface");
 
-    //TODO: envoyer un message au serveur ?
+    zmqpp::message zmq_message = ConstructMessage<StopGame>(m);
+    m_server_thread_socket.send(zmq_message);
 }
 
 Player::Player(GameSettings& game_settings) :
