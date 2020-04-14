@@ -14,11 +14,9 @@
 #include <zmqpp/message.hpp>
 
 
-template <typename T, class ... Args>
-zmqpp::message ConstructMessage(Args&&... args)
+template <typename T>
+zmqpp::message ConstructMessage(const T& object)
 {
-    T object(std::forward<Args>(args)...);
-
     zmqpp::message message;
 
     MessageWrapper::MessageType type = T::MessageType();
@@ -27,6 +25,14 @@ zmqpp::message ConstructMessage(Args&&... args)
     object.toMessage(message);
 
     return message;
+}
+
+template <typename T, class ... Args>
+zmqpp::message ConstructMessage(Args&&... args)
+{
+    T object(std::forward<Args>(args)...);
+
+    return ConstructMessage<T>(object);
 }
 
 template <typename T>
