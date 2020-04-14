@@ -140,7 +140,6 @@ void Player::retrieve_piece_locations(const std::string& board_configuration)
 }
 
 
-
 void Player::process_graphics_case_clicked(zmqpp::message& message)
 {
     CaseClicked c = ConstructObject<CaseClicked>(message);

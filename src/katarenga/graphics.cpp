@@ -9,6 +9,13 @@
 
 using MessageType = MessageWrapper::MessageType;
 
+void print_help()
+{
+    std::cout << "h,help for help" << std::endl;
+    std::cout << "c,click for click in a case" << std::endl;
+    std::cout << "p,print to print the board" << std::endl;
+    std::cout << "s,stop for quit" << std::endl;
+}
 
 void graphics_function(zmqpp::context &zmq_context, std::string render_binding_point)
 {
@@ -21,6 +28,8 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
     bool end_game = false;
 //    int has_won = 0;
 
+    print_help();
+
     while(!end_game)
     {
         std::cout << "Enter a command: " << std::endl;
@@ -30,10 +39,7 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
 
         if(command == "h" || command == "help")
         {
-            std::cout << "h,help for help" << std::endl;
-            std::cout << "c,click for click in a case" << std::endl;
-            std::cout << "p,print to print the board" << std::endl;
-            std::cout << "s,stop for quit" << std::endl;
+            print_help();
         }
         else if(command == "c" || command == "click")
         {
