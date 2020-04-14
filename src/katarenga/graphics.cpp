@@ -42,13 +42,7 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
             std::string move_str;
             std::cin >> move_str;
 
-            zmqpp::message message;
-
-            MessageType type = MessageType::CaseClicked;
-            message.add(&type, sizeof(MessageType));
-
-            CaseClicked m(move_str);
-            m.toMessage(message);
+            zmqpp::message message = ConstructMessage<CaseClicked>(move_str);
 
             // envoie le message (non bloquant)
             bool ret = socket_main_thread.send(message, true);
@@ -58,10 +52,12 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
         }
         else if(command == "p" || command == "print")
         {
-            zmqpp::message message;
+//            zmqpp::message message;
 
-            MessageType type = MessageType::AskBoardConfiguration;
-            message.add(&type, sizeof(MessageType));
+//            MessageType type = MessageType::AskBoardConfiguration;
+//            message.add(&type, sizeof(MessageType));
+
+            zmqpp::message message = ConstructMessage<AskBoardConfiguration>();
 
             // envoie le coup (non bloquant)
             bool ret = socket_main_thread.send(message, true);

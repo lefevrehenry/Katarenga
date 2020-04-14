@@ -64,7 +64,7 @@ void Server::sendWonMessage()
 
 void Server::process_player_ask_board_configuration(zmqpp::message& message)
 {
-    AskBoardConfiguration m(message);
+    AskBoardConfiguration m = ConstructObject<AskBoardConfiguration>(message);
     AnswerBoardConfiguration answer(m_board->getBoardConfiguration());
     int player = m.getPlayer();
 

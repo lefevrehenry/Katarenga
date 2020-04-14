@@ -1,14 +1,14 @@
 #include "CaseClicked.hpp"
 
-CaseClicked::CaseClicked(const std::string& caseClicked) :
-    m_case(caseClicked)
+CaseClicked::CaseClicked()
 {
 
 }
 
-CaseClicked::CaseClicked(zmqpp::message& message)
+CaseClicked::CaseClicked(const std::string& caseClicked) :
+    m_case(caseClicked)
 {
-    fromMessage(message);
+
 }
 
 void CaseClicked::toMessage(zmqpp::message& message)

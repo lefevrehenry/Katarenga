@@ -15,8 +15,9 @@ public:
         return MessageWrapper::MessageType::CaseClicked;
     }
 
+public:
+    CaseClicked();
     CaseClicked(const std::string& caseClicked);
-    CaseClicked(zmqpp::message& message);
 
 public:
     void toMessage(zmqpp::message& message) override;
