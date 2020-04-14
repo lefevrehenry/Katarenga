@@ -47,3 +47,11 @@ void player_msg(const std::string& msg)
         std::cout << "[player thread]" << msg << std::endl;
 }
 
+void convert_move_str(const std::string& move_str, int& source, int& dest)
+{
+    std::string src_str = move_str.substr(1,2);
+    std::string dest_str = move_str.substr(4,2);
+    source = stoi(src_str);
+    dest = stoi(dest_str);
+}
+

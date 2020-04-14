@@ -10,6 +10,7 @@
 #include <string>
 #include <thread>
 #include <utility>
+#include <vector>
 
 namespace zmqpp {
     class context;
@@ -37,11 +38,12 @@ private:
     void process_server_player_won(zmqpp::message& message);
     void process_server_game_stopped(zmqpp::message& message);
 
-private:
     void process_graphics_case_clicked(zmqpp::message& message);
     void process_graphics_game_stopped(zmqpp::message& message);
 
 private:
+    void retrieve_piece_locations(const std::string& board_configuration);
+
     // Socket-related content
     zmqpp::context  m_zmq_context;
     zmqpp::poller   m_poller;
@@ -55,9 +57,11 @@ private:
 
     // Game-related content
     bool m_game_finished;
+    bool m_game_stopped;
     int m_self_player;
+    char m_self_player_sign;
     int m_current_player;
-
+    std::vector<int> m_piece_locations; // The list of cell ids where my pieces are
     Memo m_memo;        // memo for case clicked by the player <src,dst>
 };
 

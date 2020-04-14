@@ -132,7 +132,8 @@ Server::Server(ServerInfo &server_info) :
     m_poller(),
     m_white_player_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_black_player_socket(m_zmq_context, zmqpp::socket_type::pair),
-    m_player_reactor()
+    m_player_reactor(),
+    m_game_stopped(false)
 {
     m_white_player_socket.bind(server_info.white_binding_point);
     m_black_player_socket.bind(server_info.black_binding_point);

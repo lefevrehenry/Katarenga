@@ -6,17 +6,20 @@
 #include <functional>
 #include <iostream>
 
+#include <iostream> // FOR DEBUGGING PURPOSE, TODO REMOVE IT
 
 void Player::process_server_game_init(zmqpp::message& message)
 {
     GameInit m = ConstructObject<GameInit>(message);
-    m_current_player = m.getCurrentPlayer();
 
-    // TODO at some point we'll need to update the Board information kept by the client as well
+    // Update internal state
+    m_current_player = m.getCurrentPlayer();
+    retrieve_piece_locations(m.getConfiguration());
 
     // Then forward to the render thread
     m_render_thread_socket.send(message);
 }
+
 
 void Player::process_server_board_configuration(zmqpp::message& message)
 {
@@ -24,23 +27,23 @@ void Player::process_server_board_configuration(zmqpp::message& message)
     std::string configuration = m.getConfiguration();
     size_t size = configuration.size();
 
+    retrieve_piece_locations(configuration);
+
     // Retrieve current player
-    if (configuration[size-1] == '+')
+    if (configuration[size-2] == '+')
     {
         m_current_player = 1;
     }
-    else if (configuration[size-1] == '-')
+    else if (configuration[size-2] == '-')
     {
         m_current_player = -1;
     }
     else
     {
-        std::string err = "Wrong current player sent in BoardConfiguration message: " + std::string(1, configuration.at(size-1));
+        std::string err = "Wrong current player sent in BoardConfiguration message: " + std::string(1, configuration.at(size-2));
         player_msg(err);
         std::terminate();
     }
-
-    // TODO at some point we'll need to update the Board informations kept by the client as well
 
     // Then forward it to the render thread
     m_render_thread_socket.send(message);
@@ -50,10 +53,10 @@ void Player::process_server_move_message(zmqpp::message& message)
 {
     MoveMessage m = ConstructObject<MoveMessage>(message);
     int move_player = m.getPlayer();
+    MoveType type = m.getType();
 
-    switch(m.getType())
+    if (type == MoveType::MovePlayed)
     {
-    case MoveType::MovePlayed:
         if (move_player != m_current_player)
         {
             throw std::runtime_error("Move received from a player not in his turn.");
@@ -61,15 +64,37 @@ void Player::process_server_move_message(zmqpp::message& message)
         }
         else
         {
-            m_current_player = -m_current_player;
+            // Update the new location of the piece if it was my move
+            if (move_player == m_self_player)
+            {
+                bool found = false;
+                int src, dest;
+                convert_move_str(m.getMove(), src, dest);
+                for (auto it = m_piece_locations.begin(); it != m_piece_locations.end(); ++it)
+                {
+                    if (*it == src)
+                    {
+                        *it = dest;
+                        found = true;
+                        std::cout << "Updating piece location from " << src << "to" << dest << std::endl;
+                    }
+                }
 
-            // TODO at some point we'll need to update the Board informations
+                if (!found)
+                {
+                    throw std::runtime_error("Bad internal state: Did not find piece location for move received");
+                    // TODO need to ask the correct board configuration to the server instead of throwing an error
+                }
+            }
+            m_current_player = -m_current_player;
         }
-        break;
-    case MoveType::InvalidMove:
-        // TODO check if it's the same as the pending move
-        break;
-    case MoveType::PlayThisMove:
+    }
+    else if (type == MoveType::InvalidMove)
+    {
+        // TODO maybe do something here before forwarding it to the render thread
+    }
+    else
+    {
         throw std::runtime_error("PlayThisMove received from the server, this should not happen");
     }
 
@@ -98,6 +123,28 @@ void Player::process_server_game_stopped(zmqpp::message& message)
     // Forward it to the render thread
     m_render_thread_socket.send(message);
 }
+
+void Player::retrieve_piece_locations(const std::string& board_configuration)
+{
+    m_piece_locations.clear();
+
+    // Retrieve pieces from the regular board but not Camp cells
+    for (int i = 1; i <= 8; ++i)
+    {
+        for (int j = 1; j <= 8; ++j)
+        {
+            int cell_index = 8 * i + j - 1;
+            if (board_configuration.at(2 * cell_index + 1) == m_self_player_sign)
+            {
+                // This cell is occupied by one of my pieces
+                m_piece_locations.push_back(cell_index);
+                std::cout << "Found a piece at location " << cell_index << std::endl;
+            }
+        }
+    }
+}
+
+
 
 void Player::process_graphics_case_clicked(zmqpp::message& message)
 {
@@ -154,6 +201,8 @@ void Player::process_graphics_stop_game(zmqpp::message& message)
     m_server_thread_socket.send(zmq_message);
 }
 
+
+
 Player::Player(GameSettings& game_settings) :
     m_zmq_context(),
     m_poller(),
@@ -162,6 +211,7 @@ Player::Player(GameSettings& game_settings) :
     m_server_thread_reactor(),
     m_render_thread_reactor(),
     m_game_finished(false),
+    m_game_stopped(false),
     m_self_player(game_settings.self_player),
     m_current_player(0),
     m_memo({-1,-1})
@@ -201,6 +251,10 @@ Player::Player(GameSettings& game_settings) :
 
     m_render_thread_reactor.add(MessageType::CaseClicked, process_graphics_case_clicked);
     m_render_thread_reactor.add(MessageType::StopGame, process_graphics_game_stopped);
+
+
+    m_piece_locations.reserve(8); // Reserve space for 8 pieces
+    m_self_player_sign = (m_self_player == 1) ? '+' : '-';
 }
 
 Player::~Player()
