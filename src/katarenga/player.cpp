@@ -67,7 +67,6 @@ void Player::process_server_move_message(zmqpp::message& message)
             // Update the new location of the piece if it was my move
             if (move_player == m_self_player)
             {
-                bool found = false;
                 int src, dest;
                 convert_move_str(m.getMove(), src, dest);
                 auto it = std::find(m_piece_locations.begin(), m_piece_locations.end(), src);
@@ -151,17 +150,16 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     bool state0 = (m_memo.first == -1 && m_memo.second == -1);
     bool state1 = (m_memo.first != -1 && m_memo.second == -1);
 
-    throw std::runtime_error("todo");
-    bool is_case_own_by_player = true;//std::find(m_piece_locations.begin(), m_piece_locations.end(), id) != m_piece_locations.end();
+    bool is_case_owned_by_player = std::find(m_piece_locations.begin(), m_piece_locations.end(), id) != m_piece_locations.end();
 
     if(state0)
     {
-        if(is_case_own_by_player)
+        if(is_case_owned_by_player)
             m_memo.first = id;
     }
     else if(state1)
     {
-        if(is_case_own_by_player)
+        if(is_case_owned_by_player)
             m_memo.first = id;
         else
             m_memo.second = id;
