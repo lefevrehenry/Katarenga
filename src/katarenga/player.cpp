@@ -176,7 +176,7 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     if(state2)
     {
         // envoie le coup au serveur
-        std::string move_str = std::to_string(m_memo.first) + ":" + std::to_string(m_memo.second);
+        std::string move_str = create_move_str(m_memo.first, m_memo.second);
         zmqpp::message play_message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, move_str, m_self_player);
 
         m_server_thread_socket.send(play_message);

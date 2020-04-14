@@ -24,6 +24,7 @@ void render_msg(const std::string& msg);
 void player_msg(const std::string& msg);
 
 void convert_move_str(const std::string& move_str, int& source, int& dest);
+std::string create_move_str(int source, int dest);
 
 #endif // UTILS_HPP
 
