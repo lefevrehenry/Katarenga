@@ -39,7 +39,7 @@ private:
     void process_server_game_stopped(zmqpp::message& message);
 
     void process_graphics_case_clicked(zmqpp::message& message);
-    void process_graphics_game_stopped(zmqpp::message& message);
+    void process_graphics_stop_game(zmqpp::message& message);
 
 private:
     void retrieve_piece_locations(const std::string& board_configuration);

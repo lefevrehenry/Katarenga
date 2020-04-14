@@ -247,10 +247,10 @@ Player::Player(GameSettings& game_settings) :
 
     // Add callback functions to react to messages received from the render thread
     Callback process_graphics_case_clicked = std::bind(&Player::process_graphics_case_clicked, this, std::placeholders::_1);
-    Callback process_graphics_game_stopped = std::bind(&Player::process_graphics_game_stopped, this, std::placeholders::_1);
+    Callback process_graphics_stop_game = std::bind(&Player::process_graphics_stop_game, this, std::placeholders::_1);
 
     m_render_thread_reactor.add(MessageType::CaseClicked, process_graphics_case_clicked);
-    m_render_thread_reactor.add(MessageType::StopGame, process_graphics_game_stopped);
+    m_render_thread_reactor.add(MessageType::StopGame, process_graphics_stop_game);
 
 
     m_piece_locations.reserve(8); // Reserve space for 8 pieces
