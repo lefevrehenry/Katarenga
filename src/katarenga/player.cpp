@@ -273,7 +273,10 @@ void Player::loop()
                 m_server_thread_socket.receive(input_message);
 
                 // Will call the callback corresponding to the message type
-                m_server_thread_reactor.process_message(input_message);
+                bool processed = m_server_thread_reactor.process_message(input_message);
+
+                if(!processed)
+                    player_msg("message received from the server thread but no callback were defined for its type");
             }
             else if(m_poller.has_input(m_render_thread_socket))
             {
@@ -281,7 +284,10 @@ void Player::loop()
                 m_render_thread_socket.receive(input_message);
 
                 // Will call the callback corresponding to the message type
-                m_render_thread_reactor.process_message(input_message);
+                bool processed = m_render_thread_reactor.process_message(input_message);
+
+                if(!processed)
+                    player_msg("message received from the render thread but no callback were defined for its type");
             }
             else
             {
