@@ -52,11 +52,6 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
         }
         else if(command == "p" || command == "print")
         {
-//            zmqpp::message message;
-
-//            MessageType type = MessageType::AskBoardConfiguration;
-//            message.add(&type, sizeof(MessageType));
-
             zmqpp::message message = ConstructMessage<AskBoardConfiguration>();
 
             // envoie le coup (non bloquant)
@@ -67,10 +62,7 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
         }
         else if(command == "s" || command == "stop")
         {
-            zmqpp::message message;
-
-            MessageType type = MessageType::StopGame;
-            message.add(&type, sizeof(MessageType));
+            zmqpp::message message = ConstructMessage<StopGame>("human decide to stop", 0);
 
             // envoie le message (non bloquant)
             bool ret = socket_main_thread.send(message, true);
