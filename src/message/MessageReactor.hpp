@@ -32,7 +32,7 @@ public:
     void remove(MessageType type);
 
 public:
-    void process_message(zmqpp::message& message) const;
+    bool process_message(zmqpp::message& message) const;
 
 private:
     RegistryMap m_registry;

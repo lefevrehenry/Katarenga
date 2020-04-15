@@ -15,7 +15,7 @@
 
 
 template <typename T>
-zmqpp::message ConstructMessage(const T& object)
+zmqpp::message ConstructMessage(T& object)
 {
     zmqpp::message message;
 

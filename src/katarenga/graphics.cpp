@@ -9,8 +9,15 @@
 
 using MessageType = MessageWrapper::MessageType;
 
+void print_help()
+{
+    std::cout << "h,help for help" << std::endl;
+    std::cout << "c,click for click in a case" << std::endl;
+    std::cout << "p,print to print the board" << std::endl;
+    std::cout << "s,stop for quit" << std::endl;
+}
 
-void graphics_function(zmqpp::context &zmq_context, std::string render_binding_point)
+void graphics_function(zmqpp::context& zmq_context, const std::string& render_binding_point)
 {
     zmqpp::socket socket_main_thread(zmq_context, zmqpp::socket_type::pair);
     socket_main_thread.connect(render_binding_point);
@@ -21,6 +28,8 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
     bool end_game = false;
 //    int has_won = 0;
 
+    print_help();
+
     while(!end_game)
     {
         std::cout << "Enter a command: " << std::endl;
@@ -30,10 +39,7 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
 
         if(command == "h" || command == "help")
         {
-            std::cout << "h,help for help" << std::endl;
-            std::cout << "c,click for click in a case" << std::endl;
-            std::cout << "p,print to print the board" << std::endl;
-            std::cout << "s,stop for quit" << std::endl;
+            print_help();
         }
         else if(command == "c" || command == "click")
         {
@@ -52,11 +58,6 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
         }
         else if(command == "p" || command == "print")
         {
-//            zmqpp::message message;
-
-//            MessageType type = MessageType::AskBoardConfiguration;
-//            message.add(&type, sizeof(MessageType));
-
             zmqpp::message message = ConstructMessage<AskBoardConfiguration>();
 
             // envoie le coup (non bloquant)
@@ -67,10 +68,7 @@ void graphics_function(zmqpp::context &zmq_context, std::string render_binding_p
         }
         else if(command == "s" || command == "stop")
         {
-            zmqpp::message message;
-
-            MessageType type = MessageType::StopGame;
-            message.add(&type, sizeof(MessageType));
+            zmqpp::message message = ConstructMessage<StopGame>("human decide to stop", 0);
 
             // envoie le message (non bloquant)
             bool ret = socket_main_thread.send(message, true);

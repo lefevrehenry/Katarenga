@@ -20,7 +20,7 @@ void MessageReactor::remove(MessageReactor::MessageType type)
         m_registry.erase(it);
 }
 
-void MessageReactor::process_message(zmqpp::message& message) const
+bool MessageReactor::process_message(zmqpp::message& message) const
 {
     // read the header (correspond to the type of the message sent)
     MessageType type = *message.get<const MessageType*>(0);
@@ -37,27 +37,10 @@ void MessageReactor::process_message(zmqpp::message& message) const
         // call it
         function(message);
 
-//        // according to the type of the request we construct the reply message
-//        switch (type) {
-//            case MessageType::AskBoardConfiguration: {
-//                construct_reply<BoardConfiguration>(request_message, reply_message, function);
-//                break;
-//            }
-//            case MessageType::CheckConnectivity: {
-//                construct_reply<CheckConnectivity>(request_message, reply_message, function);
-//                break;
-//            }
-//            case MessageType::IsThisMoveValid: {
-//                break;
-//            }
-//            case MessageType::PlayThisMove: {
-//                break;
-//            }
-//            case MessageType::ForgetItRageQuit: {
-//                break;
-//            }
-//        }
+        return true;
     }
+
+    return false;
 }
 
 //zmqpp::message MessageReactor::process_broadcast(zmqpp::message& request_message, zmqpp::message& reply_message) const

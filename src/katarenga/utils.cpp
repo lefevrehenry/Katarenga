@@ -55,3 +55,8 @@ void convert_move_str(const std::string& move_str, int& source, int& dest)
     dest = stoi(dest_str);
 }
 
+std::string create_move_str(int source, int dest)
+{
+    return std::to_string(source) + ":" + std::to_string(dest);
+}
+

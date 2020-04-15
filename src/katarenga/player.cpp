@@ -4,7 +4,7 @@
 #include <message/message_utils.hpp>
 
 #include <functional>
-#include <iostream>
+#include <algorithm>
 
 #include <iostream> // FOR DEBUGGING PURPOSE, TODO REMOVE IT
 
@@ -67,20 +67,15 @@ void Player::process_server_move_message(zmqpp::message& message)
             // Update the new location of the piece if it was my move
             if (move_player == m_self_player)
             {
-                bool found = false;
                 int src, dest;
                 convert_move_str(m.getMove(), src, dest);
-                for (auto it = m_piece_locations.begin(); it != m_piece_locations.end(); ++it)
+                auto it = std::find(m_piece_locations.begin(), m_piece_locations.end(), src);
+                if (it != m_piece_locations.end())
                 {
-                    if (*it == src)
-                    {
-                        *it = dest;
-                        found = true;
-                        std::cout << "Updating piece location from " << src << "to" << dest << std::endl;
-                    }
+                    *it = dest;
+                    std::cout << "Updating piece location from " << src << "to" << dest << std::endl;
                 }
-
-                if (!found)
+                else
                 {
                     throw std::runtime_error("Bad internal state: Did not find piece location for move received");
                     // TODO need to ask the correct board configuration to the server instead of throwing an error
@@ -145,7 +140,6 @@ void Player::retrieve_piece_locations(const std::string& board_configuration)
 }
 
 
-
 void Player::process_graphics_case_clicked(zmqpp::message& message)
 {
     CaseClicked c = ConstructObject<CaseClicked>(message);
@@ -155,17 +149,16 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     bool state0 = (m_memo.first == -1 && m_memo.second == -1);
     bool state1 = (m_memo.first != -1 && m_memo.second == -1);
 
-    throw std::runtime_error("todo");
-    bool is_case_own_by_player = true;//std::find(m_piece_locations.begin(), m_piece_locations.end(), id) != m_piece_locations.end();
+    bool is_case_owned_by_player = std::find(m_piece_locations.begin(), m_piece_locations.end(), id) != m_piece_locations.end();
 
     if(state0)
     {
-        if(is_case_own_by_player)
+        if(is_case_owned_by_player)
             m_memo.first = id;
     }
     else if(state1)
     {
-        if(is_case_own_by_player)
+        if(is_case_owned_by_player)
             m_memo.first = id;
         else
             m_memo.second = id;
@@ -176,10 +169,10 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     if(state2)
     {
         // envoie le coup au serveur
-        std::string move_str = std::to_string(m_memo.first) + ":" + std::to_string(m_memo.second);
+        std::string move_str = create_move_str(m_memo.first, m_memo.second);
         zmqpp::message play_message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, move_str, m_self_player);
 
-        m_server_thread_socket.send(play_message);
+        m_server_thread_socket.send(play_message, true);
 
         // re-init
         m_memo.first = -1;
@@ -189,16 +182,12 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     std::cout << " '(main thread) case clicked ' " << id << std::endl;
 }
 
-void Player::process_graphics_stop_game(zmqpp::message& message)
+void Player::process_graphics_stop_game(zmqpp::message&)
 {
-    StopGame m = ConstructObject<StopGame>(message);
-
     m_game_finished = true;
-    m.setPlayer(m_self_player);
-    m.setReason("Game stopped by the graphical interface");
 
-    zmqpp::message zmq_message = ConstructMessage<StopGame>(m);
-    m_server_thread_socket.send(zmq_message);
+    zmqpp::message message = ConstructMessage<StopGame>("Game stopped by the graphical interface", m_self_player);
+    m_server_thread_socket.send(message, true);
 }
 
 
@@ -279,7 +268,10 @@ void Player::loop()
                 m_server_thread_socket.receive(input_message);
 
                 // Will call the callback corresponding to the message type
-                m_server_thread_reactor.process_message(input_message);
+                bool processed = m_server_thread_reactor.process_message(input_message);
+
+                if(!processed)
+                    player_msg("message received from the server thread but no callback were defined for its type");
             }
             else if(m_poller.has_input(m_render_thread_socket))
             {
@@ -287,7 +279,10 @@ void Player::loop()
                 m_render_thread_socket.receive(input_message);
 
                 // Will call the callback corresponding to the message type
-                m_render_thread_reactor.process_message(input_message);
+                bool processed = m_render_thread_reactor.process_message(input_message);
+
+                if(!processed)
+                    player_msg("message received from the render thread but no callback were defined for its type");
             }
             else
             {
