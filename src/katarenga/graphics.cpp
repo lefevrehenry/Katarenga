@@ -16,6 +16,15 @@ void print_help()
     render_msg("s,stop for quit");
 }
 
+void Graphics::process_main_answer_board_configuration(zmqpp::message& message)
+{
+    AnswerBoardConfiguration m = ConstructObject<AnswerBoardConfiguration>(message);
+    std::string board_configuration = m.getConfiguration();
+
+    render_msg("AnswerBoardConfiguration received");
+    render_msg(board_configuration);
+}
+
 Graphics::Graphics(zmqpp::context& zmq_context, const std::string& main_thread_binding_point) :
     m_poller(),
     m_main_thread_socket(zmq_context, zmqpp::socket_type::pair),
@@ -23,6 +32,17 @@ Graphics::Graphics(zmqpp::context& zmq_context, const std::string& main_thread_b
     m_end_game(false)
 {
     m_main_thread_socket.connect(main_thread_binding_point);
+
+    // We want to listen to the socket
+    m_poller.add(m_main_thread_socket, zmqpp::poller::poll_in);
+
+    using MessageType = MessageWrapper::MessageType;
+    using Callback = MessageReactor::Callback;
+
+    // Add callback functions to react to messages received from the main thread
+    Callback process_main_answer_board_configuration = std::bind(&Graphics::process_main_answer_board_configuration, this, std::placeholders::_1);
+
+    m_main_thread_reactor.add(MessageType::AnswerBoardConfiguration, process_main_answer_board_configuration);
 }
 
 Graphics::~Graphics()
@@ -32,7 +52,7 @@ Graphics::~Graphics()
 
 void Graphics::loop()
 {
-    render_msg("GL thread ready to play!");
+    render_msg("render thread ready to play!");
 
     print_help();
 
@@ -70,7 +90,36 @@ void Graphics::loop()
             bool ret = m_main_thread_socket.send(message, true);
 
             if(!ret)
-                render_msg("(print) error, message not sent");
+                std::cout << "(print) error, message not sent" << std::endl;
+            else
+            {
+                zmqpp::message input_message;
+
+                // wait no more than 5 seconds the coming answer
+                if(m_poller.poll(5000))
+                {
+                    if(m_poller.has_input(m_main_thread_socket))
+                    {
+                        // receive the message
+                        m_main_thread_socket.receive(input_message);
+
+                        // Will call the callback corresponding to the message type
+                        bool processed = m_main_thread_reactor.process_message(input_message);
+
+                        if(!processed)
+                            render_msg("message received from the main thread but no callback were defined for its type");
+                    }
+                    else
+                    {
+                        render_msg("This should not happen, terminating.");
+                        std::terminate(); // Forcefully terminates the execution
+                    }
+                }
+                else
+                {
+                    render_msg("no board configuration received from the main thread");
+                }
+            }
         }
         else if(command == "s" || command == "stop")
         {

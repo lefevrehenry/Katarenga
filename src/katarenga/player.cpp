@@ -196,6 +196,12 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     player_msg("case clicked " + std::to_string(id));
 }
 
+void Player::process_graphics_ask_board_configuration(zmqpp::message& message)
+{
+    player_msg("AskBoardConfig received");
+    m_server_thread_socket.send(message, true);
+}
+
 void Player::process_graphics_stop_game(zmqpp::message&)
 {
     m_game_finished = true;
@@ -252,9 +258,11 @@ Player::Player(GameSettings& game_settings) :
 
     // Add callback functions to react to messages received from the render thread
     Callback process_graphics_case_clicked              = std::bind(&Player::process_graphics_case_clicked, this, std::placeholders::_1);
+    Callback process_graphics_ask_board_configuration   = std::bind(&Player::process_graphics_ask_board_configuration, this, std::placeholders::_1);
     Callback process_graphics_stop_game                 = std::bind(&Player::process_graphics_stop_game, this, std::placeholders::_1);
 
     m_render_thread_reactor.add(MessageType::CaseClicked, process_graphics_case_clicked);
+    m_render_thread_reactor.add(MessageType::AskBoardConfiguration, process_graphics_ask_board_configuration);
     m_render_thread_reactor.add(MessageType::StopGame, process_graphics_stop_game);
 
 

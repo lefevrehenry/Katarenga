@@ -20,6 +20,9 @@ public:
     void loop();
 
 private:
+    void process_main_answer_board_configuration(zmqpp::message& message);
+
+private:
     zmqpp::poller   m_poller;
     zmqpp::socket   m_main_thread_socket;
 

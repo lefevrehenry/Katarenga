@@ -40,6 +40,7 @@ private:
     void process_server_game_stopped(zmqpp::message& message);
 
     void process_graphics_case_clicked(zmqpp::message& message);
+    void process_graphics_ask_board_configuration(zmqpp::message& message);
     void process_graphics_stop_game(zmqpp::message& message);
 
 private:
