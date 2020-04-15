@@ -17,7 +17,7 @@ void print_help()
     std::cout << "s,stop for quit" << std::endl;
 }
 
-void graphics_function(zmqpp::context &zmq_context, std::string render_binding_point)
+void graphics_function(zmqpp::context& zmq_context, const std::string& render_binding_point)
 {
     zmqpp::socket socket_main_thread(zmq_context, zmqpp::socket_type::pair);
     socket_main_thread.connect(render_binding_point);
