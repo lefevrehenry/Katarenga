@@ -20,9 +20,8 @@ void Server::process_player_move_message(zmqpp::message& message)
 
                 // Notify players
                 move_msg.setType(MoveType::MovePlayed);
-                zmqpp::message zmq_message;
-                move_msg.toMessage(zmq_message);
-                sendToBoth(zmq_message);
+                zmqpp::message message = ConstructMessage<MoveMessage>(move_msg);
+                sendToBoth(message);
 
                 // Check if the player has won
                 if (m_board->isGameFinished())
@@ -45,38 +44,34 @@ void Server::process_player_move_message(zmqpp::message& message)
     // Else, the player send a message of type MovePlayed or InvalidMove, ignore it
 }
 
-void Server::rejectMove(MoveMessage &move_msg)
+void Server::rejectMove(MoveMessage& move_msg)
 {
     move_msg.setType(MoveType::InvalidMove);
-    zmqpp::message m;
-    move_msg.toMessage(m);
+
+    zmqpp::message m = ConstructMessage<MoveMessage>(move_msg);
     sendToPlayer(m, move_msg.getPlayer());
 }
 
 void Server::sendWonMessage()
 {
-    PlayerWon won_message(m_board->whoWon());
-    zmqpp::message zmq_message;
-    won_message.toMessage(zmq_message);
-    sendToBoth(zmq_message);
+    zmqpp::message message = ConstructMessage<PlayerWon>(m_board->whoWon());
+    sendToBoth(message);
 }
 
 
-void Server::process_player_ask_board_configuration(zmqpp::message& message)
+void Server::process_player_ask_board_configuration(zmqpp::message& input_message)
 {
-    AskBoardConfiguration m = ConstructObject<AskBoardConfiguration>(message);
-    AnswerBoardConfiguration answer(m_board->getBoardConfiguration());
+    AskBoardConfiguration m = ConstructObject<AskBoardConfiguration>(input_message);
     int player = m.getPlayer();
 
-    zmqpp::message zmq_message;
-    answer.toMessage(zmq_message);
+    zmqpp::message output_message = ConstructMessage<AnswerBoardConfiguration>(m_board->getBoardConfiguration());
     if (player == 1)
     {
-        m_white_player_socket.send(zmq_message);
+        m_white_player_socket.send(output_message);
     }
     else
     {
-        m_black_player_socket.send(zmq_message);
+        m_black_player_socket.send(output_message);
     }
 }
 
@@ -88,18 +83,14 @@ void Server::process_player_stop_game(zmqpp::message& message)
     if (player == 1)
     {
         std::string reason = "White player: " + m.getReason();
-        GameStopped forward(reason);
-        zmqpp::message zmq_message;
-        forward.toMessage(zmq_message);
-        m_black_player_socket.send(zmq_message);
+        zmqpp::message message = ConstructMessage<GameStopped>(reason);
+        m_black_player_socket.send(message);
     }
     else
     {
         std::string reason = "Black player: " + m.getReason();
-        GameStopped forward(reason);
-        zmqpp::message zmq_message;
-        forward.toMessage(zmq_message);
-        m_white_player_socket.send(zmq_message);
+        zmqpp::message message = ConstructMessage<GameStopped>(reason);
+        m_white_player_socket.send(message);
     }
 
     // We do not treat any more message and quit
@@ -202,10 +193,8 @@ void Server::loop()
             else
             {
                 server_msg("This should not happen, terminating");
-                GameStopped message("Server is broken");
-                zmqpp::message zmq_message;
-                message.toMessage(zmq_message);
-                sendToBoth(zmq_message);
+                zmqpp::message message = ConstructMessage<GameStopped>("Server is broken");
+                sendToBoth(message);
                 std::terminate();
             }
 
