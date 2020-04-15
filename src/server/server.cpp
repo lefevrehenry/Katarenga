@@ -133,6 +133,8 @@ Server::Server(ServerInfo &server_info) :
     m_white_player_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_black_player_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_player_reactor(),
+    m_board(new Board()),
+    m_current_player(),
     m_game_stopped(false)
 {
     m_white_player_socket.bind(server_info.white_binding_point);
@@ -145,8 +147,8 @@ Server::Server(ServerInfo &server_info) :
 
     /* Create the function callback here and add them to the player_reactor */
     Callback process_player_ask_board_configuration = std::bind(&Server::process_player_ask_board_configuration, this, std::placeholders::_1);
-    Callback process_player_move_message= std::bind(&Server::process_player_move_message, this, std::placeholders::_1);
-    Callback process_player_stop_game = std::bind(&Server::process_player_stop_game, this, std::placeholders::_1);
+    Callback process_player_move_message            = std::bind(&Server::process_player_move_message, this, std::placeholders::_1);
+    Callback process_player_stop_game               = std::bind(&Server::process_player_stop_game, this, std::placeholders::_1);
 
     m_player_reactor.add(MessageWrapper::MessageType::AskBoardConfiguration, process_player_ask_board_configuration);
     m_player_reactor.add(MessageWrapper::MessageType::MoveMessage, process_player_move_message);
@@ -157,24 +159,20 @@ Server::~Server()
 {
     m_white_player_socket.close();
     m_black_player_socket.close();
-    delete m_board;
 }
 
 void Server::new_game()
 {
-    if (m_board != nullptr)
-        delete m_board;
-
-    m_board = new Board();
     m_board->setBoardCellTypes(generateBoardCellTypes());
     m_current_player = m_board->getCurrentPlayer();
     m_game_stopped = false;
 
+    std::string board_configuration = m_board->getBoardConfiguration();
+    int currentPlayer = m_board->getCurrentPlayer();
+
     // Send GameInit messages to the players
-    GameInit message(m_board->getBoardConfiguration(), m_board->getCurrentPlayer());
-    zmqpp::message zmq_message;
-    message.toMessage(zmq_message);
-    sendToBoth(zmq_message);
+    zmqpp::message message = ConstructMessage<GameInit>(board_configuration, currentPlayer);
+    sendToBoth(message);
 
     server_msg("New game created");
 }

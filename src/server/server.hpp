@@ -4,9 +4,11 @@
 #include "server_utils.hpp"
 #include <message/message_utils.hpp>
 
+// ZMQPP
 #include <zmqpp/zmqpp.hpp>
 
 // Standard Library
+#include <memory>
 #include <string>
 #include <thread>
 
@@ -22,7 +24,7 @@ class Server
 {
 
 public:
-    Server(ServerInfo &server_info);
+    Server(ServerInfo& server_info);
     virtual ~Server();
 
 public:
@@ -41,6 +43,7 @@ private:
     void rejectMove(MoveMessage& move_msg);
     void sendWonMessage();
 
+private:
     // Socket-related content
     zmqpp::context  m_zmq_context;
     zmqpp::poller   m_poller;
@@ -50,9 +53,10 @@ private:
     MessageReactor  m_player_reactor;
 
     // Game-related content
-    Board *m_board = nullptr;
+    std::unique_ptr<Board> m_board;
     int m_current_player;
     bool m_game_stopped;
+
 };
 
 #endif // SERVER_HPP
