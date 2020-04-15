@@ -1,7 +1,6 @@
 #include "graphics.hpp"
 #include "player.hpp"
 #include "utils.hpp"
-#include <message/message_utils.hpp>
 
 #include <GLTK/GLFWApplication.h>
 
@@ -17,20 +16,27 @@ void print_help()
     render_msg("s,stop for quit");
 }
 
-void graphics_function(zmqpp::context& zmq_context, const std::string& render_binding_point)
+Graphics::Graphics(zmqpp::context& zmq_context, const std::string& main_thread_binding_point) :
+    m_poller(),
+    m_main_thread_socket(zmq_context, zmqpp::socket_type::pair),
+    m_main_thread_reactor(),
+    m_end_game(false)
 {
-    zmqpp::socket socket_main_thread(zmq_context, zmqpp::socket_type::pair);
-    socket_main_thread.connect(render_binding_point);
+    m_main_thread_socket.connect(main_thread_binding_point);
+}
 
+Graphics::~Graphics()
+{
+    m_main_thread_socket.close();
+}
+
+void Graphics::loop()
+{
     render_msg("GL thread ready to play!");
-
-    // Main loop
-    bool end_game = false;
-//    int has_won = 0;
 
     print_help();
 
-    while(!end_game)
+    while(!m_end_game)
     {
         render_msg("Enter a command: ");
 
@@ -51,7 +57,7 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
             zmqpp::message message = ConstructMessage<CaseClicked>(move_str);
 
             // envoie le message (non bloquant)
-            bool ret = socket_main_thread.send(message, true);
+            bool ret = m_main_thread_socket.send(message, true);
 
             if(!ret)
                 render_msg("(click) error, message not sent");
@@ -61,7 +67,7 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
             zmqpp::message message = ConstructMessage<AskBoardConfiguration>();
 
             // envoie le coup (non bloquant)
-            bool ret = socket_main_thread.send(message, true);
+            bool ret = m_main_thread_socket.send(message, true);
 
             if(!ret)
                 render_msg("(print) error, message not sent");
@@ -71,12 +77,12 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
             zmqpp::message message = ConstructMessage<StopGame>("human decide to stop", 0);
 
             // envoie le message (non bloquant)
-            bool ret = socket_main_thread.send(message, true);
+            bool ret = m_main_thread_socket.send(message, true);
 
             if(!ret)
                 render_msg("(stop) error, message not sent");
             else
-                end_game = true;
+                m_end_game = true;
         }
         else
         {
@@ -91,67 +97,12 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
 //        }
     }
 
-    socket_main_thread.close();
-
     render_msg("Terminating");
 }
 
+void graphics_function(zmqpp::context& zmq_context, const std::string& main_thread_binding_point)
+{
+    Graphics graphic(zmq_context, main_thread_binding_point);
 
-
-//void standalone_graphics_function(int socket_port, bool verbose)
-//{
-//    string socket_endpoint = "tcp://127.0.0.1:" + to_string(socket_port);
-//    zmqpp::context_t context;
-//    zmqpp::socket_t socketS(context, zmqpp::socket_type::pair);
-//    socketS.connect(socket_endpoint);
-
-//    string board_configuration = s_recv(socketS);
-//    s_send(socketS, "ACK");
-
-//    render_msg("GL received board config:\n" << board_configuration);
-
-////    Board board;
-
-//    render_msg("GL thread ready to play!");
-
-//    // Main loop
-//    string move_str;
-//    string ret;
-//    bool end_game = false;
-//    int has_won = 0;
-//    int current_player;
-
-////    board.print();
-//    while(!end_game)
-//    {
-////        ret = s_recv(socketS);
-////        if (ret[0] == 'p')
-////        {
-////            // It's a player turn
-////            current_player = (ret[1] == '1' ? 1 : -1);
-
-////            move_str = askNextMoveText(current_player);
-
-////            s_send(socketS, move_str);
-////            ret = s_recv(socketS);
-
-////            if (ret[0] == 'm')
-////            {
-////                // The move has been accepted, apply it
-////                board.playMove(ret);
-////                board.print();
-////            }
-////        }
-////        else if (ret[0] == 'w')
-////        {
-////            // A player has won
-////            has_won = (ret[1] == '1' ? 1 : -1);
-
-////            // Just stop the loop and terminate
-////            end_game = true;
-////        }
-//    }
-
-//    socketS.close();
-//    render_msg("Terminating GL thread.");
-//}
+    graphic.loop();
+}
