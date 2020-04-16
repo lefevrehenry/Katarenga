@@ -29,9 +29,11 @@ public:
     virtual ~Player();
 
 public:
+    void connect();
     void loop();    // function executed in the main thread
 
 private:
+    void process_server_reply_connectivity(zmqpp::message& message);
     void process_server_game_init(zmqpp::message& message);
     void process_server_board_configuration(zmqpp::message& message);
     void process_server_move_message(zmqpp::message& message);
@@ -61,6 +63,7 @@ private:
     int m_self_player;
     char m_self_player_sign;
     int m_current_player;
+    bool m_connected;
     std::vector<int> m_piece_locations; // The list of cell ids where my pieces are
     Memo m_memo;        // memo for case clicked by the player <src,dst>
 };

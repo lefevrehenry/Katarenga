@@ -102,6 +102,7 @@ int main(int argc, char * argv[])
         player_msg("Creating Player and starting main loop");
 
         Player player(game_settings);
+        player.connect();
         player.loop();
     }
 
