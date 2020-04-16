@@ -14,10 +14,16 @@ void Server::process_player_check_connectivity(zmqpp::message& message)
 
         // we accept the white player !
         if(accepted)
+        {
             m_connectiviy.first = true;
 
-        zmqpp::message output_message = ConstructMessage<ReplyConnectivity>(accepted);
-        m_white_player_socket.send(output_message);
+            std::string board_configuration = m_board->getBoardConfiguration();
+            int currentPlayer = m_board->getCurrentPlayer();
+
+            // send him the game state
+            zmqpp::message output_message = ConstructMessage<GameInit>(board_configuration, currentPlayer);
+            m_white_player_socket.send(output_message);
+        }
     }
     else if (player == -1)
     {
@@ -26,10 +32,16 @@ void Server::process_player_check_connectivity(zmqpp::message& message)
 
         // we accept the black player !
         if(accepted)
+        {
             m_connectiviy.second = true;
 
-        zmqpp::message output_message = ConstructMessage<ReplyConnectivity>(accepted);
-        m_black_player_socket.send(output_message);
+            std::string board_configuration = m_board->getBoardConfiguration();
+            int currentPlayer = m_board->getCurrentPlayer();
+
+            // send him the game state
+            zmqpp::message output_message = ConstructMessage<GameInit>(board_configuration, currentPlayer);
+            m_black_player_socket.send(output_message);
+        }
     }
     else
     {

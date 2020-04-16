@@ -8,19 +8,19 @@
 
 #include <iostream> // FOR DEBUGGING PURPOSE, TODO REMOVE IT
 
-void Player::process_server_reply_connectivity(zmqpp::message& message)
-{
-    ReplyConnectivity m = ConstructObject<ReplyConnectivity>(message);
+//void Player::process_server_reply_connectivity(zmqpp::message& message)
+//{
+//    ReplyConnectivity m = ConstructObject<ReplyConnectivity>(message);
 
-    bool accepted = m.getAccepted();
+//    bool accepted = m.getAccepted();
 
-    if(accepted)
-        player_msg("Connection accepted with the server");
-    else
-        player_msg("Connection rejected with the server");
+//    if(accepted)
+//        player_msg("Connection accepted with the server");
+//    else
+//        player_msg("Connection rejected with the server");
 
-    m_connected = accepted;
-}
+//    m_connected = accepted;
+//}
 
 void Player::process_server_game_init(zmqpp::message& message)
 {
@@ -29,6 +29,7 @@ void Player::process_server_game_init(zmqpp::message& message)
     // Update internal state
     m_current_player = m.getCurrentPlayer();
     retrieve_piece_locations(m.getConfiguration());
+    m_connected = true;
 
     // Then forward to the render thread
     m_render_thread_socket.send(message);
@@ -273,8 +274,6 @@ void Player::connect()
     if(m_connected)
         return;
 
-    int attempt = 5;
-
     zmqpp::poller poller;   // safer to use a local poller/reactor I think
     MessageReactor reactor;
 
@@ -283,48 +282,39 @@ void Player::connect()
     using MessageType = MessageWrapper::MessageType;
     using Callback = MessageReactor::Callback;
 
-    Callback process_server_reply_connectivity = std::bind(&Player::process_server_reply_connectivity, this, std::placeholders::_1);
-    reactor.add(MessageType::ReplyConnectivity, process_server_reply_connectivity);
+    Callback process_server_game_init = std::bind(&Player::process_server_game_init, this, std::placeholders::_1);
+    reactor.add(MessageType::GameInit, process_server_game_init);
 
-    while(!m_connected && attempt > 0)
+    zmqpp::message message = ConstructMessage<CheckConnectivity>(m_self_player);
+    m_server_thread_socket.send(message, true);
+
+    // wait 5 seconds the response of the server
+    if(poller.poll(5000))
     {
-        attempt -= 1;
-
-        zmqpp::message message = ConstructMessage<CheckConnectivity>(m_self_player);
-        m_server_thread_socket.send(message, true);
-
-        // wait 5 seconds the response of the server
-        if(poller.poll(5000))
+        if(poller.has_input(m_server_thread_socket))
         {
-            if(poller.has_input(m_server_thread_socket))
-            {
-                zmqpp::message input_message;
+            zmqpp::message input_message;
 
-                // receive the message
-                m_server_thread_socket.receive(input_message);
+            // receive the message
+            m_server_thread_socket.receive(input_message);
 
-                // process it
-                bool processed = reactor.process_message(input_message);
+            // process it
+            bool processed = reactor.process_message(input_message);
 
-                if(!processed)
-                    player_msg("message received from the server thread but no callback were defined for its type");
-            }
+            if(!processed)
+                player_msg("message received from the server thread but no callback were defined for its type");
         }
-
-        if(!m_connected)
-            player_msg("Server not responding :(");
     }
 
     if(!m_connected)
-        player_msg("Cannot connect to the server after 5 attempts. Abort ...");
+        player_msg("Server not responding :(");
 }
 
 void Player::loop()
 {
-    if(!m_connected)
+    while(!m_connected)
     {
-        player_msg("Server not connected");
-        return;
+        connect();
     }
 
     player_msg("Player entering the main loop!");
