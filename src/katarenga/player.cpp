@@ -221,7 +221,7 @@ Player::Player(GameSettings& game_settings) :
     m_piece_locations(),
     m_memo({-1,-1})
 {
-    m_server_thread_socket.bind(game_settings.server_binding_point);
+    m_server_thread_socket.connect(game_settings.server_binding_point);
     m_render_thread_socket.bind(game_settings.render_binding_point);
 
     // Create the render thread and
