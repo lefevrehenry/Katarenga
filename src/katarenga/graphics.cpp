@@ -11,10 +11,10 @@ using MessageType = MessageWrapper::MessageType;
 
 void print_help()
 {
-    std::cout << "h,help for help" << std::endl;
-    std::cout << "c,click for click in a case" << std::endl;
-    std::cout << "p,print to print the board" << std::endl;
-    std::cout << "s,stop for quit" << std::endl;
+    render_msg("h,help for help");
+    render_msg("c,click for click in a case");
+    render_msg("p,print to print the board");
+    render_msg("s,stop for quit");
 }
 
 void graphics_function(zmqpp::context& zmq_context, const std::string& render_binding_point)
@@ -32,7 +32,7 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
 
     while(!end_game)
     {
-        std::cout << "Enter a command: " << std::endl;
+        render_msg("Enter a command: ");
 
         std::string command = "";
         std::cin >> command;
@@ -43,7 +43,7 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
         }
         else if(command == "c" || command == "click")
         {
-            std::cout << "Enter your string as the index of the cell '<src_cell_index>' ";
+            render_msg("Enter your string as the index of the cell '<src_cell_index>' ");
 
             std::string move_str;
             std::cin >> move_str;
@@ -54,7 +54,7 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
             bool ret = socket_main_thread.send(message, true);
 
             if(!ret)
-                std::cout << "(click) error, message not sent" << std::endl;
+                render_msg("(click) error, message not sent");
         }
         else if(command == "p" || command == "print")
         {
@@ -64,7 +64,7 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
             bool ret = socket_main_thread.send(message, true);
 
             if(!ret)
-                std::cout << "(print) error, message not sent" << std::endl;
+                render_msg("(print) error, message not sent");
         }
         else if(command == "s" || command == "stop")
         {
@@ -74,20 +74,20 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
             bool ret = socket_main_thread.send(message, true);
 
             if(!ret)
-                std::cout << "(stop) error, message not sent" << std::endl;
+                render_msg("(stop) error, message not sent");
             else
                 end_game = true;
         }
         else
         {
-            std::cout << "unknow command '" << command << "'" << std::endl;
+            render_msg("unknow command '" + command + "'");
         }
 
 //        if ((has_won = board.gameFinished()) != 0)
 //        {
 //            end_game = true;
-//            std::cout << "Woah! " << (has_won == 1?"White":"Black") << " player has won the game!"
-//                                                                  "" << std::endl;
+//            render_msg("Woah! " << (has_won == 1?"White":"Black") << " player has won the game!"
+//                                                                  "");
 //        }
     }
 
@@ -108,11 +108,11 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
 //    string board_configuration = s_recv(socketS);
 //    s_send(socketS, "ACK");
 
-//    std::cout << "GL received board config:\n" << board_configuration << std::endl;
+//    render_msg("GL received board config:\n" << board_configuration);
 
 ////    Board board;
 
-//    std::cout << "GL thread ready to play!" << std::endl;
+//    render_msg("GL thread ready to play!");
 
 //    // Main loop
 //    string move_str;
@@ -153,23 +153,5 @@ void graphics_function(zmqpp::context& zmq_context, const std::string& render_bi
 //    }
 
 //    socketS.close();
-//    std::cout << "Terminating GL thread." << std::endl;
+//    render_msg("Terminating GL thread.");
 //}
-
-
-std::string askNextMoveText(int current_player)
-{
-    int srci, desti;
-
-    std::cout << (current_player == 1 ? "It's White's (+)" : "Black's (-)") << " turn, what is your move?" << std::endl;
-    std::cout << "Source index: ";
-    std::cin >> srci;
-    std::cout << "Destination index: ";
-    std::cin >> desti;
-
-
-    std::string src_str = (srci < 10 ? "0" : "") + std::to_string(srci);
-    std::string dest_str = (desti < 10 ? "0" : "") + std::to_string(desti);
-
-    return "m" + src_str + ":" + dest_str;
-}

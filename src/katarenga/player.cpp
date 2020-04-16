@@ -88,7 +88,7 @@ void Player::process_server_move_message(zmqpp::message& message)
                 if (it != m_piece_locations.end())
                 {
                     *it = dest;
-                    std::cout << "Updating piece location from " << src << "to" << dest << std::endl;
+                    player_msg("Updating piece location from " + std::to_string(src) + " to " + std::to_string(dest));
                 }
                 else
                 {
@@ -148,7 +148,7 @@ void Player::retrieve_piece_locations(const std::string& board_configuration)
             {
                 // This cell is occupied by one of my pieces
                 m_piece_locations.push_back(cell_index);
-                std::cout << "Found a piece at location " << cell_index << std::endl;
+                player_msg("Found a piece at location " + std::to_string(cell_index));
             }
         }
     }
@@ -194,7 +194,7 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
         m_memo.second = -1;
     }
 
-    std::cout << " '(main thread) case clicked ' " << id << std::endl;
+    player_msg("case clicked " + std::to_string(id));
 }
 
 void Player::process_graphics_stop_game(zmqpp::message&)

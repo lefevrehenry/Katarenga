@@ -38,7 +38,7 @@ bool s_send(zmqpp::socket& socket, const char* cstring)
 void render_msg(const std::string& msg)
 {
     static const std::string white = "\033[0m";
-    static const std::string yellow = "\[\033[33m";
+    static const std::string yellow = "\033[33m";
     if (verbose)
         std::cout << yellow << "[render thread]" << white << " " << msg << std::endl;
 }
