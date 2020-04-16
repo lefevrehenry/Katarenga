@@ -33,6 +33,7 @@ public:
 
 private:
     /* Put here functions reacting to player messages */
+    void process_player_check_connectivity(zmqpp::message& message);
     void process_player_move_message(zmqpp::message& message);
     void process_player_ask_board_configuration(zmqpp::message& message);
     void process_player_stop_game(zmqpp::message& message);
@@ -56,6 +57,9 @@ private:
     std::unique_ptr<Board> m_board;
     int m_current_player;
     bool m_game_stopped;
+
+    // Keep player connectivity state <white player, black player>
+    std::pair<bool,bool> m_connectiviy;
 
 };
 
