@@ -19,7 +19,8 @@ public:
         GameInit,                   // In BoardConfigMessage
         AskBoardConfiguration,      // In BoardConfigMessage
         AnswerBoardConfiguration,   // In BoardConfigMessage
-        //CheckConnectivity,
+        CheckConnectivity,          // In CheckConnectivity
+        ReplyConnectivity,          // In ReplyConnectivity
         MoveMessage,                // In MoveMessage
         PlayerWon,                  // In OtherMessage
         //PrintBoard,               // In OtherMessage
