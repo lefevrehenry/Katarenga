@@ -5,6 +5,7 @@
 #include <GLTK/GLFWApplication.h>
 
 #include <iostream>
+#include <unistd.h>
 
 using MessageType = MessageWrapper::MessageType;
 
@@ -33,8 +34,9 @@ Graphics::Graphics(zmqpp::context& zmq_context, const std::string& main_thread_b
 {
     m_main_thread_socket.connect(main_thread_binding_point);
 
-    // We want to listen to the socket
+    // Listen to the main thread and std::cin
     m_poller.add(m_main_thread_socket, zmqpp::poller::poll_in);
+    m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
 
     using MessageType = MessageWrapper::MessageType;
     using Callback = MessageReactor::Callback;
@@ -60,90 +62,71 @@ void Graphics::loop()
     {
         render_msg("Enter a command: ");
 
-        std::string command = "";
-        std::cin >> command;
-
-        if(command == "h" || command == "help")
+        if(m_poller.poll())
         {
-            print_help();
-        }
-        else if(command == "c" || command == "click")
-        {
-            render_msg("Enter your string as the index of the cell '<src_cell_index>' ");
-
-            std::string move_str;
-            std::cin >> move_str;
-
-            zmqpp::message message = ConstructMessage<CaseClicked>(move_str);
-
-            // envoie le message (non bloquant)
-            bool ret = m_main_thread_socket.send(message, true);
-
-            if(!ret)
-                render_msg("(click) error, message not sent");
-        }
-        else if(command == "p" || command == "print")
-        {
-            zmqpp::message message = ConstructMessage<AskBoardConfiguration>();
-
-            // envoie le coup (non bloquant)
-            bool ret = m_main_thread_socket.send(message, true);
-
-            if(!ret)
-                std::cout << "(print) error, message not sent" << std::endl;
-            else
+            if(m_poller.has_input(m_main_thread_socket))
             {
-                zmqpp::message input_message;
+                // receive the message
+                m_main_thread_socket.receive(input_message);
 
-                // wait no more than 5 seconds the coming answer
-                if(m_poller.poll(5000))
+                // Will call the callback corresponding to the message type
+                bool processed = m_main_thread_reactor.process_message(input_message);
+
+                if(!processed)
+                    render_msg("message received from the main thread but no callback were defined for its type");
+            }
+            if(m_poller.has_input(STDIN_FILENO))
+            {
+                std::string command;
+                std::getline(std::cin, command);
+
+                if(command == "h" || command == "help")
                 {
-                    if(m_poller.has_input(m_main_thread_socket))
-                    {
-                        // receive the message
-                        m_main_thread_socket.receive(input_message);
+                    print_help();
+                }
+                else if(command == "c" || command == "click")
+                {
+                    std::cout << "Enter your string as the index of the cell '<src_cell_index>' ";
 
-                        // Will call the callback corresponding to the message type
-                        bool processed = m_main_thread_reactor.process_message(input_message);
+                    std::string move_str;
+                    std::cin >> move_str;
 
-                        if(!processed)
-                            render_msg("message received from the main thread but no callback were defined for its type");
-                    }
+                    zmqpp::message message = ConstructMessage<CaseClicked>(move_str);
+
+                    // envoie le message (non bloquant)
+                    bool ret = m_main_thread_socket.send(message, true);
+
+                    if(!ret)
+                        std::cout << "(click) error, message not sent" << std::endl;
+                }
+                else if(command == "p" || command == "print")
+                {
+                    zmqpp::message message = ConstructMessage<AskBoardConfiguration>();
+
+                    // envoie le coup (non bloquant)
+                    bool ret = m_main_thread_socket.send(message, true);
+
+                    if(!ret)
+                        std::cout << "(print) error, message not sent" << std::endl;
+                }
+                else if(command == "s" || command == "stop")
+                {
+                    zmqpp::message message = ConstructMessage<StopGame>("human decide to stop", 0);
+
+                    // envoie le message (non bloquant)
+                    bool ret = m_main_thread_socket.send(message, true);
+
+                    if(!ret)
+                        std::cout << "(stop) error, message not sent" << std::endl;
                     else
-                    {
-                        render_msg("This should not happen, terminating.");
-                        std::terminate(); // Forcefully terminates the execution
-                    }
+                        m_end_game = true;
                 }
                 else
                 {
-                    render_msg("no board configuration received from the main thread");
+                    std::cout << "unknow command '" << command << "'" << std::endl;
                 }
             }
         }
-        else if(command == "s" || command == "stop")
-        {
-            zmqpp::message message = ConstructMessage<StopGame>("human decide to stop", 0);
-
-            // envoie le message (non bloquant)
-            bool ret = m_main_thread_socket.send(message, true);
-
-            if(!ret)
-                render_msg("(stop) error, message not sent");
-            else
-                m_end_game = true;
-        }
-        else
-        {
-            render_msg("unknow command '" + command + "'");
-        }
-
-//        if ((has_won = board.gameFinished()) != 0)
-//        {
-//            end_game = true;
-//            render_msg("Woah! " << (has_won == 1?"White":"Black") << " player has won the game!"
-//                                                                  "");
-//        }
     }
 
     render_msg("Terminating");
