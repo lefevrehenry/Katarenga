@@ -21,7 +21,7 @@ zmqpp::message ConstructMessage(T& object)
     zmqpp::message message;
 
     MessageWrapper::MessageType type = T::MessageType();
-    message.add(&type, sizeof(MessageWrapper::MessageType));
+    message.add_raw<MessageWrapper::MessageType>(&type, sizeof(MessageWrapper::MessageType));
 
     object.toMessage(message);
 
@@ -41,8 +41,8 @@ T ConstructObject(zmqpp::message& message)
 {
     T object;
 
-    const MessageWrapper::MessageType* type;
-    message >> type;
+    //message >> type;
+    message.next(); // Just skip the first part which is the MessageType
 
     object.fromMessage(message);
 
