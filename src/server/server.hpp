@@ -43,6 +43,7 @@ private:
     void sendToPlayer(zmqpp::message& message, int player);
     void rejectMove(MoveMessage& move_msg);
     void sendWonMessage();
+    void sendGameInit(int player);
 
 private:
     // Socket-related content

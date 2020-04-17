@@ -10,37 +10,21 @@ void Server::process_player_check_connectivity(zmqpp::message& message)
     if(player == 1)
     {
         // check wether the white player is already connected or not
-        bool accepted = (m_connectiviy.first == false);
-
-        // we accept the white player !
-        if(accepted)
+        if(m_connectiviy.first == false)
         {
+            // we accept the white player!
             m_connectiviy.first = true;
-
-            std::string board_configuration = m_board->getBoardConfiguration();
-            int currentPlayer = m_board->getCurrentPlayer();
-
-            // send him the game state
-            zmqpp::message output_message = ConstructMessage<GameInit>(board_configuration, currentPlayer);
-            m_white_player_socket.send(output_message);
+            sendGameInit(player);
         }
     }
     else if (player == -1)
     {
         // check wether the black player is already connected or not
-        bool accepted = (m_connectiviy.second == false);
-
-        // we accept the black player !
-        if(accepted)
+        if(m_connectiviy.second == false)
         {
+            // we accept the black player!
             m_connectiviy.second = true;
-
-            std::string board_configuration = m_board->getBoardConfiguration();
-            int currentPlayer = m_board->getCurrentPlayer();
-
-            // send him the game state
-            zmqpp::message output_message = ConstructMessage<GameInit>(board_configuration, currentPlayer);
-            m_black_player_socket.send(output_message);
+            sendGameInit(player);
         }
     }
     else
@@ -48,6 +32,7 @@ void Server::process_player_check_connectivity(zmqpp::message& message)
         server_msg("an unknown player tries to connect with the server");
     }
 }
+
 
 void Server::process_player_move_message(zmqpp::message& message)
 {
@@ -91,20 +76,6 @@ void Server::process_player_move_message(zmqpp::message& message)
     // Else, the player send a message of type MovePlayed or InvalidMove, ignore it
 }
 
-void Server::rejectMove(MoveMessage& move_msg)
-{
-    move_msg.setType(MoveType::InvalidMove);
-
-    zmqpp::message m = ConstructMessage<MoveMessage>(move_msg);
-    sendToPlayer(m, move_msg.getPlayer());
-}
-
-void Server::sendWonMessage()
-{
-    zmqpp::message message = ConstructMessage<PlayerWon>(m_board->whoWon());
-    sendToBoth(message);
-}
-
 
 void Server::process_player_ask_board_configuration(zmqpp::message& input_message)
 {
@@ -145,6 +116,26 @@ void Server::process_player_stop_game(zmqpp::message& message)
 }
 
 
+void Server::rejectMove(MoveMessage& move_msg)
+{
+    move_msg.setType(MoveType::InvalidMove);
+
+    zmqpp::message m = ConstructMessage<MoveMessage>(move_msg);
+    sendToPlayer(m, move_msg.getPlayer());
+}
+
+void Server::sendWonMessage()
+{
+    zmqpp::message message = ConstructMessage<PlayerWon>(m_board->whoWon());
+    sendToBoth(message);
+}
+
+void Server::sendGameInit(int player)
+{
+    zmqpp::message zmq_message = ConstructMessage<GameInit>(m_board->getBoardConfiguration(),
+                                                            m_board->getCurrentPlayer());
+    sendToPlayer(zmq_message, player);
+}
 
 void Server::sendToBoth(zmqpp::message& message)
 {
