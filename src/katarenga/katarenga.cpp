@@ -15,7 +15,7 @@ bool parse_arguments(int argc, char * argv[], GameSettings& game_settings)
 R"(Katarenga: A nice two-player board game!
 
 Usage:
-    katarenga --white | --black    [--server-ip <ip>]
+    katarenga (--white | --black)  [--server-ip <ip>]
                                    [--offset-port <port>]
                                    [options]
     katarenga --standalone         [options]
