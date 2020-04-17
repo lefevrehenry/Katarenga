@@ -40,7 +40,7 @@ void render_msg(const std::string& msg)
     static const std::string white = "\033[0m";
     static const std::string yellow = "\033[33m";
     if (verbose)
-        std::cout << yellow << "[render thread]" << white << " " << msg << std::endl;
+        std::cout << yellow << "[render thread] " << white << " " << msg << std::endl;
 }
 
 void player_msg(const std::string& msg)
@@ -49,7 +49,7 @@ void player_msg(const std::string& msg)
     static const std::string green = "\033[32m";
 
     if (verbose)
-        std::cout << green << "[player thread]" << white << " " << msg << std::endl;
+        std::cout << green << "[player thread] " << white << " " << msg << std::endl;
 }
 
 void convert_move_str(const std::string& move_str, int& source, int& dest)

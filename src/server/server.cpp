@@ -45,7 +45,7 @@ void Server::process_player_check_connectivity(zmqpp::message& message)
     }
     else
     {
-        server_msg("an unknow player try to connect with the server");
+        server_msg("an unknown player tries to connect with the server");
     }
 }
 
@@ -247,7 +247,7 @@ void Server::loop()
             bool processed = m_player_reactor.process_message(input_message);
 
             if(!processed)
-                server_msg("message received from on of the player socket but no callback were defined for its type");
+                server_msg("Message received from one of the player socket but no callback were defined to handle it");
         }
     }
 }
