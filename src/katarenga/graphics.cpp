@@ -66,6 +66,8 @@ void Graphics::loop()
         {
             if(m_poller.has_input(m_main_thread_socket))
             {
+                zmqpp::message input_message;
+
                 // receive the message
                 m_main_thread_socket.receive(input_message);
 
