@@ -5,7 +5,8 @@
 #include "MessageReactor.hpp"
 
 #include "BoardConfigMessage.hpp"
-//#include "CheckConnectivity.hpp"
+#include "CheckConnectivity.hpp"
+#include "ReplyConnectivity.hpp"
 #include "MoveMessage.hpp"
 #include "QuitMessage.hpp"
 #include "OtherMessage.hpp"

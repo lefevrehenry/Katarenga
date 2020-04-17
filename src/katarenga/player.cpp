@@ -8,6 +8,20 @@
 
 #include <iostream> // FOR DEBUGGING PURPOSE, TODO REMOVE IT
 
+//void Player::process_server_reply_connectivity(zmqpp::message& message)
+//{
+//    ReplyConnectivity m = ConstructObject<ReplyConnectivity>(message);
+
+//    bool accepted = m.getAccepted();
+
+//    if(accepted)
+//        player_msg("Connection accepted with the server");
+//    else
+//        player_msg("Connection rejected with the server");
+
+//    m_connected = accepted;
+//}
+
 void Player::process_server_game_init(zmqpp::message& message)
 {
     GameInit m = ConstructObject<GameInit>(message);
@@ -15,6 +29,7 @@ void Player::process_server_game_init(zmqpp::message& message)
     // Update internal state
     m_current_player = m.getCurrentPlayer();
     retrieve_piece_locations(m.getConfiguration());
+    m_connected = true;
 
     // Then forward to the render thread
     m_render_thread_socket.send(message);
@@ -73,7 +88,7 @@ void Player::process_server_move_message(zmqpp::message& message)
                 if (it != m_piece_locations.end())
                 {
                     *it = dest;
-                    std::cout << "Updating piece location from " << src << "to" << dest << std::endl;
+                    player_msg("Updating piece location from " + std::to_string(src) + " to " + std::to_string(dest));
                 }
                 else
                 {
@@ -124,16 +139,16 @@ void Player::retrieve_piece_locations(const std::string& board_configuration)
     m_piece_locations.clear();
 
     // Retrieve pieces from the regular board but not Camp cells
-    for (int i = 1; i <= 8; ++i)
+    for (int i = 0; i < 8; ++i)
     {
-        for (int j = 1; j <= 8; ++j)
+        for (int j = 0; j < 8; ++j)
         {
-            int cell_index = 8 * i + j - 1;
+            int cell_index = (i * 8 ) + j;
             if (board_configuration.at(2 * cell_index + 1) == m_self_player_sign)
             {
                 // This cell is occupied by one of my pieces
                 m_piece_locations.push_back(cell_index);
-                std::cout << "Found a piece at location " << cell_index << std::endl;
+                player_msg("Found a piece at location " + std::to_string(cell_index));
             }
         }
     }
@@ -179,7 +194,7 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
         m_memo.second = -1;
     }
 
-    std::cout << " '(main thread) case clicked ' " << id << std::endl;
+    player_msg("case clicked " + std::to_string(id));
 }
 
 void Player::process_graphics_stop_game(zmqpp::message&)
@@ -203,9 +218,11 @@ Player::Player(GameSettings& game_settings) :
     m_game_stopped(false),
     m_self_player(game_settings.self_player),
     m_current_player(0),
+    m_connected(false),
+    m_piece_locations(),
     m_memo({-1,-1})
 {
-    m_server_thread_socket.bind(game_settings.server_binding_point);
+    m_server_thread_socket.connect(game_settings.server_binding_point);
     m_render_thread_socket.bind(game_settings.render_binding_point);
 
     // Create the render thread and
@@ -252,8 +269,54 @@ Player::~Player()
     m_render_thread_socket.close();
 }
 
+void Player::connect()
+{
+    if(m_connected)
+        return;
+
+    zmqpp::poller poller;   // safer to use a local poller/reactor I think
+    MessageReactor reactor;
+
+    poller.add(m_server_thread_socket, zmqpp::poller::poll_in);
+
+    using MessageType = MessageWrapper::MessageType;
+    using Callback = MessageReactor::Callback;
+
+    Callback process_server_game_init = std::bind(&Player::process_server_game_init, this, std::placeholders::_1);
+    reactor.add(MessageType::GameInit, process_server_game_init);
+
+    zmqpp::message message = ConstructMessage<CheckConnectivity>(m_self_player);
+    m_server_thread_socket.send(message, true);
+
+    // wait 5 seconds the response of the server
+    if(poller.poll(5000))
+    {
+        if(poller.has_input(m_server_thread_socket))
+        {
+            zmqpp::message input_message;
+
+            // receive the message
+            m_server_thread_socket.receive(input_message);
+
+            // process it
+            bool processed = reactor.process_message(input_message);
+
+            if(!processed)
+                player_msg("message received from the server thread but no callback were defined for its type");
+        }
+    }
+
+    if(!m_connected)
+        player_msg("Server not responding :(");
+}
+
 void Player::loop()
 {
+    while(!m_connected)
+    {
+        connect();
+    }
+
     player_msg("Player entering the main loop!");
 
     while(!m_game_finished)

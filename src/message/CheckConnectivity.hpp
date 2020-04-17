@@ -5,41 +5,31 @@
 
 
 /**
- * @brief The CheckConnectivity struct
+ * @brief The CheckConnectivity class
  */
-/*struct CheckConnectivity
+class CheckConnectivity : public MessageWrapper
 {
+public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::CheckConnectivity;
     }
 
-    class Request : public DefaultMessageWrapper
-    {
-    };
+public:
+    CheckConnectivity();
+    CheckConnectivity(int player);
 
-    class Reply : public MessageWrapper
-    {
+public:
+    virtual void toMessage(zmqpp::message& message);
+    virtual void fromMessage(zmqpp::message& message);
 
-    public:
-        Reply();
+public:
+    int getPlayer() const;
+    void setPlayer(int player);
 
-    public:
-        virtual void toMessage(zmqpp::message& message);
-        virtual void fromMessage(zmqpp::message& message);
+private:
+    int m_player;
 
-    public:
-        bool getConnectivity() const;
-        void setConnectivity(bool connectivity);
-
-    private:
-        bool m_connectivity;
-
-    };
-
-    class Broadcast : public DefaultMessageWrapper
-    {
-    };
-};*/
+};
 
 #endif

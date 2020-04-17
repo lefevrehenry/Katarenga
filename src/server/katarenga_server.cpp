@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
         return 1;
 
     Server server(server_info);
+    server.new_game();
     server.loop();
 
     return 0;

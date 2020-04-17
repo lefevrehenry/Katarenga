@@ -29,6 +29,7 @@ public:
     virtual ~Player();
 
 public:
+    void connect();
     void loop();    // function executed in the main thread
 
 private:
@@ -61,6 +62,7 @@ private:
     int m_self_player;
     char m_self_player_sign;
     int m_current_player;
+    bool m_connected;
     std::vector<int> m_piece_locations; // The list of cell ids where my pieces are
     Memo m_memo;        // memo for case clicked by the player <src,dst>
 };

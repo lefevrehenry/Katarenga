@@ -1,27 +1,33 @@
 #include "CheckConnectivity.hpp"
-/*
-CheckConnectivity::Reply::Reply() : MessageWrapper(),
-    m_connectivity(false)
+
+CheckConnectivity::CheckConnectivity() : MessageWrapper(),
+    m_player(0)
 {
+
 }
 
-void CheckConnectivity::Reply::toMessage(zmqpp::message& message)
+CheckConnectivity::CheckConnectivity(int player) : MessageWrapper(),
+    m_player(player)
 {
-    message << m_connectivity;
+
 }
 
-void CheckConnectivity::Reply::fromMessage(zmqpp::message& message)
+void CheckConnectivity::toMessage(zmqpp::message& message)
 {
-    message >> m_connectivity;
+    message << m_player;
 }
 
-bool CheckConnectivity::Reply::getConnectivity() const
+void CheckConnectivity::fromMessage(zmqpp::message& message)
 {
-    return m_connectivity;
+    message >> m_player;
 }
 
-void CheckConnectivity::Reply::setConnectivity(bool connectivity)
+int CheckConnectivity::getPlayer() const
 {
-    m_connectivity = connectivity;
+    return m_player;
 }
-*/
+
+void CheckConnectivity::setPlayer(int player)
+{
+    m_player = player;
+}

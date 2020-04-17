@@ -4,9 +4,11 @@
 #include "server_utils.hpp"
 #include <message/message_utils.hpp>
 
+// ZMQPP
 #include <zmqpp/zmqpp.hpp>
 
 // Standard Library
+#include <memory>
 #include <string>
 #include <thread>
 
@@ -22,7 +24,7 @@ class Server
 {
 
 public:
-    Server(ServerInfo &server_info);
+    Server(ServerInfo& server_info);
     virtual ~Server();
 
 public:
@@ -31,6 +33,7 @@ public:
 
 private:
     /* Put here functions reacting to player messages */
+    void process_player_check_connectivity(zmqpp::message& message);
     void process_player_move_message(zmqpp::message& message);
     void process_player_ask_board_configuration(zmqpp::message& message);
     void process_player_stop_game(zmqpp::message& message);
@@ -40,7 +43,9 @@ private:
     void sendToPlayer(zmqpp::message& message, int player);
     void rejectMove(MoveMessage& move_msg);
     void sendWonMessage();
+    void sendGameInit(int player);
 
+private:
     // Socket-related content
     zmqpp::context  m_zmq_context;
     zmqpp::poller   m_poller;
@@ -50,9 +55,13 @@ private:
     MessageReactor  m_player_reactor;
 
     // Game-related content
-    Board *m_board = nullptr;
+    std::unique_ptr<Board> m_board;
     int m_current_player;
     bool m_game_stopped;
+
+    // Keep player connectivity state <white player, black player>
+    std::pair<bool,bool> m_connectiviy;
+
 };
 
 #endif // SERVER_HPP
