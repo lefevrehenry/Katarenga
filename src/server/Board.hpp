@@ -22,11 +22,13 @@ public:
 public:
     bool isValidMove(const Move& m, int player) const;
     bool isValidMove(const std::string& move_str, int player) const;
+    bool isValidMove(int src, int dest, int player) const;
 
     Move askNextValidMove() const;
 
-    void playMove(const Move& move);
-    void playMove(const std::string& move_str);
+    bool playMove(const Move& move);
+    bool playMove(const std::string& move_str);
+    bool playMove(int src, int dest);
 
     // Fills the list with possible Moves of the Piece in the cell (row,col)
     void fillAllMoves(int row, int col, std::vector<Move>* moveList) const;
@@ -53,6 +55,8 @@ private:
     std::string moveToString(const Move& move) const;
     // Converts a string representation of a Move to a Move
     Move stringToMove(const std::string& move_str) const;
+
+    Move indicesToMove(int src, int dest) const;
 
 private:
     Cell *** _plateau;                  // The Board containing the 8*8 BoardCells and the 4 CampCells

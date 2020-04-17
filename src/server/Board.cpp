@@ -235,6 +235,12 @@ bool Board::isValidMove(const std::string& move_str, int player) const
     return isValidMove(m, player);
 }
 
+bool Board::isValidMove(int src, int dest, int player) const
+{
+    Move m = indicesToMove(src, dest);
+    return isValidMove(m, player);
+}
+
 Move Board::askNextValidMove() const
 {
     int srci, desti;
@@ -262,13 +268,13 @@ Move Board::askNextValidMove() const
     return m;
 }
 
-void Board::playMove(const Move& move)
+bool Board::playMove(const Move& move)
 {
     if (!isValidMove(move, getCurrentPlayer()))
     {
         // TODO throw an error
-        std::cout << "ERROR: Trying to play an invalid move" << std::endl;
-        return;
+        //std::cout << "ERROR: Trying to play an invalid move" << std::endl;
+        return false;
     }
 
     BoardCell * src_cell = (BoardCell *)move.first;
@@ -285,12 +291,19 @@ void Board::playMove(const Move& move)
     _currentPlayer = -_currentPlayer;
 
     updateGameFinished();
+    return true;
 }
 
-void Board::playMove(const std::string& move_str)
+bool Board::playMove(const std::string& move_str)
 {
     Move m = stringToMove(move_str);
-    playMove(m);
+    return playMove(m);
+}
+
+bool Board::playMove(int src, int dest)
+{
+    Move m = indicesToMove(src, dest);
+    return playMove(m);
 }
 
 void Board::fillAllMoves(int row, int col, std::vector<Move>* list) const
@@ -780,4 +793,9 @@ Move Board::stringToMove(const std::string& move_str) const
     std::cout << srci << " " << desti << std::endl;*/
 
     return Move(indexToCell(stoi(src_str)),indexToCell(stoi(dest_str)));
+}
+
+Move Board::indicesToMove(int src, int dest) const
+{
+    return Move(indexToCell(src), indexToCell(dest));
 }

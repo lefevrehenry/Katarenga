@@ -44,13 +44,14 @@ void Server::process_player_move_message(zmqpp::message& message)
         if (move_player == m_current_player)
         {
             // That's a move from the current player, handle it
-            std::string move_str = move_msg.getMove();
-            if (m_board->isValidMove(move_str, move_player))
-            {
-                // The move is accepted, update the Board state
-                m_board->playMove(move_str);
+            int src = move_msg.getSource();
+            int dest = move_msg.getDestination();
 
-                // Notify players
+            bool valid_move = m_board->playMove(src, dest); // Returns false if invalid move
+
+            if (valid_move)
+            {
+                // The move was accepted, notify players
                 move_msg.setType(MoveType::MovePlayed);
                 zmqpp::message message = ConstructMessage<MoveMessage>(move_msg);
                 sendToBoth(message);
@@ -73,7 +74,7 @@ void Server::process_player_move_message(zmqpp::message& message)
             rejectMove(move_msg);
         }
     }
-    // Else, the player send a message of type MovePlayed or InvalidMove, ignore it
+    // Else, the player sent a message of type MovePlayed or InvalidMove, ignore it
 }
 
 

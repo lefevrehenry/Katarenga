@@ -41,9 +41,10 @@ MoveMessage::MoveMessage() : MessageWrapper()
 
 }
 
-MoveMessage::MoveMessage(const MoveType& type, const std::string& move, int player) : MessageWrapper(),
+MoveMessage::MoveMessage(const MoveType& type, int src, int dest, int player) : MessageWrapper(),
     m_type(type),
-    m_move(move),
+    m_src(src),
+    m_dest(dest),
     m_player(player)
 {
 
@@ -52,7 +53,8 @@ MoveMessage::MoveMessage(const MoveType& type, const std::string& move, int play
 void MoveMessage::toMessage(zmqpp::message& message)
 {
     message << moveTypeToString(m_type);
-    message << m_move;
+    message << m_src;
+    message << m_dest;
     message << m_player;
 }
 
@@ -61,18 +63,29 @@ void MoveMessage::fromMessage(zmqpp::message& message)
     std::string type_str;
     message >> type_str;
     m_type = stringToMoveType(type_str);
-    message >> m_move;
+    message >> m_src;
+    message >> m_dest;
     message >> m_player;
 }
 
-std::string MoveMessage::getMove() const
+int MoveMessage::getSource() const
 {
-    return m_move;
+    return m_src;
 }
 
-void MoveMessage::setMove(const std::string& move)
+void MoveMessage::setSource(int index)
 {
-    m_move = move;
+    m_src = index;
+}
+
+int MoveMessage::getDestination() const
+{
+    return m_dest;
+}
+
+void MoveMessage::setDestination(int index)
+{
+    m_dest = index;
 }
 
 MoveType MoveMessage::getType() const

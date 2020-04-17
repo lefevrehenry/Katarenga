@@ -81,8 +81,8 @@ void Player::process_server_move_message(zmqpp::message& message)
             // Update the new location of the piece if it was my move
             if (move_player == m_self_player)
             {
-                int src, dest;
-                convert_move_str(m.getMove(), src, dest);
+                int src = m.getSource();
+                int dest = m.getDestination();
                 auto it = std::find(m_piece_locations.begin(), m_piece_locations.end(), src);
                 if (it != m_piece_locations.end())
                 {
@@ -183,8 +183,7 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     if(state2)
     {
         // envoie le coup au serveur
-        std::string move_str = create_move_str(m_memo.first, m_memo.second);
-        zmqpp::message play_message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, move_str, m_self_player);
+        zmqpp::message play_message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, m_memo.first, m_memo.second, m_self_player);
 
         m_server_thread_socket.send(play_message, true);
 
