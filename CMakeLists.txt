@@ -9,10 +9,13 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # build common library
+message("-- Configuring messages build")
 add_subdirectory(src/message)
 
 # build the server executable
+message("-- Configuring server build")
 add_subdirectory(src/server)
 
 # build the katarenga executable
+message("-- Configuring client build")
 add_subdirectory(src/katarenga)
