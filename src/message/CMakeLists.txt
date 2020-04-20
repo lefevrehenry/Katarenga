@@ -1,14 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 project(message_utils)
 
-## ZeroMQ dependency
-find_package(ZMQPP MODULE QUIET)
-if(NOT ZMQPP_FOUND)
-    find_package(ZMQPP CONFIG REQUIRED)
-endif()
-get_target_property(_ZMQPP_DIR ZMQPP INTERFACE_INCLUDE_DIRECTORIES)
-message("-- Found ZMQPP: ${_ZMQPP_DIR}")
-
 set(HEADER_FILES
     message_utils.hpp
     MessageReactor.hpp
