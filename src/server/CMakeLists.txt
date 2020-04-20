@@ -1,22 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.2)
 project(katarenga_server)
 
-## ZeroMQ dependency
-find_package(ZMQPP MODULE QUIET)
-if(NOT ZMQPP_FOUND)
-    find_package(ZMQPP CONFIG REQUIRED)
-endif()
-get_target_property(_ZMQPP_DIR ZMQPP INTERFACE_INCLUDE_DIRECTORIES)
-message("-- Found ZMQPP: ${_ZMQPP_DIR}")
-
-## Docopt dependency
-find_package(docopt MODULE QUIET)
-if(NOT DOCOPT_FOUND)
-    find_package(docopt CONFIG REQUIRED)
-endif()
-get_target_property(_DOCOPT_DIR docopt INTERFACE_INCLUDE_DIRECTORIES)
-message("-- Found docopt: ${_DOCOPT_DIR}")
-
 set(HEADER_FILES
     Board.hpp
     Cell.hpp
