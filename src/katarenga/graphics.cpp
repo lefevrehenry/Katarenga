@@ -58,6 +58,27 @@ void Graphics::process_main_answer_board_configuration(zmqpp::message& message)
     render_msg(s);
 }
 
+void Graphics::process_main_answer_move_message(zmqpp::message& message)
+{
+    MoveMessage m = ConstructObject<MoveMessage>(message);
+
+    int move_player = m.getPlayer();
+    MoveType type = m.getType();
+
+    if (type == MoveType::MovePlayed)
+    {
+        render_msg("MovePlayed");
+    }
+    else if (type == MoveType::InvalidMove)
+    {
+        render_msg("InvalidMove");
+    }
+    else if (type == MoveType::PlayThisMove)
+    {
+        render_msg("PlayThisMove");
+    }
+}
+
 Graphics::Graphics(zmqpp::context& zmq_context, const std::string& main_thread_binding_point) :
     m_poller(),
     m_main_thread_socket(zmq_context, zmqpp::socket_type::pair),
@@ -75,8 +96,11 @@ Graphics::Graphics(zmqpp::context& zmq_context, const std::string& main_thread_b
 
     // Add callback functions to react to messages received from the main thread
     Callback process_main_answer_board_configuration = std::bind(&Graphics::process_main_answer_board_configuration, this, std::placeholders::_1);
+    Callback process_main_answer_move_message = std::bind(&Graphics::process_main_answer_move_message, this, std::placeholders::_1);
 
     m_main_thread_reactor.add(MessageType::AnswerBoardConfiguration, process_main_answer_board_configuration);
+    m_main_thread_reactor.add(MessageType::MoveMessage, process_main_answer_move_message);
+
 }
 
 Graphics::~Graphics()
