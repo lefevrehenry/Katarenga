@@ -9,6 +9,37 @@
 
 using MessageType = MessageWrapper::MessageType;
 
+std::string format_board(const std::string& board_configuration)
+{
+    std::string s = "";
+
+    s += "\n";
+    s += "    1  2  3  4  5  6  7  8   ";
+    s += "\n";
+    s += "             White           ";
+    s += "\n";
+    s += "  X                         X";
+    s += "\n";
+
+    std::string board = board_configuration.substr(0,128);
+
+    for (int j = 0; j < 8; ++j) {
+        s += std::to_string(j+1) + "  ";
+        for (int i = 0; i < 8; ++i) {
+            size_t index = (j * 8) + i;
+            std::string c = board.substr(2*index,2);
+            s += " " + c;
+        }
+        s += "\n";
+    }
+
+    s += "  X                         X";
+    s += "\n";
+    s += "             Black           ";
+
+    return s;
+}
+
 void print_help()
 {
     render_msg("h,help for help");
@@ -23,7 +54,29 @@ void Graphics::process_main_answer_board_configuration(zmqpp::message& message)
     std::string board_configuration = m.getConfiguration();
 
     render_msg("AnswerBoardConfiguration received");
-    render_msg(board_configuration);
+    std::string s = format_board(board_configuration);
+    render_msg(s);
+}
+
+void Graphics::process_main_answer_move_message(zmqpp::message& message)
+{
+    MoveMessage m = ConstructObject<MoveMessage>(message);
+
+    int move_player = m.getPlayer();
+    MoveType type = m.getType();
+
+    if (type == MoveType::MovePlayed)
+    {
+        render_msg("MovePlayed");
+    }
+    else if (type == MoveType::InvalidMove)
+    {
+        render_msg("InvalidMove");
+    }
+    else if (type == MoveType::PlayThisMove)
+    {
+        render_msg("PlayThisMove");
+    }
 }
 
 Graphics::Graphics(zmqpp::context& zmq_context, const std::string& main_thread_binding_point) :
@@ -43,8 +96,11 @@ Graphics::Graphics(zmqpp::context& zmq_context, const std::string& main_thread_b
 
     // Add callback functions to react to messages received from the main thread
     Callback process_main_answer_board_configuration = std::bind(&Graphics::process_main_answer_board_configuration, this, std::placeholders::_1);
+    Callback process_main_answer_move_message = std::bind(&Graphics::process_main_answer_move_message, this, std::placeholders::_1);
 
     m_main_thread_reactor.add(MessageType::AnswerBoardConfiguration, process_main_answer_board_configuration);
+    m_main_thread_reactor.add(MessageType::MoveMessage, process_main_answer_move_message);
+
 }
 
 Graphics::~Graphics()
