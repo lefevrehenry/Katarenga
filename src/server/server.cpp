@@ -146,8 +146,11 @@ void Server::sendGameInit(int player)
 
 void Server::sendToBoth(zmqpp::message& message)
 {
-    m_white_player_socket.send(message);
-    m_black_player_socket.send(message);
+    zmqpp::message white_message = message.copy();
+    m_white_player_socket.send(white_message, true);
+
+    zmqpp::message black_message = message.copy();
+    m_black_player_socket.send(black_message, true);
 }
 
 void Server::sendToPlayer(zmqpp::message& message, int player)
