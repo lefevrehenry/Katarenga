@@ -68,7 +68,7 @@ const std::string Board::getBoardConfiguration() const
     // Populate the cells of the board
     for(int row = 0; row < 8; ++row)
     {
-        for (int col = 1; col < 8; ++col)
+        for (int col = 0; col < 8; ++col)
         {
             const BoardCell& cell = _plateau[row][col];
             switch(cell.getType())
