@@ -1,7 +1,6 @@
 ﻿#ifndef PIECE_HPP
 #define PIECE_HPP
 
-#include "server_utils.hpp"
 #include <vector>
 
 class Cell;
@@ -11,11 +10,10 @@ class Piece
 
 public:
     Piece(int player, Cell* cell);
-    ~Piece();
+    virtual ~Piece();
 
 public:
     int getPlayer() const;
-    std::vector<Move>* getMoveList();
 
     Cell* getCell() const;
     void setCell(Cell* cell);
@@ -23,7 +21,6 @@ public:
 private:
     int _player;
     Cell* _cell;
-    std::vector<Move>* _moveList;
 
 };
 

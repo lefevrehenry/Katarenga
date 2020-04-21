@@ -27,7 +27,7 @@ public:
     int getRow() const;
     int getColumn() const;
 
-	virtual bool isCampCell() = 0;
+    virtual bool isCampCell() const = 0;
 
 protected:
     Piece* _piece;      // Points to the Piece on this Cell, or nullptr
@@ -44,13 +44,14 @@ class BoardCell : public Cell
 {
 
 public:
+    BoardCell();
     BoardCell(CellType type, int row, int column);
 
 public:
     CellType getType() const;
     void setType(CellType type);
 
-    virtual bool isCampCell() override;
+    virtual bool isCampCell() const override;
 
 private:
     CellType _type;     // Type of the BoardCell
@@ -63,10 +64,19 @@ class CampCell : public Cell
 {
 
 public:
+    enum Type {
+        WhiteLeft = 0,
+        WhiteRight = 1,
+        BlackLeft = 2,
+        BlackRight = 3
+    };
+
+public:
+    CampCell();
     CampCell(int row, int column, int index);
 
 public:
-    virtual bool isCampCell() override;
+    virtual bool isCampCell() const override;
 
 };
 

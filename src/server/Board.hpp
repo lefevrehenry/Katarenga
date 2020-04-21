@@ -3,17 +3,23 @@
 
 #include "server_utils.hpp"
 #include "Cell.hpp"
-#include "Piece.hpp"
 
+// Standard Library
+#include <string>
 #include <vector>
-#include <utility>
+//#include <utility>
 
+class Piece;
+
+/**
+ * @brief The Board class
+ */
 class Board
 {
 
 public:
     Board();
-    ~Board();
+    virtual ~Board();
 
 public:
     const std::string getBoardConfiguration() const;
@@ -24,7 +30,7 @@ public:
     bool isValidMove(const std::string& move_str, int player) const;
     bool isValidMove(int src, int dest, int player) const;
 
-    Move askNextValidMove() const;
+//    Move askNextValidMove() const;
 
     bool playMove(const Move& move);
     bool playMove(const std::string& move_str);
@@ -46,10 +52,13 @@ public:
 
 private:
     void removePiece(Piece* p);
-    Cell* indexToCell(int cell_index) const;
+    const BoardCell& indexToBoardCell(int cell_index) const;
+    BoardCell& indexToBoardCell(int cell_index);
+    const CampCell& indexToCampCell(int campcell_index) const;
+    CampCell& indexToCampCell(int campcell_index);
     // Internal function to populate the vector of Moves, called in getAllMoves.
     // Returns false if the while loop calling this function has to break.
-    bool checkCellAddMove(BoardCell* src_cell, int row, int col, int player, CellType type, std::vector<Move>* plist) const;
+    bool checkCellAddMove(const BoardCell& src_cell, int row, int col, int player, CellType type, std::vector<Move>* plist) const;
 
     // Converts a Move to a string representation of that Move
     std::string moveToString(const Move& move) const;
@@ -59,14 +68,17 @@ private:
     Move indicesToMove(int src, int dest) const;
 
 private:
-    Cell *** _plateau;                  // The Board containing the 8*8 BoardCells and the 4 CampCells
-	std::vector<Piece*> _piecesW;		// The list of White Pieces
+    BoardCell                           _plateau[8][8];
+    std::map<CampCell::Type, CampCell>  _campCell;
+
+//    Cell *** _plateau;                // The Board containing the 8*8 BoardCells and the 4 CampCells
+    std::vector<Piece*> _piecesW;       // The list of White Pieces
 	std::vector<Piece*> _piecesB;		// The list of Black Pieces
 
 //    bool _verbose;                      // Whether to talk a lot or not
-    int _currentPlayer = 1;			      // 1 if White, -1 if Black
-    int _winningPlayer = 0;				  // 0 if not win, 1 if White wins, -1 if Black wins
-    bool _gameFinished = false;
+    int _currentPlayer; 			      // 1 if White, -1 if Black
+    int _winningPlayer; 				  // 0 if not win, 1 if White wins, -1 if Black wins
+    bool _gameFinished;
 
 };
 

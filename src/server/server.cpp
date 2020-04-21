@@ -103,17 +103,23 @@ void Server::process_player_stop_game(zmqpp::message& message)
     {
         std::string reason = "White player: " + m.getReason();
         zmqpp::message message = ConstructMessage<GameStopped>(reason);
-        m_black_player_socket.send(message);
+        m_black_player_socket.send(message, true);
+
+        server_msg(reason);
+        m_connectiviy.first = false;
     }
     else
     {
         std::string reason = "Black player: " + m.getReason();
         zmqpp::message message = ConstructMessage<GameStopped>(reason);
-        m_white_player_socket.send(message);
+        m_white_player_socket.send(message, true);
+
+        server_msg(reason);
+        m_connectiviy.second = false;
     }
 
     // We do not treat any more message and quit
-    m_game_stopped = true;
+//    m_game_stopped = true;
 }
 
 
