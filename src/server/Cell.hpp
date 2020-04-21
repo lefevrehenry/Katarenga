@@ -27,6 +27,12 @@ public:
     int getRow() const;
     int getColumn() const;
 
+public:
+    bool operator==(const Cell& other) const
+    {
+        return _row == other._row && _column == other._column;
+    }
+
     virtual bool isCampCell() const = 0;
 
 protected:

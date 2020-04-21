@@ -30,8 +30,6 @@ public:
     bool isValidMove(const std::string& move_str, int player) const;
     bool isValidMove(int src, int dest, int player) const;
 
-//    Move askNextValidMove() const;
-
     bool playMove(const Move& move);
     bool playMove(const std::string& move_str);
     bool playMove(int src, int dest);
@@ -47,7 +45,6 @@ public:
     int getCurrentPlayer() const;
 
 public:
-    //void main_loop();
     void print() const;
 
 private:
@@ -56,9 +53,6 @@ private:
     BoardCell& indexToBoardCell(int cell_index);
     const CampCell& indexToCampCell(int campcell_index) const;
     CampCell& indexToCampCell(int campcell_index);
-    // Internal function to populate the vector of Moves, called in getAllMoves.
-    // Returns false if the while loop calling this function has to break.
-    bool checkCellAddMove(const BoardCell& src_cell, int row, int col, int player, CellType type, std::vector<Move>* plist) const;
 
     // Converts a Move to a string representation of that Move
     std::string moveToString(const Move& move) const;
@@ -71,11 +65,9 @@ private:
     BoardCell                           _plateau[8][8];
     std::map<CampCell::Type, CampCell>  _campCell;
 
-//    Cell *** _plateau;                // The Board containing the 8*8 BoardCells and the 4 CampCells
-    std::vector<Piece*> _piecesW;       // The list of White Pieces
-	std::vector<Piece*> _piecesB;		// The list of Black Pieces
+    std::vector<Piece*>                 _piecesW;       // The list of White Pieces
+    std::vector<Piece*>                 _piecesB;		// The list of Black Pieces
 
-//    bool _verbose;                      // Whether to talk a lot or not
     int _currentPlayer; 			      // 1 if White, -1 if Black
     int _winningPlayer; 				  // 0 if not win, 1 if White wins, -1 if Black wins
     bool _gameFinished;
