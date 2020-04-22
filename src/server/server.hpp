@@ -17,6 +17,8 @@ namespace zmqpp {
     class poller;
 }
 
+class Board;
+
 /**
  * @brief The Player class lives in the main thread
  */

@@ -136,20 +136,19 @@ void Player::process_server_game_stopped(zmqpp::message& message)
 void Player::retrieve_piece_locations(const std::string& board_configuration)
 {
     m_piece_locations.clear();
-    int index_offset = 8; // To have the same indices as the server
     std::string debug_str = "";
 
     // Retrieve pieces from the regular board but not Camp cells
-    for (int i = 0; i < 8; ++i)
+    for (int row = 0; row < 8; ++row)
     {
-        for (int j = 0; j < 8; ++j)
+        for (int col = 0; col < 8; ++col)
         {
-            int cell_index = (i * 8 ) + j;
+            int cell_index = (row * 8) + col;
             if (board_configuration.at(2 * cell_index + 1) == m_self_player_sign)
             {
                 // This cell is occupied by one of my pieces
-                m_piece_locations.push_back(cell_index + index_offset);
-                debug_str += " " + std::to_string(cell_index + index_offset);
+                m_piece_locations.push_back(cell_index);
+                debug_str += " " + std::to_string(cell_index);
             }
         }
     }

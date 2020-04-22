@@ -1,16 +1,15 @@
 ﻿#ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include "Cell.hpp"
+
 // ZMQ
 #include <zmqpp/zmqpp.hpp>
 
 // Standard Library
 #include <string>
 
-class Board;
-class Cell;
-
-using Move = std::pair<Cell*,Cell*>;
+using Move = std::pair<const Cell&,const Cell&>;
 
 struct ServerInfo
 {

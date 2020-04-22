@@ -60,7 +60,8 @@ Other options:
         game_settings.server_ip = args["--server-ip"].asString();
         game_settings.server_port = args["--server-port"].asLong();
 
-        game_settings.server_binding_point = "tcp://" + game_settings.server_ip + ":" + std::to_string(game_settings.server_port);
+        int offset_port = (game_settings.self_player == -1 ? 1 : 0);
+        game_settings.server_binding_point = "tcp://" + game_settings.server_ip + ":" + std::to_string(game_settings.server_port + offset_port);
     }
 
     game_settings.render_binding_point = "inproc://katarenga-render-thread";

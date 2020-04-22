@@ -33,7 +33,6 @@ void Server::process_player_check_connectivity(zmqpp::message& message)
     }
 }
 
-
 void Server::process_player_move_message(zmqpp::message& message)
 {
     MoveMessage move_msg = ConstructObject<MoveMessage>(message);
@@ -41,7 +40,7 @@ void Server::process_player_move_message(zmqpp::message& message)
     if (move_type == MoveType::PlayThisMove)
     {
         int move_player = move_msg.getPlayer();
-        if (move_player == m_current_player)
+        if (move_player == m_board->getCurrentPlayer())
         {
             // That's a move from the current player, handle it
             int src = move_msg.getSource();
@@ -77,7 +76,6 @@ void Server::process_player_move_message(zmqpp::message& message)
     // Else, the player sent a message of type MovePlayed or InvalidMove, ignore it
 }
 
-
 void Server::process_player_ask_board_configuration(zmqpp::message& input_message)
 {
     AskBoardConfiguration m = ConstructObject<AskBoardConfiguration>(input_message);
@@ -103,17 +101,23 @@ void Server::process_player_stop_game(zmqpp::message& message)
     {
         std::string reason = "White player: " + m.getReason();
         zmqpp::message message = ConstructMessage<GameStopped>(reason);
-        m_black_player_socket.send(message);
+        m_black_player_socket.send(message, true);
+
+        server_msg(reason);
+        m_connectiviy.first = false;
     }
     else
     {
         std::string reason = "Black player: " + m.getReason();
         zmqpp::message message = ConstructMessage<GameStopped>(reason);
-        m_white_player_socket.send(message);
+        m_white_player_socket.send(message, true);
+
+        server_msg(reason);
+        m_connectiviy.second = false;
     }
 
     // We do not treat any more message and quit
-    m_game_stopped = true;
+//    m_game_stopped = true;
 }
 
 
@@ -140,8 +144,11 @@ void Server::sendGameInit(int player)
 
 void Server::sendToBoth(zmqpp::message& message)
 {
-    m_white_player_socket.send(message);
-    m_black_player_socket.send(message);
+    zmqpp::message white_message = message.copy();
+    m_white_player_socket.send(white_message, true);
+
+    zmqpp::message black_message = message.copy();
+    m_black_player_socket.send(black_message, true);
 }
 
 void Server::sendToPlayer(zmqpp::message& message, int player)
@@ -164,7 +171,6 @@ Server::Server(ServerInfo &server_info) :
     m_black_player_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_player_reactor(),
     m_board(new Board()),
-    m_current_player(),
     m_game_stopped(false),
     m_connectiviy({false,false})
 {
@@ -197,7 +203,6 @@ Server::~Server()
 void Server::new_game()
 {
     m_board->setBoardCellTypes(generateBoardCellTypes());
-    m_current_player = m_board->getCurrentPlayer();
     m_game_stopped = false;
 
     server_msg("New game created");
