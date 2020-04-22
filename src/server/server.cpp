@@ -33,7 +33,6 @@ void Server::process_player_check_connectivity(zmqpp::message& message)
     }
 }
 
-
 void Server::process_player_move_message(zmqpp::message& message)
 {
     MoveMessage move_msg = ConstructObject<MoveMessage>(message);
@@ -41,7 +40,7 @@ void Server::process_player_move_message(zmqpp::message& message)
     if (move_type == MoveType::PlayThisMove)
     {
         int move_player = move_msg.getPlayer();
-        if (move_player == m_current_player)
+        if (move_player == m_board->getCurrentPlayer())
         {
             // That's a move from the current player, handle it
             int src = move_msg.getSource();
@@ -76,7 +75,6 @@ void Server::process_player_move_message(zmqpp::message& message)
     }
     // Else, the player sent a message of type MovePlayed or InvalidMove, ignore it
 }
-
 
 void Server::process_player_ask_board_configuration(zmqpp::message& input_message)
 {
@@ -173,7 +171,6 @@ Server::Server(ServerInfo &server_info) :
     m_black_player_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_player_reactor(),
     m_board(new Board()),
-    m_current_player(),
     m_game_stopped(false),
     m_connectiviy({false,false})
 {
@@ -206,7 +203,6 @@ Server::~Server()
 void Server::new_game()
 {
     m_board->setBoardCellTypes(generateBoardCellTypes());
-    m_current_player = m_board->getCurrentPlayer();
     m_game_stopped = false;
 
     server_msg("New game created");
