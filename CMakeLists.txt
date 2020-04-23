@@ -23,7 +23,7 @@ if (BUILD_SERVER OR BUILD_CLIENT)
     ## ZeroMQ dependency
     find_package(ZMQPP 4.2.0 MODULE QUIET)
     if(NOT ZMQPP_FOUND)
-        find_package(ZMQPP CONFIG REQUIRED)
+        find_package(ZMQPP 4.2.0 CONFIG REQUIRED)
     endif()
     get_target_property(_ZMQPP_DIR ZMQPP INTERFACE_INCLUDE_DIRECTORIES)
     message(STATUS "Found ZMQPP: ${_ZMQPP_DIR}")
