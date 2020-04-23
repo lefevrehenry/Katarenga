@@ -21,7 +21,7 @@ endif()
 
 if (BUILD_SERVER OR BUILD_CLIENT)
     ## ZeroMQ dependency
-    find_package(ZMQPP 4.2.0 MODULE QUIET REQUIRED)
+    find_package(ZMQPP 4.2.0 MODULE QUIET)
     if(NOT ZMQPP_FOUND)
         find_package(ZMQPP CONFIG REQUIRED)
     endif()
