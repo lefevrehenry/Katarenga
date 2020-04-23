@@ -6,7 +6,7 @@
 # ZMQPP - the target to link with
 
 # find ZMQ Core library to link with
-find_package(ZMQ REQUIRED)
+find_package(ZMQ 4.3.1 REQUIRED)
 
 find_path(ZMQPP_INCLUDE_DIR zmqpp/zmqpp.hpp)
 find_library(ZMQPP_LIBRARY NAMES zmqpp)
