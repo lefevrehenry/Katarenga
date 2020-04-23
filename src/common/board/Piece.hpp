@@ -1,23 +1,25 @@
 ﻿#ifndef PIECE_HPP
 #define PIECE_HPP
 
+#include "board_utils.hpp"
+
 class Cell;
 
 class Piece
 {
 
 public:
-    Piece(int player, Cell* cell);
+    Piece(BoardPlayer player, Cell* cell);
     virtual ~Piece();
 
 public:
-    int getPlayer() const;
+    BoardPlayer getPlayer() const;
 
     Cell* getCell() const;
     void setCell(Cell* cell);
 
 private:
-    int _player;
+    BoardPlayer _player;
     Cell* _cell;
 
 };

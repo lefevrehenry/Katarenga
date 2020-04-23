@@ -41,7 +41,7 @@ MoveMessage::MoveMessage() : MessageWrapper()
 
 }
 
-MoveMessage::MoveMessage(const MoveType& type, int src, int dest, int player) : MessageWrapper(),
+MoveMessage::MoveMessage(const MoveType& type, int src, int dest, BoardPlayer player) : MessageWrapper(),
     m_type(type),
     m_src(src),
     m_dest(dest),
@@ -55,7 +55,8 @@ void MoveMessage::toMessage(zmqpp::message& message)
     message << moveTypeToString(m_type);
     message << m_src;
     message << m_dest;
-    message << m_player;
+    message.add_raw<BoardPlayer>(&m_player, sizeof(m_player));
+    //message << m_player;
 }
 
 void MoveMessage::fromMessage(zmqpp::message& message)
@@ -65,7 +66,8 @@ void MoveMessage::fromMessage(zmqpp::message& message)
     m_type = stringToMoveType(type_str);
     message >> m_src;
     message >> m_dest;
-    message >> m_player;
+    m_player = *message.get<const BoardPlayer*>(0);
+    //message >> m_player;
 }
 
 int MoveMessage::getSource() const
@@ -98,12 +100,12 @@ void MoveMessage::setType(const MoveType& type)
     m_type = type;
 }
 
-int MoveMessage::getPlayer() const
+BoardPlayer MoveMessage::getPlayer() const
 {
     return m_player;
 }
 
-void MoveMessage::setPlayer(int player)
+void MoveMessage::setPlayer(BoardPlayer player)
 {
     m_player = player;
 }

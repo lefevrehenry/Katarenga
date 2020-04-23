@@ -41,6 +41,7 @@ public:
  */
 struct DefaultMessageWrapper : public MessageWrapper
 {
+public:
     virtual void toMessage(zmqpp::message&) override {}
     virtual void fromMessage(zmqpp::message&) override {}
 };

@@ -42,28 +42,3 @@ bool MessageReactor::process_message(zmqpp::message& message) const
 
     return false;
 }
-
-//zmqpp::message MessageReactor::process_broadcast(zmqpp::message& request_message, zmqpp::message& reply_message) const
-//{
-//    // the message returned
-//    zmqpp::message publish_message;
-
-//    // read the header (correspond to the type of the request sent)
-//    MessageType type = *request_message.get<const MessageType*>(0);
-
-//    // according to the type of the request we construct the publish message
-//    switch (type) {
-//        case MessageType::PlayThisMove: {
-//            publish_message = construct_publish<PlayThisMove>(request_message, reply_message);
-//            break;
-//        }
-//        case MessageType::ForgetItRageQuit: {
-//            break;
-//        }
-//        default: {
-//            break;
-//        }
-//    }
-
-//    return publish_message;
-//}

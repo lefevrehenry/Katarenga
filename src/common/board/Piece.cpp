@@ -1,7 +1,7 @@
 #include "Piece.hpp"
 #include "Cell.hpp"
 
-Piece::Piece(int player, Cell* cell) :
+Piece::Piece(BoardPlayer player, Cell* cell) :
     _player(player),
     _cell(cell)
 {
@@ -13,7 +13,7 @@ Piece::~Piece()
 
 }
 
-int Piece::getPlayer() const
+BoardPlayer Piece::getPlayer() const
 {
     return _player;
 }

@@ -2,6 +2,7 @@
 #define MESSAGEREACTOR_HPP
 
 #include "MessageWrapper.hpp"
+#include "../shared_utils.hpp"
 
 // ZMQ
 #include <zmqpp/message.hpp>
@@ -16,7 +17,6 @@
  */
 class MessageReactor
 {
-
 public:
     using MessageType = MessageWrapper::MessageType;
     using Callback = std::function<void(zmqpp::message& message)>;
@@ -27,11 +27,9 @@ private:
 public:
     MessageReactor();
 
-public:
     void add(MessageType type, Callback callback);
     void remove(MessageType type);
 
-public:
     bool process_message(zmqpp::message& message) const;
 
 private:

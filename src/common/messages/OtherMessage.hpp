@@ -2,7 +2,7 @@
 #define OTHERMESSAGE_HPP
 
 #include "MessageWrapper.hpp"
-//#include "../server/utils.hpp"
+#include "../board/board_utils.hpp"
 
 // Standard Library
 #include <string>
@@ -18,28 +18,19 @@ public:
 
 public:
     PlayerWon();
-    PlayerWon(int player);
+    PlayerWon(BoardPlayer player);
 
 public:
     void toMessage(zmqpp::message& message) override;
     void fromMessage(zmqpp::message& message) override;
 
-    int getPlayer() const;
-    void setPlayer(int player);
+    BoardPlayer getPlayer() const;
+    void setPlayer(BoardPlayer player);
 
 private:
-    int m_player;
+    BoardPlayer m_player;
 
 };
 
-/*class PrintBoard : DefaultMessageWrapper
-{
-public:
-    static MessageWrapper::MessageType MessageType()
-    {
-        return MessageWrapper::MessageType::PrintBoard;
-    }
-
-};*/
 
 #endif

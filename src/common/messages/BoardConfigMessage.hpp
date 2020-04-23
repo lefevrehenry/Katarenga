@@ -2,6 +2,7 @@
 #define BOARDCONFIGMESSAGE_HPP
 
 #include "MessageWrapper.hpp"
+#include "../board/board_utils.hpp"
 
 // Standard Library
 #include <string>
@@ -16,7 +17,7 @@ public:
 
 public:
     GameInit();
-    GameInit(const std::string& board_config, int current_player);
+    GameInit(const std::string& board_config, BoardPlayer current_player);
 
 public:
     void toMessage(zmqpp::message& message) override;
@@ -25,19 +26,15 @@ public:
     std::string getConfiguration() const;
     void setConfiguration(const std::string& configuration);
 
-    int getCurrentPlayer() const;
-    void setCurrentPlayer(int player);
-
-    //int getSelfPlayer() const;
-    //void setSelfPlayer(int player);
+    BoardPlayer getCurrentPlayer() const;
+    void setCurrentPlayer(BoardPlayer player);
 
 private:
     std::string m_configuration;
-    int m_current_player;
-    //int m_self_player;
+    BoardPlayer m_current_player;
 };
 
-class AskBoardConfiguration : MessageWrapper
+class AskBoardConfiguration : public DefaultMessageWrapper
 {
 public:
     static MessageWrapper::MessageType MessageType()
@@ -45,20 +42,10 @@ public:
         return MessageWrapper::MessageType::AskBoardConfiguration;
     }
 
-public:
-    AskBoardConfiguration();
-    AskBoardConfiguration(int player);
+/*    AskBoardConfiguration();
 
-public:
     void toMessage(zmqpp::message& message) override;
-    void fromMessage(zmqpp::message& message) override;
-
-    int getPlayer() const;
-    void setPlayer(int player);
-
-private:
-    int m_player;
-
+    void fromMessage(zmqpp::message& message) override;*/
 };
 
 class AnswerBoardConfiguration : MessageWrapper

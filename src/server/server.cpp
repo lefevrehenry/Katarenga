@@ -1,5 +1,6 @@
 #include "server.hpp"
-#include "Board.hpp"
+#include <common/board/Board.hpp>
+#include <common/board/board_utils.hpp>
 
 // Standard Library
 #include <string>

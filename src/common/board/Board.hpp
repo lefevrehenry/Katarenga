@@ -1,12 +1,12 @@
 ﻿#ifndef BOARD_HPP
 #define BOARD_HPP
 
-#include "server_utils.hpp"
-#include "Cell.hpp"
+#include "board_utils.hpp"
 
 // Standard Library
 #include <string>
 #include <vector>
+#include <map>
 //#include <utility>
 
 class Piece;
@@ -26,9 +26,9 @@ public:
     void setBoardCellTypes(const std::string& boardString);
 
 public:
-    bool isValidMove(const Move& m, int player) const;
-    bool isValidMove(const std::string& move_str, int player) const;
-    bool isValidMove(int src, int dest, int player) const;
+    bool isValidMove(const Move& m, BoardPlayer player) const;
+    bool isValidMove(const std::string& move_str, BoardPlayer player) const;
+    bool isValidMove(int src, int dest, BoardPlayer player) const;
 
     bool playMove(const Move& move);
     bool playMove(const std::string& move_str);
@@ -38,16 +38,13 @@ public:
     void fillAllMoves(int row, int col, std::vector<Move>* moveList) const;
 
 public:
-    // Return 0 if not finished, 1 if White won, -1 if Black won.
-    int whoWon() const;
-    bool isGameFinished() const;
+    BoardPlayer getCurrentPlayer() const;
     void updateGameFinished();
-    int getCurrentPlayer() const;
-
-public:
-    void print() const;
+    bool isGameFinished() const;
+    BoardPlayer whoWon() const;
 
 private:
+    void nextPlayer();
     void removePiece(Piece* p);
     const BoardCell& indexToBoardCell(int cell_index) const;
     BoardCell& indexToBoardCell(int cell_index);
@@ -68,10 +65,10 @@ private:
     std::vector<Piece*>                 _piecesW;       // The list of White Pieces
     std::vector<Piece*>                 _piecesB;		// The list of Black Pieces
 
-    int _currentPlayer; 			      // 1 if White, -1 if Black
-    int _winningPlayer; 				  // 0 if not win, 1 if White wins, -1 if Black wins
     bool _gameFinished;
 
+    BoardPlayer _currentPlayer;
+    BoardPlayer _winningPlayer;
 };
 
 #endif // BOARD_HPP

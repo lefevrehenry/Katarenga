@@ -1,15 +1,11 @@
-﻿#ifndef UTILS_HPP
-#define UTILS_HPP
+﻿#ifndef SERVER_UTILS_HPP
+#define SERVER_UTILS_HPP
 
-#include "Cell.hpp"
-
-// ZMQ
-#include <zmqpp/zmqpp.hpp>
+#include <common/shared_utils.hpp>
+#include <common/board/board_utils.hpp>
 
 // Standard Library
 #include <string>
-
-using Move = std::pair<const Cell&,const Cell&>;
 
 struct ServerInfo
 {
@@ -24,26 +20,8 @@ struct ServerInfo
 };
 
 
-/////////////////////////////////////////////////
-
-/**
- * @brief return a zmqpp::message matching the corresponding reply of the request
- * @param input request_message from which the reply is constructed
- * @return reply excepted for the request_message
- */
-//zmqpp::message process_request(zmqpp::message& request_message);
-
-/**
- * @brief return a zmqpp::message matching the corresponding broadcast of the request
- * @param input request_message from which the broadcast is constructed
- * @param input reply_message from which the broadcast is constructed
- * @return broadcast expected for the request_message
- */
-//zmqpp::message process_broadcast(zmqpp::message& request_message, zmqpp::message& reply_message);
-
-// Generates a Sring containing the cell types of the board, row by row.
-std::string generateBoardCellTypes();
+BoardPlayer gameActorToPlayer(const GameActor& actor);
 
 void server_msg(const std::string& msg);
 
-#endif // UTILS_HPP
+#endif // SERVER_UTILS_HPP

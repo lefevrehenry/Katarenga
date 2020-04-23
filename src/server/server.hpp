@@ -2,7 +2,8 @@
 #define SERVER_HPP
 
 #include "server_utils.hpp"
-#include <message/message_utils.hpp>
+#include <common/messages/message_utils.hpp>
+#include <common/shared_utils.hpp>
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>

@@ -1,5 +1,4 @@
 #include "server.hpp"
-#include "Board.hpp"
 #include "server_utils.hpp"
 
 // docopt

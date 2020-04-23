@@ -7,29 +7,19 @@
 /**
  * @brief The CheckConnectivity class
  */
-class CheckConnectivity : public MessageWrapper
+class CheckConnectivity : public DefaultMessageWrapper
 {
 public:
     static MessageWrapper::MessageType MessageType()
     {
         return MessageWrapper::MessageType::CheckConnectivity;
     }
-
-public:
-    CheckConnectivity();
-    CheckConnectivity(int player);
+/*    CheckConnectivity();
 
 public:
     virtual void toMessage(zmqpp::message& message);
     virtual void fromMessage(zmqpp::message& message);
-
-public:
-    int getPlayer() const;
-    void setPlayer(int player);
-
-private:
-    int m_player;
-
+*/
 };
 
 #endif

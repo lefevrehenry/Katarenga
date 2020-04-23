@@ -2,7 +2,7 @@
 #define MOVEMESSAGE_HPP
 
 #include "MessageWrapper.hpp"
-//#include "../server/utils.hpp"
+#include "../board/board_utils.hpp"
 
 // Standard Library
 #include <string>
@@ -24,7 +24,7 @@ public:
 
 public:
     MoveMessage();
-    MoveMessage(const MoveType& type, int src, int dest, int player);
+    MoveMessage(const MoveType& type, int src, int dest, BoardPlayer player);
 
 public:
     void toMessage(zmqpp::message& message) override;
@@ -39,14 +39,14 @@ public:
     int getDestination() const;
     void setDestination(int index);
 
-    int getPlayer() const;
-    void setPlayer(int player);
+    BoardPlayer getPlayer() const;
+    void setPlayer(BoardPlayer player);
 
 private:
     MoveType m_type;    // The type of the move
     int m_src;          // The index of the source cell
     int m_dest;         // The index of the destination cell
-    int m_player;       // The player who performed the move
+    BoardPlayer m_player;       // The player who performed the move
 };
 
 #endif

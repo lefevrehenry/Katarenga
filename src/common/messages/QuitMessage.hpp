@@ -18,7 +18,7 @@ public:
 
 public:
     StopGame();
-    StopGame(const std::string& reason, int player);
+    StopGame(const std::string& reason);
 
 public:
     void toMessage(zmqpp::message& message) override;
@@ -27,12 +27,8 @@ public:
     std::string getReason() const;
     void setReason(const std::string& reason);
 
-    int getPlayer() const;
-    void setPlayer(int player);
-
 private:
     std::string m_reason;
-    int m_player;
 
 };
 

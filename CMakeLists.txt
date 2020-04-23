@@ -37,8 +37,8 @@ if (BUILD_SERVER OR BUILD_CLIENT)
     message(STATUS "Found docopt: ${_DOCOPT_DIR}")
 
     # build common library
-    message(STATUS "Configuring messages build")
-    add_subdirectory(src/message)
+    message(STATUS "Configuring common library")
+    add_subdirectory(src/common)
 endif()
 
 # build the server executable

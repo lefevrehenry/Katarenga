@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.2)
-project(message_utils)
 
 set(HEADER_FILES
     message_utils.hpp
@@ -24,12 +23,4 @@ set(SOURCE_FILES
     QuitMessage.cpp
     OtherMessage.cpp
     CaseClicked.cpp
-)
-
-add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})
-
-target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/..)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    ZMQPP
 )

@@ -1,5 +1,4 @@
 ﻿#include "Board.hpp"
-#include "server.hpp"
 #include "Piece.hpp"
 
 #include <iostream>
@@ -10,8 +9,8 @@ Board::Board() :
     _campCell(),
     _piecesW(8),
     _piecesB(8),
-    _currentPlayer(1),
-    _winningPlayer(0),
+    _currentPlayer(BoardPlayer::White),
+    _winningPlayer(BoardPlayer::None),
     _gameFinished(false)
 {
     // Initialization of the BoardCells
@@ -31,11 +30,11 @@ Board::Board() :
     for(int col = 0; col < 8; ++col)
 	{
         // For White
-        Piece* pieceW = new Piece(1, &_plateau[0][col]);
+        Piece* pieceW = new Piece(BoardPlayer::White, &_plateau[0][col]);
 		_piecesW.push_back(pieceW);
 
         // For Black
-        Piece* pieceB = new Piece(-1, &_plateau[7][col]);
+        Piece* pieceB = new Piece(BoardPlayer::Black, &_plateau[7][col]);
 		_piecesB.push_back(pieceB);
 	}
 }
@@ -91,7 +90,7 @@ const std::string Board::getBoardConfiguration() const
 
             Piece* piece = cell.getPiece();
             if(piece)
-                s += (piece->getPlayer() == 1 ? "+" : "-");
+                s += (piece->getPlayer() == BoardPlayer::White ? "+" : "-");
             else
                 s += " ";
         }
@@ -104,10 +103,10 @@ const std::string Board::getBoardConfiguration() const
     s += (_campCell.at(CampCell::Type::BlackRight).isEmpty() ? " " : "+");
 
     // Then put the current player and whether the game is finished
-    s += (_currentPlayer == 1 ? "+" : "-");
+    s += (_currentPlayer == BoardPlayer::White ? "+" : "-");
 
     if(isGameFinished())
-        s += (whoWon() == 1 ? "+" : "-");
+        s += (whoWon() == BoardPlayer::White ? "+" : "-");
     else
         s += " ";
 
@@ -151,7 +150,7 @@ void Board::setBoardCellTypes(const std::string& boardString)
     updateGameFinished();
 }
 
-bool Board::isValidMove(const Move& m, int player) const
+bool Board::isValidMove(const Move& m, BoardPlayer player) const
 {
     if (m.first.isEmpty() || m.first.getPiece()->getPlayer() != player)
         return false;
@@ -173,13 +172,13 @@ bool Board::isValidMove(const Move& m, int player) const
     return false;
 }
 
-bool Board::isValidMove(const std::string& move_str, int player) const
+bool Board::isValidMove(const std::string& move_str, BoardPlayer player) const
 {
     Move m = stringToMove(move_str);
     return isValidMove(m, player);
 }
 
-bool Board::isValidMove(int src, int dest, int player) const
+bool Board::isValidMove(int src, int dest, BoardPlayer player) const
 {
     Move m = indicesToMove(src, dest);
     return isValidMove(m, player);
@@ -200,7 +199,7 @@ bool Board::playMove(const Move& move)
     dst_cell.setPiece(piece);
     src_cell.setPiece(nullptr);
     piece->setCell(&dst_cell);
-    _currentPlayer = -_currentPlayer;
+    nextPlayer();
 
     updateGameFinished();
 
@@ -226,24 +225,24 @@ void Board::fillAllMoves(int row, int col, std::vector<Move>* list) const
     if (cell.isEmpty() || cell.isCampCell())
         return;
 
-    int player = cell.getPiece()->getPlayer();
+    BoardPlayer player = cell.getPiece()->getPlayer();
 
     // Check if the piece can go to an adversary camp
-    if (row == 0 && player == -1)
+    if (row == 0 && player == BoardPlayer::Black)
     {
-        if(_plateau[0][0].isEmpty())
-            list->push_back(Move(cell,_campCell.at(CampCell::Type::WhiteLeft)));
+        if(_campCell.at(CampCell::WhiteLeft).isEmpty())
+            list->push_back(Move(cell,_campCell.at(CampCell::WhiteLeft)));
 
-        if(_plateau[0][7].isEmpty())
-            list->push_back(Move(cell,_campCell.at(CampCell::Type::WhiteRight)));
+        if(_campCell.at(CampCell::WhiteRight).isEmpty())
+            list->push_back(Move(cell,_campCell.at(CampCell::WhiteRight)));
     }
-    if (row == 7 && player == 1)
+    if (row == 7 && player == BoardPlayer::White)
     {
-        if(_plateau[7][0].isEmpty())
-            list->push_back(Move(cell,_campCell.at(CampCell::Type::BlackLeft)));
+        if(_campCell.at(CampCell::BlackLeft).isEmpty())
+            list->push_back(Move(cell,_campCell.at(CampCell::BlackLeft)));
 
-        if(_plateau[7][0].isEmpty())
-            list->push_back(Move(cell,_campCell.at(CampCell::Type::BlackRight)));
+        if(_campCell.at(CampCell::BlackRight).isEmpty())
+            list->push_back(Move(cell,_campCell.at(CampCell::BlackRight)));
     }
 
     switch(cell.getType())
@@ -264,7 +263,7 @@ void Board::fillAllMoves(int row, int col, std::vector<Move>* list) const
                 continue;
 
             const BoardCell& new_cell = _plateau[new_row][new_col];
-            if(new_cell.isEmpty() || new_cell.getPiece()->getPlayer() == -player)
+            if(new_cell.isEmpty() || new_cell.getPiece()->getPlayer() == otherPlayer(player))
                 list->push_back(Move(cell,new_cell));
         }
         break;
@@ -296,7 +295,7 @@ void Board::fillAllMoves(int row, int col, std::vector<Move>* list) const
                 }
                 else
                 {
-                    if(new_cell.getPiece()->getPlayer() == -player)
+                    if(new_cell.getPiece()->getPlayer() == otherPlayer(player))
                         list->push_back(Move(cell,new_cell));
 
                     break;
@@ -335,7 +334,7 @@ void Board::fillAllMoves(int row, int col, std::vector<Move>* list) const
                 }
                 else
                 {
-                    if(new_cell.getPiece()->getPlayer() == -player)
+                    if(new_cell.getPiece()->getPlayer() == otherPlayer(player))
                         list->push_back(Move(cell,new_cell));
 
                     break;
@@ -364,7 +363,7 @@ void Board::fillAllMoves(int row, int col, std::vector<Move>* list) const
                 continue;
 
             const BoardCell& new_cell = _plateau[new_row][new_col];
-            if(new_cell.isEmpty() || new_cell.getPiece()->getPlayer() == -player)
+            if(new_cell.isEmpty() || new_cell.getPiece()->getPlayer() == otherPlayer(player))
                 list->push_back(Move(cell,new_cell));
         }
         break;
@@ -380,13 +379,13 @@ void Board::updateGameFinished()
     // Check if White won
     if (!_campCell.at(CampCell::Type::BlackLeft).isEmpty() && !_campCell.at(CampCell::Type::BlackRight).isEmpty())
     {
-        _winningPlayer = 1;
+        _winningPlayer = BoardPlayer::White;
         _gameFinished = true;
     }
     // Check if Black won
     else if (!_campCell.at(CampCell::Type::WhiteLeft).isEmpty() && !_campCell.at(CampCell::Type::WhiteRight).isEmpty())
     {
-        _winningPlayer = -1;
+        _winningPlayer = BoardPlayer::Black;
         _gameFinished = true;
     }
 }
@@ -396,62 +395,21 @@ bool Board::isGameFinished() const
     return _gameFinished;
 }
 
-int Board::whoWon() const
+BoardPlayer Board::whoWon() const
 {
     return _winningPlayer;
 }
 
-int Board::getCurrentPlayer() const
+BoardPlayer Board::getCurrentPlayer() const
 {
     return _currentPlayer;
 }
 
-void Board::print() const
+void Board::nextPlayer()
 {
-    std::string s = "   1    2    3    4    5    6    7    8\n";
-    s += (_campCell.at(CampCell::Type::WhiteLeft).isEmpty() ? " " : "X");
-    s += "              White              ";
-    s += (_campCell.at(CampCell::Type::WhiteRight).isEmpty() ? " " : "X");
-    s += "\n";
-    for(int row = 0; row < 8; ++row)   // Iterates over rows
-    {
-        s+= std::to_string(row) + " ";
-        for(int col = 0; col < 8; ++col)	// Iterates over columns
-        {
-            const BoardCell& cell = _plateau[row][col];
-
-            int id = cell.getIndex();
-            s += (id >= 10 ? "" : " ") + std::to_string(cell.getIndex());
-
-            switch(cell.getType())
-            {
-                case CellType::KING:
-                    s += "K";
-                    break;
-                case CellType::BISHOP:
-                    s += "B";
-                    break;
-                case CellType::KNIGHT:
-                    s += "N";
-                    break;
-                case CellType::ROOK:
-                    s += "R";
-                    break;
-                case CellType::NONE:
-                    s += "-";
-                    break;
-            }
-
-            s += (cell.isEmpty() ? "  " : cell.getPiece()->getPlayer() == 1 ? "+ " : "- ");
-        }
-        s += "\n";
-    }
-    s += (_campCell.at(CampCell::Type::BlackLeft).isEmpty() ? " " : "X");
-    s += "              Black              ";
-    s += (_campCell.at(CampCell::Type::BlackRight).isEmpty() ? " " : "X");
-
-    server_msg(s);
+    _currentPlayer = (_currentPlayer == BoardPlayer::White) ? BoardPlayer::Black : BoardPlayer::White;
 }
+
 
 void Board::removePiece(Piece* p)
 {

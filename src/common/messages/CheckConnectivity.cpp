@@ -1,6 +1,6 @@
 #include "CheckConnectivity.hpp"
 
-CheckConnectivity::CheckConnectivity() : MessageWrapper(),
+/*CheckConnectivity::CheckConnectivity() : MessageWrapper(),
     m_player(0)
 {
 
@@ -31,3 +31,4 @@ void CheckConnectivity::setPlayer(int player)
 {
     m_player = player;
 }
+*/

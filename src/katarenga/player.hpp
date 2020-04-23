@@ -2,7 +2,8 @@
 #define PLAYER_HPP
 
 #include "utils.hpp"
-#include <message/message_utils.hpp>
+#include <common/messages/message_utils.hpp>
+#include <common/board/board_utils.hpp>
 
 #include <zmqpp/zmqpp.hpp>
 
@@ -60,9 +61,9 @@ private:
     // Game-related content
     bool m_game_finished;
     bool m_game_stopped;
-    int m_self_player;
+    BoardPlayer m_self_player;
     char m_self_player_sign;
-    int m_current_player;
+    BoardPlayer m_current_player;
     bool m_connected;
     std::vector<int> m_piece_locations; // The list of cell ids where my pieces are
     Memo m_memo;        // memo for case clicked by the player <src,dst>
