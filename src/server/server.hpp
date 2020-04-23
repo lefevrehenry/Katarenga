@@ -41,6 +41,10 @@ private:
     void process_player_stop_game(zmqpp::message& message);
 
 private:
+    void stop_the_game();
+    void process_command_line(const std::string& command);
+
+private:
     void sendToBoth(zmqpp::message& message);
     void sendToPlayer(zmqpp::message& message, int player);
     void rejectMove(MoveMessage& move_msg);

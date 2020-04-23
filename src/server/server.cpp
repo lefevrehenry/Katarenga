@@ -1,6 +1,42 @@
 #include "server.hpp"
 #include "Board.hpp"
 
+// Standard Library
+#include <string>
+#include <unistd.h>
+
+std::string format_board(const std::string& board_configuration)
+{
+    std::string s = "";
+
+    s += "\n";
+    s += "    1  2  3  4  5  6  7  8   ";
+    s += "\n";
+    s += "             White           ";
+    s += "\n";
+    s += "  X                         X";
+    s += "\n";
+
+    std::string board = board_configuration.substr(0,128);
+
+    for (int j = 0; j < 8; ++j) {
+        s += std::to_string(j+1) + "  ";
+        for (int i = 0; i < 8; ++i) {
+            size_t index = (j * 8) + i;
+            std::string c = board.substr(2*index,2);
+            s += " " + c;
+        }
+        s += "\n";
+    }
+
+    s += "  X                         X";
+    s += "\n";
+    s += "             Black           ";
+
+    return s;
+}
+
+
 void Server::process_player_check_connectivity(zmqpp::message& message)
 {
     CheckConnectivity o = ConstructObject<CheckConnectivity>(message);
@@ -50,6 +86,8 @@ void Server::process_player_move_message(zmqpp::message& message)
 
             if (valid_move)
             {
+                server_msg("player " + std::to_string(move_player) + " played move " + std::to_string(src) + ":" + std::to_string(dest));
+
                 // The move was accepted, notify players
                 move_msg.setType(MoveType::MovePlayed);
                 zmqpp::message message = ConstructMessage<MoveMessage>(move_msg);
@@ -63,6 +101,8 @@ void Server::process_player_move_message(zmqpp::message& message)
             }
             else
             {
+                server_msg("player " + std::to_string(move_player) + " cannot play move " + std::to_string(src) + ":" + std::to_string(dest));
+
                 // This is not a valid move, reject it
                 rejectMove(move_msg);
             }
@@ -117,7 +157,99 @@ void Server::process_player_stop_game(zmqpp::message& message)
     }
 
     // We do not treat any more message and quit
-//    m_game_stopped = true;
+    //m_game_stopped = true;
+}
+
+
+void Server::stop_the_game()
+{
+    zmqpp::message message = ConstructMessage<StopGame>("Game is closed by the server", 0);
+    sendToBoth(message);
+
+    m_game_stopped = true;
+
+    server_msg("Game closed");
+}
+
+void Server::process_command_line(const std::string& command)
+{
+    if(command.size() == 0)
+        return;
+
+    // all available options here
+    static std::list<std::string> options = {"help", "h", "print", "p", "move", "m", "close", "c"};
+
+    std::string option_found = "";
+
+    // try to find the option matching the command
+    for (const std::string& option : options)
+    {
+        size_t option_size = option.size();
+
+        if(command.size() >= option_size && command.substr(0, option_size) == option) {
+            option_found = option;
+            break;
+        }
+    }
+
+    if(option_found.size() == 0) {
+        server_msg("Unknow command '" + command + "'");
+        return;
+    }
+
+    if(option_found == "h" || option_found == "help")
+    {
+        server_msg("h,help for help");
+        server_msg("p,print to print the board");
+        server_msg("move, play a move (format like 'move <player>:src:dst')");
+        server_msg("c,close to close the server");
+    }
+    else if(option_found == "p" || option_found == "print")
+    {
+        std::string board_configuration = format_board(m_board->getBoardConfiguration());
+        server_msg(board_configuration);
+    }
+    else if(option_found == "m" || option_found == "move")
+    {
+        int player = 0;
+        int src_index = -1;
+        int dst_index = -1;
+
+        try {
+            std::string token;
+
+            std::string str = command;
+            str.erase(0, option_found.size() + 1);
+
+            token = str.substr(0, str.find(":"));
+            str.erase(0, token.size() + 1);
+
+            player = std::stoi(token);
+
+            token = str.substr(0, str.find(":"));
+            str.erase(0, token.size() + 1);
+
+            src_index = std::stoi(token);
+            dst_index = std::stoi(str);
+        }
+        catch(...)
+        {
+            server_msg("cannot parse move command '" + command + "'");
+            return;
+        }
+
+        // emulate a move received from the player
+        zmqpp::message message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, src_index, dst_index, player);
+        process_player_move_message(message);
+    }
+    else if(option_found == "c" || option_found == "close")
+    {
+        stop_the_game();
+    }
+    else
+    {
+        server_msg("Unknow command '" + command + "'");
+    }
 }
 
 
@@ -155,11 +287,11 @@ void Server::sendToPlayer(zmqpp::message& message, int player)
 {
     if (player == 1)
     {
-        m_white_player_socket.send(message);
+        m_white_player_socket.send(message, true);
     }
     else
     {
-        m_black_player_socket.send(message);
+        m_black_player_socket.send(message, true);
     }
 }
 
@@ -177,8 +309,10 @@ Server::Server(ServerInfo &server_info) :
     m_white_player_socket.bind(server_info.white_binding_point);
     m_black_player_socket.bind(server_info.black_binding_point);
 
+    // Listen to both players and std::cin
     m_poller.add(m_white_player_socket, zmqpp::poller::poll_in);
     m_poller.add(m_black_player_socket, zmqpp::poller::poll_in);
+    m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
 
     using Callback = MessageReactor::Callback;
 
@@ -214,37 +348,45 @@ void Server::loop()
 
     while(!m_board->isGameFinished() && !m_game_stopped)
     {
-        zmqpp::message input_message;
-
         // TODO at some point we'll need to have a heartbeat of the two players
         // (or a mean to check whether they are still connected)
         // and stop the game when one player does not respond anymore
         if(m_poller.poll(zmqpp::poller::wait_forever))
         {
-            // First receive the message
             if(m_poller.has_input(m_white_player_socket))
             {
+                zmqpp::message input_message;
+
                 // receive the message
                 m_white_player_socket.receive(input_message);
+
+                // Will call the callback corresponding to the message type
+                bool processed = m_player_reactor.process_message(input_message);
+
+                if(!processed)
+                    server_msg("Message received from one of the player socket but no callback were defined to handle it");
             }
-            else if (m_poller.has_input(m_black_player_socket))
+            else if(m_poller.has_input(m_black_player_socket))
             {
+                zmqpp::message input_message;
+
                 // receive the message
                 m_black_player_socket.receive(input_message);
+
+                // Will call the callback corresponding to the message type
+                bool processed = m_player_reactor.process_message(input_message);
+
+                if(!processed)
+                    server_msg("Message received from one of the player socket but no callback were defined to handle it");
             }
-            else
+            else if(m_poller.has_input(STDIN_FILENO))
             {
-                server_msg("This should not happen, terminating");
-                zmqpp::message message = ConstructMessage<GameStopped>("Server is broken");
-                sendToBoth(message);
-                std::terminate();
+                std::string command;
+                std::getline(std::cin, command);
+
+                // process the command read from std::cin
+                process_command_line(command);
             }
-
-            // Will call the callback corresponding to the message type
-            bool processed = m_player_reactor.process_message(input_message);
-
-            if(!processed)
-                server_msg("Message received from one of the player socket but no callback were defined to handle it");
         }
     }
 }
