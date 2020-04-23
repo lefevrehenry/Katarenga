@@ -5,7 +5,7 @@ class Piece;
 
 enum class CellType
 {
-    KING, ROCK, BISHOP, KNIGHT, NONE
+    KING, ROOK, BISHOP, KNIGHT, NONE
 };
 
 // Base class for all cells of the Board

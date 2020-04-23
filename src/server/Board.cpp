@@ -82,7 +82,7 @@ const std::string Board::getBoardConfiguration() const
             case CellType::KNIGHT:
                 s += "N";
                 break;
-            case CellType::ROCK:
+            case CellType::ROOK:
                 s += "R";
                 break;
             default:
@@ -133,7 +133,7 @@ void Board::setBoardCellTypes(const std::string& boardString)
                 cell.setType(CellType::KING);
                 break;
             case 'R':
-                cell.setType(CellType::ROCK);
+                cell.setType(CellType::ROOK);
                 break;
             case 'B':
                 cell.setType(CellType::BISHOP);
@@ -309,7 +309,7 @@ void Board::fillAllMoves(int row, int col, std::vector<Move>* list) const
         break;
     }
 
-    case CellType::ROCK: // Check cells in straight line until Rock cell or edge or oponnent
+    case CellType::ROOK: // Check cells in straight line until Rook cell or edge or oponnent
     {
         // all direction move from a Rook cell (check cells in diagonal until next edge or Bishop cell or oponnent)
         static const std::vector< std::pair<int,int> > directions = {
@@ -434,7 +434,7 @@ void Board::print() const
                 case CellType::KNIGHT:
                     s += "N";
                     break;
-                case CellType::ROCK:
+                case CellType::ROOK:
                     s += "R";
                     break;
                 case CellType::NONE:
