@@ -36,21 +36,21 @@ public:
 
 private:
     /* Put here functions reacting to player messages */
-    void process_player_check_connectivity(zmqpp::message& message);
-    void process_player_move_message(zmqpp::message& message);
-    void process_player_ask_board_configuration(zmqpp::message& message);
-    void process_player_stop_game(zmqpp::message& message);
+    void process_player_check_connectivity(zmqpp::message& message, const GameActor &src_actor);
+    void process_player_move_message(zmqpp::message& message, const GameActor &src_actor);
+    void process_player_ask_board_configuration(zmqpp::message& message, const GameActor &src_actor);
+    void process_player_stop_game(zmqpp::message& message, const GameActor &src_actor);
 
 private:
     void stop_the_game();
     void process_command_line(const std::string& command);
 
 private:
-    void sendToBoth(zmqpp::message& message);
-    void sendToPlayer(zmqpp::message& message, int player);
-    void rejectMove(MoveMessage& move_msg);
+    void sendToBothPlayers(zmqpp::message& message);
+    void sendToActor(zmqpp::message& message, const GameActor& actor);
+    void rejectMove(MoveMessage& move_msg, const GameActor& actor);
     void sendWonMessage();
-    void sendGameInit(int player);
+    void sendGameInit(const GameActor& player);
 
 private:
     // Socket-related content
@@ -59,7 +59,8 @@ private:
     zmqpp::socket   m_white_player_socket;
     zmqpp::socket   m_black_player_socket;
 
-    MessageReactor  m_player_reactor;
+    MessageReactor  m_white_player_reactor;
+    MessageReactor  m_black_player_reactor;
 
     // Game-related content
     std::unique_ptr<Board> m_board;

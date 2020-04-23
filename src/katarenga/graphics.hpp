@@ -1,7 +1,7 @@
 #ifndef GRAPHICS_HPP
 #define GRAPHICS_HPP
 
-#include <message/message_utils.hpp>
+#include <common/messages/message_utils.hpp>
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>

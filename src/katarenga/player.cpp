@@ -1,26 +1,9 @@
 #include "player.hpp"
 #include "graphics.hpp"
 
-#include <message/message_utils.hpp>
-
 #include <functional>
 #include <algorithm>
 
-#include <iostream> // FOR DEBUGGING PURPOSE, TODO REMOVE IT
-
-//void Player::process_server_reply_connectivity(zmqpp::message& message)
-//{
-//    ReplyConnectivity m = ConstructObject<ReplyConnectivity>(message);
-
-//    bool accepted = m.getAccepted();
-
-//    if(accepted)
-//        player_msg("Connection accepted with the server");
-//    else
-//        player_msg("Connection rejected with the server");
-
-//    m_connected = accepted;
-//}
 
 void Player::process_server_game_init(zmqpp::message& message)
 {
@@ -46,11 +29,11 @@ void Player::process_server_answer_board_configuration(zmqpp::message& message)
     // Retrieve current player
     if (configuration[size-2] == '+')
     {
-        m_current_player = 1;
+        m_current_player = BoardPlayer::White;
     }
     else if (configuration[size-2] == '-')
     {
-        m_current_player = -1;
+        m_current_player = BoardPlayer::Black;
     }
     else
     {
@@ -66,7 +49,7 @@ void Player::process_server_answer_board_configuration(zmqpp::message& message)
 void Player::process_server_move_message(zmqpp::message& message)
 {
     MoveMessage m = ConstructObject<MoveMessage>(message);
-    int move_player = m.getPlayer();
+    BoardPlayer move_player = m.getPlayer();
     MoveType type = m.getType();
 
     if (type == MoveType::MovePlayed)
@@ -95,7 +78,7 @@ void Player::process_server_move_message(zmqpp::message& message)
                     // TODO need to ask the correct board configuration to the server instead of throwing an error
                 }
             }
-            m_current_player = -m_current_player;
+            m_current_player = otherPlayer(m_current_player);
         }
     }
     else if (type == MoveType::InvalidMove)
@@ -113,7 +96,7 @@ void Player::process_server_move_message(zmqpp::message& message)
 
 void Player::process_server_player_won(zmqpp::message& message)
 {
-    PlayerWon m = ConstructObject<PlayerWon>(message);
+    //PlayerWon m = ConstructObject<PlayerWon>(message);
 
     m_game_finished = true;
     //m_current_player = m.getPlayer(); //TODO ??
@@ -126,8 +109,7 @@ void Player::process_server_game_stopped(zmqpp::message& message)
 {
     //GameStopped m = ConstructObject<GameStopped>(message);
 
-    m_game_finished = true;
-    //m_current_player = 0; // TODO ??
+    m_game_stopped = true;
 
     // Forward it to the render thread
     m_render_thread_socket.send(message);
@@ -200,15 +182,15 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
 void Player::process_graphics_ask_board_configuration(zmqpp::message& /*message*/)
 {
     player_msg("AskBoardConfig received");
-    zmqpp::message zmq_message = ConstructMessage<AskBoardConfiguration>(m_self_player);
+    zmqpp::message zmq_message = ConstructMessage<AskBoardConfiguration>();
     m_server_thread_socket.send(zmq_message, true);
 }
 
 void Player::process_graphics_stop_game(zmqpp::message& /*message*/)
 {
-    m_game_finished = true;
+    m_game_stopped = true;
 
-    zmqpp::message message = ConstructMessage<StopGame>("Game stopped by the graphical interface", m_self_player);
+    zmqpp::message message = ConstructMessage<StopGame>("Game stopped by the graphical interface");
     m_server_thread_socket.send(message, true);
 }
 
@@ -224,7 +206,7 @@ Player::Player(GameSettings& game_settings) :
     m_game_finished(false),
     m_game_stopped(false),
     m_self_player(game_settings.self_player),
-    m_current_player(0),
+    m_current_player(BoardPlayer::None),
     m_connected(false),
     m_piece_locations(),
     m_memo({-1,-1})
@@ -294,7 +276,7 @@ void Player::connect()
     Callback process_server_game_init = std::bind(&Player::process_server_game_init, this, std::placeholders::_1);
     reactor.add(MessageType::GameInit, process_server_game_init);
 
-    zmqpp::message message = ConstructMessage<CheckConnectivity>(m_self_player);
+    zmqpp::message message = ConstructMessage<CheckConnectivity>();
     m_server_thread_socket.send(message, true);
 
     // wait 5 seconds the response of the server
@@ -328,7 +310,7 @@ void Player::loop()
 
     player_msg("Player entering the main loop!");
 
-    while(!m_game_finished)
+    while(!m_game_finished && !m_game_stopped)
     {
         zmqpp::message input_message;
 

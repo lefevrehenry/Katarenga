@@ -6,77 +6,48 @@
 #include <string>
 #include <unistd.h>
 
-std::string format_board(const std::string& board_configuration)
+
+/******* Functions related to player messages *******/
+
+void Server::process_player_check_connectivity(zmqpp::message& message, const GameActor &src_actor)
 {
-    std::string s = "";
+    //CheckConnectivity o = ConstructObject<CheckConnectivity>(message);
 
-    s += "\n";
-    s += "    1  2  3  4  5  6  7  8   ";
-    s += "\n";
-    s += "             White           ";
-    s += "\n";
-    s += "  X                         X";
-    s += "\n";
+    //Player player = o.getPlayer();
 
-    std::string board = board_configuration.substr(0,128);
-
-    for (int j = 0; j < 8; ++j) {
-        s += std::to_string(j+1) + "  ";
-        for (int i = 0; i < 8; ++i) {
-            size_t index = (j * 8) + i;
-            std::string c = board.substr(2*index,2);
-            s += " " + c;
-        }
-        s += "\n";
-    }
-
-    s += "  X                         X";
-    s += "\n";
-    s += "             Black           ";
-
-    return s;
-}
-
-
-void Server::process_player_check_connectivity(zmqpp::message& message)
-{
-    CheckConnectivity o = ConstructObject<CheckConnectivity>(message);
-
-    int player = o.getPlayer();
-
-    if(player == 1)
+    if(src_actor == GameActor::WHITECLIENT)
     {
         // check wether the white player is already connected or not
         if(m_connectiviy.first == false)
         {
             // we accept the white player!
             m_connectiviy.first = true;
-            sendGameInit(player);
+            sendGameInit(src_actor);
         }
     }
-    else if (player == -1)
+    else if (src_actor == GameActor::BLACKCLIENT)
     {
         // check wether the black player is already connected or not
         if(m_connectiviy.second == false)
         {
             // we accept the black player!
             m_connectiviy.second = true;
-            sendGameInit(player);
+            sendGameInit(src_actor);
         }
     }
     else
     {
-        server_msg("an unknown player tries to connect with the server");
+        server_msg("Ṅon-supported CheckConnectivity message received from " + to_string(src_actor) + " actor");
     }
 }
 
-void Server::process_player_move_message(zmqpp::message& message)
+void Server::process_player_move_message(zmqpp::message& message, const GameActor &src_actor)
 {
     MoveMessage move_msg = ConstructObject<MoveMessage>(message);
     MoveType move_type = move_msg.getType();
     if (move_type == MoveType::PlayThisMove)
     {
-        int move_player = move_msg.getPlayer();
+        BoardPlayer move_player = gameActorToPlayer(src_actor);
         if (move_player == m_board->getCurrentPlayer())
         {
             // That's a move from the current player, handle it
@@ -87,12 +58,12 @@ void Server::process_player_move_message(zmqpp::message& message)
 
             if (valid_move)
             {
-                server_msg("player " + std::to_string(move_player) + " played move " + std::to_string(src) + ":" + std::to_string(dest));
+                server_msg("player " + to_string(move_player) + " played move " + std::to_string(src) + ":" + std::to_string(dest));
 
                 // The move was accepted, notify players
                 move_msg.setType(MoveType::MovePlayed);
                 zmqpp::message message = ConstructMessage<MoveMessage>(move_msg);
-                sendToBoth(message);
+                sendToBothPlayers(message);
 
                 // Check if the player has won
                 if (m_board->isGameFinished())
@@ -102,43 +73,43 @@ void Server::process_player_move_message(zmqpp::message& message)
             }
             else
             {
-                server_msg("player " + std::to_string(move_player) + " cannot play move " + std::to_string(src) + ":" + std::to_string(dest));
+                server_msg("player " + to_string(move_player) + " cannot play move " + std::to_string(src) + ":" + std::to_string(dest));
 
                 // This is not a valid move, reject it
-                rejectMove(move_msg);
+                rejectMove(move_msg, src_actor);
             }
         }
         else
         {
             // That's a move from the other player, reject it
-            rejectMove(move_msg);
+            rejectMove(move_msg, src_actor);
         }
     }
     // Else, the player sent a message of type MovePlayed or InvalidMove, ignore it
 }
 
-void Server::process_player_ask_board_configuration(zmqpp::message& input_message)
+void Server::process_player_ask_board_configuration(zmqpp::message& input_message, const GameActor &src_actor)
 {
-    AskBoardConfiguration m = ConstructObject<AskBoardConfiguration>(input_message);
-    int player = m.getPlayer();
+    //AskBoardConfiguration m = ConstructObject<AskBoardConfiguration>(input_message);
+    //int player = m.getPlayer();
 
     zmqpp::message output_message = ConstructMessage<AnswerBoardConfiguration>(m_board->getBoardConfiguration());
-    if (player == 1)
+    if (src_actor == GameActor::WHITECLIENT)
     {
         m_white_player_socket.send(output_message);
     }
-    else
+    else if (src_actor == GameActor::BLACKCLIENT)
     {
         m_black_player_socket.send(output_message);
     }
 }
 
-void Server::process_player_stop_game(zmqpp::message& message)
+void Server::process_player_stop_game(zmqpp::message& message, const GameActor &src_actor)
 {
     StopGame m = ConstructObject<StopGame>(message);
-    int player = m.getPlayer();
+    //int player = m.getPlayer();
 
-    if (player == 1)
+    if (src_actor == GameActor::WHITECLIENT)
     {
         std::string reason = "White player: " + m.getReason();
         zmqpp::message message = ConstructMessage<GameStopped>(reason);
@@ -147,7 +118,7 @@ void Server::process_player_stop_game(zmqpp::message& message)
         server_msg(reason);
         m_connectiviy.first = false;
     }
-    else
+    else if (src_actor == GameActor::BLACKCLIENT)
     {
         std::string reason = "Black player: " + m.getReason();
         zmqpp::message message = ConstructMessage<GameStopped>(reason);
@@ -155,6 +126,9 @@ void Server::process_player_stop_game(zmqpp::message& message)
 
         server_msg(reason);
         m_connectiviy.second = false;
+    }else
+    {
+        server_msg("Non-supported StopGame message received from " + to_string(src_actor) + " actor.");
     }
 
     // We do not treat any more message and quit
@@ -162,10 +136,62 @@ void Server::process_player_stop_game(zmqpp::message& message)
 }
 
 
+
+
+void Server::rejectMove(MoveMessage& move_msg, const GameActor &actor)
+{
+    move_msg.setType(MoveType::InvalidMove);
+
+    zmqpp::message m = ConstructMessage<MoveMessage>(move_msg);
+    sendToActor(m, actor);
+}
+
+void Server::sendWonMessage()
+{
+    zmqpp::message message = ConstructMessage<PlayerWon>(m_board->whoWon());
+    sendToBothPlayers(message);
+}
+
+void Server::sendGameInit(const GameActor& player)
+{
+    zmqpp::message zmq_message = ConstructMessage<GameInit>(m_board->getBoardConfiguration(),
+                                                            m_board->getCurrentPlayer());
+    sendToActor(zmq_message, player);
+}
+
+void Server::sendToBothPlayers(zmqpp::message& message)
+{
+    zmqpp::message white_message = message.copy();
+    m_white_player_socket.send(white_message, true);
+
+    zmqpp::message black_message = message.copy();
+    m_black_player_socket.send(black_message, true);
+}
+
+void Server::sendToActor(zmqpp::message& message, const GameActor& actor)
+{
+    if (actor == GameActor::WHITECLIENT)
+    {
+        m_white_player_socket.send(message, true);
+    }
+    else if (actor == GameActor::BLACKCLIENT)
+    {
+        m_black_player_socket.send(message, true);
+    }
+    else
+    {
+        server_msg("Sending messages to " + to_string(actor) + " is not supported");
+    }
+}
+
+
+
+/******* Functions related to command line *******/
+
 void Server::stop_the_game()
 {
-    zmqpp::message message = ConstructMessage<StopGame>("Game is closed by the server", 0);
-    sendToBoth(message);
+    zmqpp::message message = ConstructMessage<StopGame>("Game is closed by the server");
+    sendToBothPlayers(message);
 
     m_game_stopped = true;
 
@@ -240,8 +266,10 @@ void Server::process_command_line(const std::string& command)
         }
 
         // emulate a move received from the player
-        zmqpp::message message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, src_index, dst_index, player);
-        process_player_move_message(message);
+        BoardPlayer bplayer = (player == 1) ? BoardPlayer::White : BoardPlayer::Black;
+        zmqpp::message message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, src_index, dst_index, bplayer);
+        GameActor actor = (player == 1) ? GameActor::WHITECLIENT : GameActor::BLACKCLIENT;
+        process_player_move_message(message, actor);
     }
     else if(option_found == "c" || option_found == "close")
     {
@@ -254,55 +282,14 @@ void Server::process_command_line(const std::string& command)
 }
 
 
-void Server::rejectMove(MoveMessage& move_msg)
-{
-    move_msg.setType(MoveType::InvalidMove);
-
-    zmqpp::message m = ConstructMessage<MoveMessage>(move_msg);
-    sendToPlayer(m, move_msg.getPlayer());
-}
-
-void Server::sendWonMessage()
-{
-    zmqpp::message message = ConstructMessage<PlayerWon>(m_board->whoWon());
-    sendToBoth(message);
-}
-
-void Server::sendGameInit(int player)
-{
-    zmqpp::message zmq_message = ConstructMessage<GameInit>(m_board->getBoardConfiguration(),
-                                                            m_board->getCurrentPlayer());
-    sendToPlayer(zmq_message, player);
-}
-
-void Server::sendToBoth(zmqpp::message& message)
-{
-    zmqpp::message white_message = message.copy();
-    m_white_player_socket.send(white_message, true);
-
-    zmqpp::message black_message = message.copy();
-    m_black_player_socket.send(black_message, true);
-}
-
-void Server::sendToPlayer(zmqpp::message& message, int player)
-{
-    if (player == 1)
-    {
-        m_white_player_socket.send(message, true);
-    }
-    else
-    {
-        m_black_player_socket.send(message, true);
-    }
-}
-
 
 Server::Server(ServerInfo &server_info) :
     m_zmq_context(),
     m_poller(),
     m_white_player_socket(m_zmq_context, zmqpp::socket_type::pair),
     m_black_player_socket(m_zmq_context, zmqpp::socket_type::pair),
-    m_player_reactor(),
+    m_white_player_reactor(),
+    m_black_player_reactor(),
     m_board(new Board()),
     m_game_stopped(false),
     m_connectiviy({false,false})
@@ -317,16 +304,27 @@ Server::Server(ServerInfo &server_info) :
 
     using Callback = MessageReactor::Callback;
 
-    /* Create the function callback here and add them to the player_reactor */
-    Callback process_player_check_connectivity      = std::bind(&Server::process_player_check_connectivity, this, std::placeholders::_1);
-    Callback process_player_ask_board_configuration = std::bind(&Server::process_player_ask_board_configuration, this, std::placeholders::_1);
-    Callback process_player_move_message            = std::bind(&Server::process_player_move_message, this, std::placeholders::_1);
-    Callback process_player_stop_game               = std::bind(&Server::process_player_stop_game, this, std::placeholders::_1);
+    /* Create the function callback here and add them to the white_player_reactor */
+    Callback process_white_check_connectivity      = std::bind(&Server::process_player_check_connectivity, this, std::placeholders::_1, GameActor::WHITECLIENT);
+    Callback process_white_ask_board_configuration = std::bind(&Server::process_player_ask_board_configuration, this, std::placeholders::_1, GameActor::WHITECLIENT);
+    Callback process_white_move_message            = std::bind(&Server::process_player_move_message, this, std::placeholders::_1, GameActor::WHITECLIENT);
+    Callback process_white_stop_game               = std::bind(&Server::process_player_stop_game, this, std::placeholders::_1, GameActor::WHITECLIENT);
 
-    m_player_reactor.add(MessageWrapper::MessageType::CheckConnectivity, process_player_check_connectivity);
-    m_player_reactor.add(MessageWrapper::MessageType::AskBoardConfiguration, process_player_ask_board_configuration);
-    m_player_reactor.add(MessageWrapper::MessageType::MoveMessage, process_player_move_message);
-    m_player_reactor.add(MessageWrapper::MessageType::StopGame, process_player_stop_game);
+    m_white_player_reactor.add(MessageWrapper::MessageType::CheckConnectivity, process_white_check_connectivity);
+    m_white_player_reactor.add(MessageWrapper::MessageType::AskBoardConfiguration, process_white_ask_board_configuration);
+    m_white_player_reactor.add(MessageWrapper::MessageType::MoveMessage, process_white_move_message);
+    m_white_player_reactor.add(MessageWrapper::MessageType::StopGame, process_white_stop_game);
+
+    /* Create the function callback here and add them to the black_player_reactor */
+    Callback process_black_check_connectivity      = std::bind(&Server::process_player_check_connectivity, this, std::placeholders::_1, GameActor::BLACKCLIENT);
+    Callback process_black_ask_board_configuration = std::bind(&Server::process_player_ask_board_configuration, this, std::placeholders::_1, GameActor::BLACKCLIENT);
+    Callback process_black_move_message            = std::bind(&Server::process_player_move_message, this, std::placeholders::_1, GameActor::BLACKCLIENT);
+    Callback process_black_stop_game               = std::bind(&Server::process_player_stop_game, this, std::placeholders::_1, GameActor::BLACKCLIENT);
+
+    m_black_player_reactor.add(MessageWrapper::MessageType::CheckConnectivity, process_black_check_connectivity);
+    m_black_player_reactor.add(MessageWrapper::MessageType::AskBoardConfiguration, process_black_ask_board_configuration);
+    m_black_player_reactor.add(MessageWrapper::MessageType::MoveMessage, process_black_move_message);
+    m_black_player_reactor.add(MessageWrapper::MessageType::StopGame, process_black_stop_game);
 }
 
 Server::~Server()
@@ -362,7 +360,7 @@ void Server::loop()
                 m_white_player_socket.receive(input_message);
 
                 // Will call the callback corresponding to the message type
-                bool processed = m_player_reactor.process_message(input_message);
+                bool processed = m_white_player_reactor.process_message(input_message);
 
                 if(!processed)
                     server_msg("Message received from one of the player socket but no callback were defined to handle it");
@@ -375,7 +373,7 @@ void Server::loop()
                 m_black_player_socket.receive(input_message);
 
                 // Will call the callback corresponding to the message type
-                bool processed = m_player_reactor.process_message(input_message);
+                bool processed = m_black_player_reactor.process_message(input_message);
 
                 if(!processed)
                     server_msg("Message received from one of the player socket but no callback were defined to handle it");

@@ -41,7 +41,7 @@ Other options:
     if (args["--standalone"].asBool())
     {
         game_settings.is_standalone = true;
-        game_settings.self_player = 0;
+        game_settings.self_player = BoardPlayer::None;
         game_settings.server_binding_point = "inproc://katarenga-server-thread";
     }
     else
@@ -49,18 +49,18 @@ Other options:
         if (args["--white"].asBool())
         {
             game_settings.is_standalone = false;
-            game_settings.self_player = 1;
+            game_settings.self_player = BoardPlayer::White;
         }
         else if (args["--black"].asBool())
         {
             game_settings.is_standalone = false;
-            game_settings.self_player = -1;
+            game_settings.self_player = BoardPlayer::Black;
         }
 
         game_settings.server_ip = args["--server-ip"].asString();
         game_settings.server_port = args["--server-port"].asLong();
 
-        int offset_port = (game_settings.self_player == -1 ? 1 : 0);
+        int offset_port = (game_settings.self_player == BoardPlayer::Black ? 1 : 0);
         game_settings.server_binding_point = "tcp://" + game_settings.server_ip + ":" + std::to_string(game_settings.server_port + offset_port);
     }
 

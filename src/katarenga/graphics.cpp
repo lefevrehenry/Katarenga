@@ -1,6 +1,7 @@
 #include "graphics.hpp"
 #include "player.hpp"
 #include "utils.hpp"
+#include <common/board/board_utils.hpp>
 
 #include <GLTK/GLFWApplication.h>
 
@@ -8,37 +9,6 @@
 #include <unistd.h>
 
 using MessageType = MessageWrapper::MessageType;
-
-std::string format_board(const std::string& board_configuration)
-{
-    std::string s = "";
-
-    s += "\n";
-    s += "    1  2  3  4  5  6  7  8   ";
-    s += "\n";
-    s += "             White           ";
-    s += "\n";
-    s += "  X                         X";
-    s += "\n";
-
-    std::string board = board_configuration.substr(0,128);
-
-    for (int j = 0; j < 8; ++j) {
-        s += std::to_string(j+1) + "  ";
-        for (int i = 0; i < 8; ++i) {
-            size_t index = (j * 8) + i;
-            std::string c = board.substr(2*index,2);
-            s += " " + c;
-        }
-        s += "\n";
-    }
-
-    s += "  X                         X";
-    s += "\n";
-    s += "             Black           ";
-
-    return s;
-}
 
 void print_help()
 {
@@ -62,7 +32,7 @@ void Graphics::process_main_answer_move_message(zmqpp::message& message)
 {
     MoveMessage m = ConstructObject<MoveMessage>(message);
 
-    int move_player = m.getPlayer();
+    //BoardPlayer move_player = m.getPlayer();
     MoveType type = m.getType();
 
     if (type == MoveType::MovePlayed)
@@ -169,7 +139,7 @@ void Graphics::loop()
                 }
                 else if(command == "s" || command == "stop")
                 {
-                    zmqpp::message message = ConstructMessage<StopGame>("human decide to stop", 0);
+                    zmqpp::message message = ConstructMessage<StopGame>("human decide to stop");
 
                     // envoie le message (non bloquant)
                     bool ret = m_main_thread_socket.send(message, true);

@@ -1,6 +1,8 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
+#include <common/board/board_utils.hpp>
+
 #include <zmqpp/zmqpp.hpp>
 #include <string>
 #include <stdexcept>
@@ -12,7 +14,7 @@ struct GameSettings
     int server_port;                // The socket port of the server.
     int graphics_port;              // The socket port of the graphics thread.
     bool verbose;                   // Whether to be verbose or not.
-    int self_player;                // 1 for White; -1 for Black, 0 for Standalone;
+    BoardPlayer self_player;
     std::string server_binding_point; // The binding point to communicate with the server
     std::string render_binding_point; // The binding point to communicate with the render thread
 };
