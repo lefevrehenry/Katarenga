@@ -1,4 +1,4 @@
-﻿#include "Board.hpp"
+#include "Board.hpp"
 #include "Piece.hpp"
 
 #include <iostream>
@@ -9,9 +9,9 @@ Board::Board() :
     _campCell(),
     _piecesW(8),
     _piecesB(8),
+    _gameFinished(false),
     _currentPlayer(BoardPlayer::White),
-    _winningPlayer(BoardPlayer::None),
-    _gameFinished(false)
+    _winningPlayer(BoardPlayer::None)
 {
     // Initialization of the BoardCells
     for (int row = 0; row < 8; ++row) {
