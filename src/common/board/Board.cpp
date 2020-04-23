@@ -1,4 +1,4 @@
-#include "Board.hpp"
+﻿#include "Board.hpp"
 #include "Piece.hpp"
 
 #include <iostream>
@@ -413,8 +413,8 @@ void Board::nextPlayer()
 
 void Board::removePiece(Piece* p)
 {
-    std::cout << "Outch! " << ((p->getPlayer() == 1) ? "White" : "Black") << " just lost a Piece!" << std::endl;
-    std::vector<Piece*> * list = p->getPlayer()==1 ? &_piecesW : &_piecesB;
+    std::cout << "Outch! " << ((p->getPlayer() == BoardPlayer::White) ? "White" : "Black") << " just lost a Piece!" << std::endl;
+    std::vector<Piece*> * list = p->getPlayer() == BoardPlayer::White ? &_piecesW : &_piecesB;
 
     auto it = std::find(list->begin(), list->end(), p);
     if (it != list->end())

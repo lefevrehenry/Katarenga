@@ -251,7 +251,7 @@ Player::Player(GameSettings& game_settings) :
 
 
     m_piece_locations.reserve(8); // Reserve space for 8 pieces
-    m_self_player_sign = (m_self_player == 1) ? '+' : '-';
+    m_self_player_sign = (m_self_player == BoardPlayer::White) ? '+' : '-';
 }
 
 Player::~Player()

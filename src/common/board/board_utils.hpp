@@ -7,7 +7,11 @@
 
 using Move = std::pair<const Cell&,const Cell&>;
 
-enum BoardPlayer { None, White, Black };
+enum class BoardPlayer {
+    None,
+    White,
+    Black
+};
 
 BoardPlayer otherPlayer(const BoardPlayer &player);
 
