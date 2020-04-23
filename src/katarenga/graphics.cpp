@@ -118,7 +118,7 @@ void Graphics::loop()
     {
         render_msg("Enter a command: ");
 
-        if(m_poller.poll())
+        if(m_poller.poll(zmqpp::poller::wait_forever))
         {
             if(m_poller.has_input(m_main_thread_socket))
             {
