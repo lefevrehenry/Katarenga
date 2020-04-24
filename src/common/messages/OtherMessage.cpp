@@ -21,7 +21,7 @@ void PlayerWon::toMessage(zmqpp::message& message)
 void PlayerWon::fromMessage(zmqpp::message& message)
 {
     //message >> m_player;
-    m_player = *message.get<const BoardPlayer*>(0);
+    m_player = *message.get<const BoardPlayer*>(1);
 }
 
 BoardPlayer PlayerWon::getPlayer() const

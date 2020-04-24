@@ -56,7 +56,6 @@ void MoveMessage::toMessage(zmqpp::message& message)
     message << m_src;
     message << m_dest;
     message.add_raw<BoardPlayer>(&m_player, sizeof(m_player));
-    //message << m_player;
 }
 
 void MoveMessage::fromMessage(zmqpp::message& message)
@@ -66,8 +65,7 @@ void MoveMessage::fromMessage(zmqpp::message& message)
     m_type = stringToMoveType(type_str);
     message >> m_src;
     message >> m_dest;
-    m_player = *message.get<const BoardPlayer*>(0);
-    //message >> m_player;
+    m_player = *message.get<const BoardPlayer*>(4);
 }
 
 int MoveMessage::getSource() const

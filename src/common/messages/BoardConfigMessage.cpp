@@ -17,14 +17,12 @@ void GameInit::toMessage(zmqpp::message& message)
 {
     message << m_configuration;
     message.add_raw<BoardPlayer>(&m_current_player, sizeof(m_current_player));
-    //message << m_current_player;
 }
 
 void GameInit::fromMessage(zmqpp::message& message)
 {
     message >> m_configuration;
-    m_current_player = *message.get<const BoardPlayer*>(0);
-    //message >> m_current_player;
+    m_current_player = *message.get<const BoardPlayer*>(2);
 }
 
 std::string GameInit::getConfiguration() const
