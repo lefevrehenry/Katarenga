@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 project(common_resources)
 
-#add_subdirectory(messages)
-
 set(HEADER_FILES
     shared_utils.hpp
 
