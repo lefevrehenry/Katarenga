@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(common_resources)
+project(katarenga_common)
 
 set(HEADER_FILES
     shared_utils.hpp

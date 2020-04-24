@@ -17,5 +17,5 @@ add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ZMQPP
     docopt
-    common_resources
+    katarenga_common
 )
