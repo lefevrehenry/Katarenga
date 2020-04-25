@@ -34,14 +34,13 @@ public:
     void loop();    // function executed in the main thread
 
 private:
-    void process_server_game_init(zmqpp::message& message);
-    void process_server_answer_board_configuration(zmqpp::message& message);
+    void process_server_answer_game_status(zmqpp::message& message);
     void process_server_move_message(zmqpp::message& message);
     void process_server_player_won(zmqpp::message& message);
     void process_server_game_stopped(zmqpp::message& message);
 
     void process_graphics_case_clicked(zmqpp::message& message);
-    void process_graphics_ask_board_configuration(zmqpp::message& message);
+    void process_graphics_ask_game_status(zmqpp::message& message);
     void process_graphics_stop_game(zmqpp::message& message);
 
 private:

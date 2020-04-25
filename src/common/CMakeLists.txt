@@ -14,7 +14,7 @@ set(HEADER_FILES
     messages/MessageWrapper.hpp
     messages/CheckConnectivity.hpp
     messages/ReplyConnectivity.hpp
-    messages/BoardConfigMessage.hpp
+    messages/GameStatus.hpp
     messages/MoveMessage.hpp
     messages/QuitMessage.hpp
     messages/OtherMessage.hpp
@@ -33,7 +33,7 @@ set(SOURCE_FILES
     messages/MessageWrapper.cpp
     messages/CheckConnectivity.cpp
     messages/ReplyConnectivity.cpp
-    messages/BoardConfigMessage.cpp
+    messages/GameStatus.cpp
     messages/MoveMessage.cpp
     messages/QuitMessage.cpp
     messages/OtherMessage.cpp

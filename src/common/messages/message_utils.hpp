@@ -4,7 +4,7 @@
 #include "MessageWrapper.hpp"
 #include "MessageReactor.hpp"
 
-#include "BoardConfigMessage.hpp"
+#include "GameStatus.hpp"
 #include "CheckConnectivity.hpp"
 #include "ReplyConnectivity.hpp"
 #include "MoveMessage.hpp"

@@ -16,15 +16,12 @@ public:
     }
 
     enum class MessageType {    // throw it in a separate class
-        GameInit,                   // In BoardConfigMessage
-        AskBoardConfiguration,      // In BoardConfigMessage
-        AnswerBoardConfiguration,   // In BoardConfigMessage
+        AskGameStatus,              // In GameStatus
+        AnswerGameStatus,           // In GameStatus
         CheckConnectivity,          // In CheckConnectivity
         ReplyConnectivity,          // In ReplyConnectivity
         MoveMessage,                // In MoveMessage
         PlayerWon,                  // In OtherMessage
-        //PrintBoard,               // In OtherMessage
-        //ForgetItRageQuit,
         CaseClicked,                // In CaseClicked
         StopGame,                   // In QuitMessage
         GameStopped                 // In QuitMessage
