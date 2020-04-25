@@ -15,7 +15,7 @@ void Server::process_player_check_connectivity(zmqpp::message& message, const Ga
 
     //Player player = o.getPlayer();
 
-    if(src_actor == GameActor::WHITECLIENT)
+    if(src_actor == GameActor::WhiteClient)
     {
         // check wether the white player is already connected or not
         if(m_connectiviy.first == false)
@@ -25,7 +25,7 @@ void Server::process_player_check_connectivity(zmqpp::message& message, const Ga
             sendGameStatus(src_actor);
         }
     }
-    else if (src_actor == GameActor::BLACKCLIENT)
+    else if (src_actor == GameActor::BlackClient)
     {
         // check wether the black player is already connected or not
         if(m_connectiviy.second == false)
@@ -98,7 +98,7 @@ void Server::process_player_stop_game(zmqpp::message& message, const GameActor &
     StopGame m = ConstructObject<StopGame>(message);
     //int player = m.getPlayer();
 
-    if (src_actor == GameActor::WHITECLIENT)
+    if (src_actor == GameActor::WhiteClient)
     {
         std::string reason = "White player: " + m.getReason();
         zmqpp::message message = ConstructMessage<GameStopped>(reason);
@@ -107,7 +107,7 @@ void Server::process_player_stop_game(zmqpp::message& message, const GameActor &
         server_msg(reason);
         m_connectiviy.first = false;
     }
-    else if (src_actor == GameActor::BLACKCLIENT)
+    else if (src_actor == GameActor::BlackClient)
     {
         std::string reason = "Black player: " + m.getReason();
         zmqpp::message message = ConstructMessage<GameStopped>(reason);
@@ -159,11 +159,11 @@ void Server::sendToBothPlayers(zmqpp::message& message)
 
 void Server::sendToActor(zmqpp::message& message, const GameActor& actor)
 {
-    if (actor == GameActor::WHITECLIENT)
+    if (actor == GameActor::WhiteClient)
     {
         m_white_player_socket.send(message, true);
     }
-    else if (actor == GameActor::BLACKCLIENT)
+    else if (actor == GameActor::BlackClient)
     {
         m_black_player_socket.send(message, true);
     }
@@ -257,7 +257,7 @@ void Server::process_command_line(const std::string& command)
         // emulate a move received from the player
         BoardPlayer bplayer = (player == 1) ? BoardPlayer::White : BoardPlayer::Black;
         zmqpp::message message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, src_index, dst_index, bplayer);
-        GameActor actor = (player == 1) ? GameActor::WHITECLIENT : GameActor::BLACKCLIENT;
+        GameActor actor = (player == 1) ? GameActor::WhiteClient : GameActor::BlackClient;
         process_player_move_message(message, actor);
     }
     else if(option_found == "c" || option_found == "close")
@@ -294,10 +294,10 @@ Server::Server(ServerInfo &server_info) :
     using Callback = MessageReactor::Callback;
 
     /* Create the function callback here and add them to the white_player_reactor */
-    Callback process_white_check_connectivity      = std::bind(&Server::process_player_check_connectivity, this, std::placeholders::_1, GameActor::WHITECLIENT);
-    Callback process_white_ask_game_status         = std::bind(&Server::process_player_ask_game_status, this, std::placeholders::_1, GameActor::WHITECLIENT);
-    Callback process_white_move_message            = std::bind(&Server::process_player_move_message, this, std::placeholders::_1, GameActor::WHITECLIENT);
-    Callback process_white_stop_game               = std::bind(&Server::process_player_stop_game, this, std::placeholders::_1, GameActor::WHITECLIENT);
+    Callback process_white_check_connectivity      = std::bind(&Server::process_player_check_connectivity, this, std::placeholders::_1, GameActor::WhiteClient);
+    Callback process_white_ask_game_status         = std::bind(&Server::process_player_ask_game_status, this, std::placeholders::_1, GameActor::WhiteClient);
+    Callback process_white_move_message            = std::bind(&Server::process_player_move_message, this, std::placeholders::_1, GameActor::WhiteClient);
+    Callback process_white_stop_game               = std::bind(&Server::process_player_stop_game, this, std::placeholders::_1, GameActor::WhiteClient);
 
     m_white_player_reactor.add(MessageWrapper::MessageType::CheckConnectivity, process_white_check_connectivity);
     m_white_player_reactor.add(MessageWrapper::MessageType::AskGameStatus, process_white_ask_game_status);
@@ -305,10 +305,10 @@ Server::Server(ServerInfo &server_info) :
     m_white_player_reactor.add(MessageWrapper::MessageType::StopGame, process_white_stop_game);
 
     /* Create the function callback here and add them to the black_player_reactor */
-    Callback process_black_check_connectivity      = std::bind(&Server::process_player_check_connectivity, this, std::placeholders::_1, GameActor::BLACKCLIENT);
-    Callback process_black_ask_game_status         = std::bind(&Server::process_player_ask_game_status, this, std::placeholders::_1, GameActor::BLACKCLIENT);
-    Callback process_black_move_message            = std::bind(&Server::process_player_move_message, this, std::placeholders::_1, GameActor::BLACKCLIENT);
-    Callback process_black_stop_game               = std::bind(&Server::process_player_stop_game, this, std::placeholders::_1, GameActor::BLACKCLIENT);
+    Callback process_black_check_connectivity      = std::bind(&Server::process_player_check_connectivity, this, std::placeholders::_1, GameActor::BlackClient);
+    Callback process_black_ask_game_status         = std::bind(&Server::process_player_ask_game_status, this, std::placeholders::_1, GameActor::BlackClient);
+    Callback process_black_move_message            = std::bind(&Server::process_player_move_message, this, std::placeholders::_1, GameActor::BlackClient);
+    Callback process_black_stop_game               = std::bind(&Server::process_player_stop_game, this, std::placeholders::_1, GameActor::BlackClient);
 
     m_black_player_reactor.add(MessageWrapper::MessageType::CheckConnectivity, process_black_check_connectivity);
     m_black_player_reactor.add(MessageWrapper::MessageType::AskGameStatus, process_black_ask_game_status);

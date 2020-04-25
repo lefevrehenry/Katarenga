@@ -5,12 +5,12 @@
 
 enum class GameActor
 {
-     NONE
-    ,SERVER
-    ,WHITECLIENT
-    ,BLACKCLIENT
-    ,RENDER
-    //,SPECTATOR
+     None
+    ,Server
+    ,WhiteClient
+    ,BlackClient
+    ,Render
+    //,Spectator
 };
 
 std::string to_string(const GameActor& actor);
