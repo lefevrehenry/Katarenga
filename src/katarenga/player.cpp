@@ -12,7 +12,6 @@ void Player::process_server_answer_game_status(zmqpp::message& message)
     // Update internal state
     m_current_player = m.getCurrentPlayer();
     retrieve_piece_locations(m.getConfiguration());
-    //m_connected = true;
 
     // Then forward to the render thread
     m_render_thread_socket.send(message);
@@ -68,10 +67,7 @@ void Player::process_server_move_message(zmqpp::message& message)
 
 void Player::process_server_player_won(zmqpp::message& message)
 {
-    //PlayerWon m = ConstructObject<PlayerWon>(message);
-
     m_game_finished = true;
-    //m_current_player = m.getPlayer(); //TODO ??
 
     // Forward it to the render thread
     m_render_thread_socket.send(message);
@@ -79,8 +75,6 @@ void Player::process_server_player_won(zmqpp::message& message)
 
 void Player::process_server_game_stopped(zmqpp::message& message)
 {
-    //GameStopped m = ConstructObject<GameStopped>(message);
-
     m_game_stopped = true;
 
     // Forward it to the render thread
@@ -138,12 +132,12 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
 
     if(state2)
     {
-        // envoie le coup au serveur
+        // Send the move to the server
         zmqpp::message play_message = ConstructMessage<MoveMessage>(MoveType::PlayThisMove, m_memo.first, m_memo.second, m_self_player);
 
         m_server_thread_socket.send(play_message, true);
 
-        // re-init
+        // re-init the state
         m_memo.first = -1;
         m_memo.second = -1;
     }

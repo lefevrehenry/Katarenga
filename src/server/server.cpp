@@ -11,10 +11,6 @@
 
 void Server::process_player_check_connectivity(zmqpp::message& message, const GameActor &src_actor)
 {
-    //CheckConnectivity o = ConstructObject<CheckConnectivity>(message);
-
-    //Player player = o.getPlayer();
-
     if(src_actor == GameActor::WhiteClient)
     {
         // check wether the white player is already connected or not
