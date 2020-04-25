@@ -6,16 +6,16 @@ std::string to_string(const GameActor& actor)
     std::string s;
     switch(actor)
     {
-    case GameActor::SERVER:
+    case GameActor::Server:
         s = "Server";
         break;
-    case GameActor::WHITECLIENT:
+    case GameActor::WhiteClient:
         s = "White";
         break;
-    case GameActor::BLACKCLIENT:
+    case GameActor::BlackClient:
         s = "Black";
         break;
-    case GameActor::RENDER:
+    case GameActor::Render:
         s = "Graphics";
     default:
         s = "Unknown";

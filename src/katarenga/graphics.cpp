@@ -18,9 +18,9 @@ void print_help()
     render_msg("s,stop for quit");
 }
 
-void Graphics::process_main_answer_board_configuration(zmqpp::message& message)
+void Graphics::process_main_answer_game_status(zmqpp::message& message)
 {
-    AnswerBoardConfiguration m = ConstructObject<AnswerBoardConfiguration>(message);
+    AnswerGameStatus m = ConstructObject<AnswerGameStatus>(message);
     std::string board_configuration = m.getConfiguration();
 
     render_msg("AnswerBoardConfiguration received");
@@ -65,10 +65,10 @@ Graphics::Graphics(zmqpp::context& zmq_context, const std::string& main_thread_b
     using Callback = MessageReactor::Callback;
 
     // Add callback functions to react to messages received from the main thread
-    Callback process_main_answer_board_configuration = std::bind(&Graphics::process_main_answer_board_configuration, this, std::placeholders::_1);
+    Callback process_main_answer_game_status = std::bind(&Graphics::process_main_answer_game_status, this, std::placeholders::_1);
     Callback process_main_answer_move_message = std::bind(&Graphics::process_main_answer_move_message, this, std::placeholders::_1);
 
-    m_main_thread_reactor.add(MessageType::AnswerBoardConfiguration, process_main_answer_board_configuration);
+    m_main_thread_reactor.add(MessageType::AnswerGameStatus, process_main_answer_game_status);
     m_main_thread_reactor.add(MessageType::MoveMessage, process_main_answer_move_message);
 
 }
@@ -129,7 +129,7 @@ void Graphics::loop()
                 }
                 else if(command == "p" || command == "print")
                 {
-                    zmqpp::message message = ConstructMessage<AskBoardConfiguration>();
+                    zmqpp::message message = ConstructMessage<AskGameStatus>();
 
                     // envoie le coup (non bloquant)
                     bool ret = m_main_thread_socket.send(message, true);

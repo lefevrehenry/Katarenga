@@ -9,9 +9,9 @@ struct ServerInfo ServerInfo;
 using MessageType = MessageWrapper::MessageType;
 
 BoardPlayer gameActorToPlayer(const GameActor& actor){
-    if (actor == GameActor::WHITECLIENT)
+    if (actor == GameActor::WhiteClient)
         return BoardPlayer::White;
-    else if (actor == GameActor::BLACKCLIENT)
+    else if (actor == GameActor::BlackClient)
         return BoardPlayer::Black;
     else
         return BoardPlayer::None;

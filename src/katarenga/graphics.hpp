@@ -20,7 +20,7 @@ public:
     void loop();
 
 private:
-    void process_main_answer_board_configuration(zmqpp::message& message);
+    void process_main_answer_game_status(zmqpp::message& message);
     void process_main_answer_move_message(zmqpp::message& message);
 
 private:

@@ -38,7 +38,7 @@ private:
     /* Put here functions reacting to player messages */
     void process_player_check_connectivity(zmqpp::message& message, const GameActor &src_actor);
     void process_player_move_message(zmqpp::message& message, const GameActor &src_actor);
-    void process_player_ask_board_configuration(zmqpp::message& message, const GameActor &src_actor);
+    void process_player_ask_game_status(zmqpp::message& message, const GameActor &src_actor);
     void process_player_stop_game(zmqpp::message& message, const GameActor &src_actor);
 
 private:
@@ -50,7 +50,7 @@ private:
     void sendToActor(zmqpp::message& message, const GameActor& actor);
     void rejectMove(MoveMessage& move_msg, const GameActor& actor);
     void sendWonMessage();
-    void sendGameInit(const GameActor& player);
+    void sendGameStatus(const GameActor& player);
 
 private:
     // Socket-related content

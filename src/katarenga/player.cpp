@@ -5,44 +5,16 @@
 #include <algorithm>
 
 
-void Player::process_server_game_init(zmqpp::message& message)
+void Player::process_server_answer_game_status(zmqpp::message& message)
 {
-    GameInit m = ConstructObject<GameInit>(message);
+    AnswerGameStatus m = ConstructObject<AnswerGameStatus>(message);
 
     // Update internal state
     m_current_player = m.getCurrentPlayer();
     retrieve_piece_locations(m.getConfiguration());
-    m_connected = true;
+    //m_connected = true;
 
     // Then forward to the render thread
-    m_render_thread_socket.send(message);
-}
-
-void Player::process_server_answer_board_configuration(zmqpp::message& message)
-{
-    AnswerBoardConfiguration m = ConstructObject<AnswerBoardConfiguration>(message);
-    std::string configuration = m.getConfiguration();
-    size_t size = configuration.size();
-
-    retrieve_piece_locations(configuration);
-
-    // Retrieve current player
-    if (configuration[size-2] == '+')
-    {
-        m_current_player = BoardPlayer::White;
-    }
-    else if (configuration[size-2] == '-')
-    {
-        m_current_player = BoardPlayer::Black;
-    }
-    else
-    {
-        std::string err = "Wrong current player sent in BoardConfiguration message: " + std::string(1, configuration.at(size-2));
-        player_msg(err);
-        std::terminate();
-    }
-
-    // Then forward it to the render thread
     m_render_thread_socket.send(message);
 }
 
@@ -179,10 +151,10 @@ void Player::process_graphics_case_clicked(zmqpp::message& message)
     player_msg("case clicked " + std::to_string(id));
 }
 
-void Player::process_graphics_ask_board_configuration(zmqpp::message& /*message*/)
+void Player::process_graphics_ask_game_status(zmqpp::message& /*message*/)
 {
-    player_msg("AskBoardConfig received");
-    zmqpp::message zmq_message = ConstructMessage<AskBoardConfiguration>();
+    player_msg("AskGameStatus received from render thread");
+    zmqpp::message zmq_message = ConstructMessage<AskGameStatus>();
     m_server_thread_socket.send(zmq_message, true);
 }
 
@@ -228,25 +200,23 @@ Player::Player(GameSettings& game_settings) :
     using Callback = MessageReactor::Callback;
 
     // Add callback functions to react to messages received from the server
-    Callback process_server_game_init                   = std::bind(&Player::process_server_game_init, this, std::placeholders::_1);
-    Callback process_server_answer_board_configuration  = std::bind(&Player::process_server_answer_board_configuration, this, std::placeholders::_1);
+    Callback process_server_answer_game_status          = std::bind(&Player::process_server_answer_game_status, this, std::placeholders::_1);
     Callback process_server_move_message                = std::bind(&Player::process_server_move_message, this, std::placeholders::_1);
     Callback process_server_player_won                  = std::bind(&Player::process_server_player_won, this, std::placeholders::_1);
     Callback process_server_game_stopped                = std::bind(&Player::process_server_game_stopped, this, std::placeholders::_1);
 
-    m_server_thread_reactor.add(MessageType::GameInit, process_server_game_init);
-    m_server_thread_reactor.add(MessageType::AnswerBoardConfiguration, process_server_answer_board_configuration);
+    m_server_thread_reactor.add(MessageType::AnswerGameStatus, process_server_answer_game_status);
     m_server_thread_reactor.add(MessageType::MoveMessage, process_server_move_message);
     m_server_thread_reactor.add(MessageType::PlayerWon, process_server_player_won);
     m_server_thread_reactor.add(MessageType::GameStopped, process_server_game_stopped);
 
     // Add callback functions to react to messages received from the render thread
     Callback process_graphics_case_clicked              = std::bind(&Player::process_graphics_case_clicked, this, std::placeholders::_1);
-    Callback process_graphics_ask_board_configuration   = std::bind(&Player::process_graphics_ask_board_configuration, this, std::placeholders::_1);
+    Callback process_graphics_ask_game_status           = std::bind(&Player::process_graphics_ask_game_status, this, std::placeholders::_1);
     Callback process_graphics_stop_game                 = std::bind(&Player::process_graphics_stop_game, this, std::placeholders::_1);
 
     m_render_thread_reactor.add(MessageType::CaseClicked, process_graphics_case_clicked);
-    m_render_thread_reactor.add(MessageType::AskBoardConfiguration, process_graphics_ask_board_configuration);
+    m_render_thread_reactor.add(MessageType::AskGameStatus, process_graphics_ask_game_status);
     m_render_thread_reactor.add(MessageType::StopGame, process_graphics_stop_game);
 
 
@@ -273,8 +243,8 @@ void Player::connect()
     using MessageType = MessageWrapper::MessageType;
     using Callback = MessageReactor::Callback;
 
-    Callback process_server_game_init = std::bind(&Player::process_server_game_init, this, std::placeholders::_1);
-    reactor.add(MessageType::GameInit, process_server_game_init);
+    Callback process_server_answer_game_status = std::bind(&Player::process_server_answer_game_status, this, std::placeholders::_1);
+    reactor.add(MessageType::AnswerGameStatus, process_server_answer_game_status);
 
     zmqpp::message message = ConstructMessage<CheckConnectivity>();
     m_server_thread_socket.send(message, true);
@@ -288,6 +258,7 @@ void Player::connect()
 
             // receive the message
             m_server_thread_socket.receive(input_message);
+            m_connected = true;
 
             // process it
             bool processed = reactor.process_message(input_message);
