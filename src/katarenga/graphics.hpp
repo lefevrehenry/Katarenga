@@ -9,6 +9,14 @@
 // Standard Library
 #include <string>
 
+namespace gl {
+    class Camera;
+    class Node;
+}
+
+/**
+ * @brief The Graphics class
+ */
 class Graphics
 {
 
@@ -20,7 +28,12 @@ public:
     void loop();
 
 private:
-    void process_main_answer_game_status(zmqpp::message& message);
+    void initGLTK();
+    void createScene(gl::Node* rootNode);
+    void fitCamera(gl::Camera* camera);
+
+private:
+    void process_main_answer_board_configuration(zmqpp::message& message);
     void process_main_answer_move_message(zmqpp::message& message);
 
 private:

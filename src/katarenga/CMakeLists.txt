@@ -12,12 +12,22 @@ endif()
 get_target_property(_GLTK_DIR GLTK INTERFACE_INCLUDE_DIRECTORIES)
 message("-- Found GLTK: ${_GLTK_DIR}")
 
-file(GLOB SOURCE_FILES
-    "*.cpp"
-    "*.hpp"
+set(SOURCE_FILES
+    graphics.cpp
+    katarenga.cpp
+    player.cpp
+    standalone.cpp
+    utils.cpp
 )
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+set(HEADER_FILES
+    graphics.hpp
+    player.hpp
+    standalone.hpp
+    utils.hpp
+)
+
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} ${HEADER_FILES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     katarenga_common
