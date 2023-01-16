@@ -3,7 +3,6 @@
 // Katarenga
 #include <common/board/Board.hpp>
 #include <common/board/board_utils.hpp>
-#include <server/sockets/connection_socket.hpp>
 
 // Standard Library
 #include <string>
@@ -49,9 +48,9 @@ static void process_command_line(const std::string& command)
 Server::Server(const ServerInfo& server_info) :
     m_zmq_context(),
     m_poller(),
-    m_connection_socket(std::make_shared<ConnectionSocket>(this, &m_zmq_context, server_info.processus_endpoint))
+    m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint)
 {
-    m_poller.add(*m_connection_socket.get(), zmqpp::poller::poll_in);
+    m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
 }
 
@@ -63,10 +62,10 @@ void Server::loop()
     {
         if(m_poller.poll(5000))//zmqpp::poller::wait_forever))
         {
-            if(m_poller.has_input(*m_connection_socket))
+            if(m_poller.has_input(m_connection_socket))
             {
                 server_msg("message received");
-                m_connection_socket->process();
+                m_connection_socket.process();
             }
             else if(m_poller.has_input(STDIN_FILENO))
             {

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2)
 project(katarenga_common)
 
 set(HEADER_FILES
-    src/common/shared_utils.hpp
+    src/common/common_utils.hpp
 
     src/common/board/Board.hpp
     src/common/board/Cell.hpp
@@ -17,7 +17,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-    src/common/shared_utils.cpp
+    src/common/common_utils.cpp
 
     src/common/board/Board.cpp
     src/common/board/Cell.cpp

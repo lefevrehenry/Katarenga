@@ -84,7 +84,8 @@ void client(const ServerInfo& server_info)
     zmqpp::poller poller;
     poller.add(socket_push, zmqpp::poller::poll_in);
 
-    zmqpp::message message1 = Message::Create<NewConnection::Request>("jacky", "0.0.0.1", "28000");
+    NewConnection::Request::Parameters R = {"jacky", "0.0.0.1", "28000"};
+    zmqpp::message message1 = Message::Create<NewConnection::Request>(R);
 //    zmqpp::message message2 = Message::Create<GameStatus>();
 //    zmqpp::message message3 = Message::Create<MovePlayer>(50);
 

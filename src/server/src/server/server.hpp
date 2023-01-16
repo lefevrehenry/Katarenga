@@ -3,14 +3,11 @@
 
 // Katarenga
 #include <common/messages/messages.hpp>
-#include <common/shared_utils.hpp>
 #include <server/server_utils.hpp>
+#include <server/sockets/connection_socket.hpp>
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
-
-// Standard Library
-#include <memory>
 
 class ConnectionSocket;
 
@@ -26,28 +23,23 @@ public:
 public:
     void loop();
 
-public:
-    template<typename M>
-    void execute_message(const typename M::Parameters& parameters) {
-        throw std::runtime_error("No implementation yet");
-    }
-
-    template<typename M>
-    typename M::Reply::Parameters execute_message(const typename M::Request::Parameters& parameters) {
+//public:
+//    template<typename M>
+//    void execute_message(const typename M::Parameters& parameters) {
 //        throw std::runtime_error("No implementation yet");
-        server_msg("No implementation defined for " + Message::Name<M>());
+//    }
 
-        typename M::Reply::Parameters p;
-        p.ok = "not ok";
-        return p;
-    }
+//    template<typename M>
+//    typename M::Reply::Parameters execute_message(const typename M::Request::Parameters& parameters) {
+//        throw std::runtime_error("No implementation yet");
+//    }
 
 public:
     // Socket-related content
     zmqpp::context      m_zmq_context;
     zmqpp::poller       m_poller;
 
-    std::shared_ptr<ConnectionSocket>    m_connection_socket;
+    ConnectionSocket    m_connection_socket;
 
     // Game-related content
 

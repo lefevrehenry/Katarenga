@@ -3,10 +3,11 @@
 
 // Katarenga
 #include <common/sockets/reply_socket.hpp>
-#include <server/server.hpp>
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
+
+class Server;
 
 /**
  * @brief The ConnectionSocket class
@@ -19,12 +20,12 @@ public:
 public:
     template< typename M >
     typename M::Reply::Parameters execute_message(const typename M::Request::Parameters& parameters) {
-        // simply forward the message
-        return m_server->template execute_message<M>(parameters);
+        throw std::runtime_error("No implementation yet");
     }
 
 private:
     Server* m_server;
+
 };
 
 #endif // KATARENGA_SERVER_SOCKETS_CONNECTION_SOCKET_HPP

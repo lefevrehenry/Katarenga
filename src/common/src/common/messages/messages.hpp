@@ -55,7 +55,7 @@ public:
     template<typename M, class P = typename M::Parameters>
     static P Payload(const zmqpp::message& message)
     {
-        int id = 0;
+        int id;
 
         // read the id of the message
         message.get(id, 0);
