@@ -6,8 +6,9 @@
 
 struct ServerInfo
 {
-    zmqpp::endpoint_t tcp_endpoint;           // the tcp entry point for new connections from the network
-    zmqpp::endpoint_t localhost_endpoint;     // the local socket entry point for inter-proccess communication
+    zmqpp::endpoint_t thread_endpoint;          // the socket entry point for inter-threads communication
+    zmqpp::endpoint_t processus_endpoint;       // the socket entry point for inter-proccess communication
+    zmqpp::endpoint_t network_endpoint;         // the socket entry point for communication over the network
 };
 
 void server_msg(const std::string& msg);

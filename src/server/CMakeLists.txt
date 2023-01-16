@@ -15,6 +15,9 @@ set(SOURCE_FILES
     src/server/sockets/connection_socket.cpp
 )
 
+# Threads dependency
+find_package(Threads REQUIRED)
+
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -24,5 +27,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ZMQPP
     docopt
     katarenga_common
+    Threads::Threads
 )
 

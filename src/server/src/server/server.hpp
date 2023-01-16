@@ -2,12 +2,17 @@
 #define KATARENGA_SERVER_SERVER_HPP
 
 // Katarenga
+#include <common/messages/messages.hpp>
 #include <common/shared_utils.hpp>
 #include <server/server_utils.hpp>
-#include <server/sockets/connection_socket.hpp>
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
+
+// Standard Library
+#include <memory>
+
+class ConnectionSocket;
 
 /**
  * @brief The Server class
@@ -29,15 +34,20 @@ public:
 
     template<typename M>
     typename M::Reply::Parameters execute_message(const typename M::Request::Parameters& parameters) {
-        throw std::runtime_error("No implementation yet");
+//        throw std::runtime_error("No implementation yet");
+        server_msg("No implementation defined for " + Message::Name<M>());
+
+        typename M::Reply::Parameters p;
+        p.ok = "not ok";
+        return p;
     }
 
-private:
+public:
     // Socket-related content
     zmqpp::context      m_zmq_context;
     zmqpp::poller       m_poller;
 
-    ConnectionSocket    m_connection_socket;
+    std::shared_ptr<ConnectionSocket>    m_connection_socket;
 
     // Game-related content
 

@@ -62,14 +62,52 @@ ServerInfo ReadConfigFile()
     inih::INIReader ini(config_file);
 
     // Get and parse the ini value
+    std::string thread_port = ini.Get<std::string>("thread", "port");
+    std::string processus_port = ini.Get<std::string>("processus", "port");
     std::string tcp_port = ini.Get<std::string>("tcp", "port");
-    std::string localhost_port = ini.Get<std::string>("localhost", "port");
 
     ServerInfo config;
-    config.tcp_endpoint = "tcp://*:" + tcp_port;
-    config.localhost_endpoint = "ipc://" + localhost_port;
+    config.thread_endpoint = "inproc://" + thread_port;
+    config.processus_endpoint = "ipc://" + processus_port;
+    config.network_endpoint = "tcp://*:" + tcp_port;
 
     return config;
+}
+
+void client(const ServerInfo& server_info)
+{
+    zmqpp::context context;
+
+    zmqpp::socket socket_push(context, zmqpp::socket_type::request);
+    socket_push.connect(server_info.processus_endpoint);
+
+    zmqpp::poller poller;
+    poller.add(socket_push, zmqpp::poller::poll_in);
+
+    zmqpp::message message1 = Message::Create<NewConnection::Request>("jacky", "0.0.0.1", "28000");
+//    zmqpp::message message2 = Message::Create<GameStatus>();
+//    zmqpp::message message3 = Message::Create<MovePlayer>(50);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    server_msg("send 1");
+    socket_push.send(message1);
+
+    if(poller.poll(5000))
+    {
+        if(poller.has_input(socket_push))
+        {
+            zmqpp::message reply_message;
+            socket_push.receive(reply_message);
+
+            typename NewConnection::Reply::Parameters reply = Message::Payload<NewConnection::Reply>(reply_message);
+
+            server_msg("msg received from server '" + std::string(reply.ok) + "'");
+        }
+    }
+    else
+    {
+        server_msg("server not responding");
+    }
 }
 
 int main(int argc, char* argv[])
@@ -79,10 +117,17 @@ int main(int argc, char* argv[])
 //    if (parse_arguments(argc, argv, server_info))
 //        return 1;
 
+    Message::Id<NewConnection>();
+
     ServerInfo server_info = ReadConfigFile();
 
     Server server(server_info);
+
+    std::thread t1(client, server_info);
+
     server.loop();
+
+    t1.join();
 
     return 0;
 }

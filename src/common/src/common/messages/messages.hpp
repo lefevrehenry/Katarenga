@@ -55,8 +55,10 @@ public:
     template<typename M, class P = typename M::Parameters>
     static P Payload(const zmqpp::message& message)
     {
+        int id = 0;
+
         // read the id of the message
-        int id = message.get(0);
+        message.get(id, 0);
 
         // check the message id match the template M
         if (id != Message::Id<M>())
@@ -69,38 +71,38 @@ public:
     }
 };
 
-struct MovePlayer {
-    struct Parameters {
-        int a;
-    };
-};
+//struct MovePlayer {
+//    struct Parameters {
+//        int a;
+//    };
+//};
 
-struct GameStatus {
-    struct Parameters {
-    };
-};
+//struct GameStatus {
+//    struct Parameters {
+//    };
+//};
 
 struct NewConnection
 {
     struct Request {
         struct Parameters {
-            std::string name;
-            std::string ip;
-            std::string port;
+            const char* name;
+            const char* ip;
+            const char* port;
         };
 
     };
 
     struct Reply {
         struct Parameters {
-            std::string ok;
+            const char* ok;
         };
     };
 };
 
-struct CloseConnection {
-    struct Parameters {
-    };
-};
+//struct CloseConnection {
+//    struct Parameters {
+//    };
+//};
 
 #endif // KATARENGA_COMMON_MESSAGES_MESSAGES_HPP
