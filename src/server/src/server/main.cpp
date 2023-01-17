@@ -90,7 +90,7 @@ void client(const ServerInfo& server_info)
 //    zmqpp::message message3 = Message::Create<MovePlayer>(50);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    server_msg("send 1");
+    msg_server("send 1");
     socket_push.send(message1);
 
     if(poller.poll(5000))
@@ -102,12 +102,12 @@ void client(const ServerInfo& server_info)
 
             typename NewConnection::Reply::Parameters reply = Message::Payload<NewConnection::Reply>(reply_message);
 
-            server_msg("msg received from server '" + std::string(reply.ok) + "'");
+            msg_server("msg received from server '" + std::string(reply.ok) + "'");
         }
     }
     else
     {
-        server_msg("server not responding");
+        msg_server("server not responding");
     }
 }
 

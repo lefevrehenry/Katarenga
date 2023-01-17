@@ -30,25 +30,26 @@ static void process_command_line(const std::string& command)
     }
 
     if(option_found.size() == 0) {
-        server_msg("Unknow command '" + command + "'");
+        msg_server("Unknow command '" + command + "'");
         return;
     }
 
     if(option_found == "h" || option_found == "help")
     {
-        server_msg("h,help for help");
-        server_msg("c,close to close the server");
+        msg_server("h,help for help");
+        msg_server("c,close to close the server");
     }
     else
     {
-        server_msg("Unknow command '" + command + "'");
+        msg_server("Unknow command '" + command + "'");
     }
 }
 
 Server::Server(const ServerInfo& server_info) :
     m_zmq_context(),
     m_poller(),
-    m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint)
+    m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint),
+    m_player_sockets()
 {
     m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
@@ -56,7 +57,7 @@ Server::Server(const ServerInfo& server_info) :
 
 void Server::loop()
 {
-    server_msg("Starting main loop of the server");
+    msg_server("Starting main loop of the server");
 
     while(true)
     {
@@ -64,8 +65,8 @@ void Server::loop()
         {
             if(m_poller.has_input(m_connection_socket))
             {
-                server_msg("message received");
-                m_connection_socket.process();
+                msg_server("message received");
+                m_connection_socket.process_message();
             }
             else if(m_poller.has_input(STDIN_FILENO))
             {
@@ -80,5 +81,5 @@ void Server::loop()
         }
     }
 
-    server_msg("Exiting main loop of the server");
+    msg_server("Exiting main loop of the server");
 }

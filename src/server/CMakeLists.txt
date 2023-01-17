@@ -5,6 +5,7 @@ set(HEADER_FILES
     src/server/server_utils.hpp
 
     src/server/sockets/connection_socket.hpp
+    src/server/sockets/player_socket.hpp
 )
 
 set(SOURCE_FILES
@@ -13,6 +14,7 @@ set(SOURCE_FILES
     src/server/server_utils.cpp
 
     src/server/sockets/connection_socket.cpp
+    src/server/sockets/player_socket.cpp
 )
 
 # Threads dependency

@@ -9,10 +9,12 @@ set(HEADER_FILES
     src/common/board/Piece.hpp
     src/common/board/board_utils.hpp
 
+    src/common/engines/pair_engine.hpp
     src/common/engines/reply_engine.hpp
 
     src/common/messages/messages.hpp
 
+    src/common/sockets/pair_socket.hpp
     src/common/sockets/reply_socket.hpp
 )
 
@@ -24,10 +26,12 @@ set(SOURCE_FILES
     src/common/board/Piece.cpp
     src/common/board/board_utils.cpp
 
+    src/common/engines/pair_engine.cpp
     src/common/engines/reply_engine.cpp
 
     src/common/messages/messages.cpp
 
+    src/common/sockets/pair_socket.cpp
     src/common/sockets/reply_socket.cpp
 )
 

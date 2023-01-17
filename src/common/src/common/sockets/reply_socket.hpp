@@ -7,7 +7,6 @@
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
 
-
 /**
  * @brief The ReplySocket class
  */
@@ -22,7 +21,7 @@ public:
     }
 
 public:
-    void process() {
+    void process_message() {
         zmqpp::message input_message;
 
         // receive the request
