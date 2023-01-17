@@ -84,6 +84,12 @@ struct GameStatus {
 
 struct NewConnection
 {
+    enum class GameAction {
+        Create,
+        Join,
+        Spectate
+    };
+
     struct Request {
         struct Parameters {
             const char* name;

@@ -32,8 +32,11 @@ public:
 public:
     bool client_exists(ClientId id);
 
-    ClientSocket add_client(ClientId id);
+    bool add_client(ClientId id);
     bool remove_client(ClientId id);
+
+public:
+    ClientSocket socket(ClientId id) const;
 
 private:
     ClientSockets m_client_sockets;

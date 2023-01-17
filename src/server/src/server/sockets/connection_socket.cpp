@@ -29,8 +29,22 @@ typename NewConnection::Reply::Parameters ConnectionSocket::execute_message<NewC
 
     if(registry.client_exists(id)) {
     } else {
-        ClientSocket socket = registry.add_client(id);
+        registry.add_client(id);
+
+        ClientSocket socket = registry.socket(id);
+        //socket.reset(new PlayerSocket());
     }
+
+//    switch (action) {
+//    case GameAction::Create:
+//        // creer la game et fournir l'id
+//        break;
+//    case GameAction::Join:
+//        break;
+//    case GameAction::Spectate:
+//        break;
+//    default:
+//    }
 
     // 1. verifier si le client n'est pas déjà dans la base de donnee
     // 2. l'ajouter et ouvrir une pair socket
