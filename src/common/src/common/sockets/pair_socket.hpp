@@ -29,13 +29,17 @@ public:
 
         // call the callback corresponding to the message type
         // or does nothing if it has not been registered
-        PairEngine<T>::route(message);
+        PairEngine<T>::route_receive(message);
     }
 
+    template< typename M >
     void send_message() {
-//        zmqpp::message message = Message::Create<M>();
+        int id = Message::Id<M>();
 
-//        send(message);
+        zmqpp::message message = PairEngine<T>::route_send(id);
+
+        // send the message
+        send(message);
     }
 };
 

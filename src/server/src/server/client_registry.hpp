@@ -12,10 +12,16 @@
  */
 class ClientRegistry
 {
-    using ClientId = unsigned int;
+public:
+    using ClientId = std::string;
     using ClientSocket = std::shared_ptr<PlayerSocket>;
 
     using ClientSockets = std::map<ClientId, ClientSocket>;
+
+    static ClientId Id(const std::string& ip, const std::string& port)
+    {
+        return "client(" + ip + ":" + port + ")";
+    }
 
 public:
     ClientRegistry();
@@ -26,7 +32,7 @@ public:
 public:
     bool client_exists(ClientId id);
 
-    bool add_client(ClientId id);
+    ClientSocket add_client(ClientId id);
     bool remove_client(ClientId id);
 
 private:

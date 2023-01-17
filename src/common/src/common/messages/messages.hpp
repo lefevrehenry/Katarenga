@@ -71,16 +71,16 @@ public:
     }
 };
 
-//struct MovePlayer {
-//    struct Parameters {
-//        int a;
-//    };
-//};
+struct MovePlayer {
+    struct Parameters {
+        int a;
+    };
+};
 
-//struct GameStatus {
-//    struct Parameters {
-//    };
-//};
+struct GameStatus {
+    struct Parameters {
+    };
+};
 
 struct NewConnection
 {
@@ -95,14 +95,16 @@ struct NewConnection
 
     struct Reply {
         struct Parameters {
-            const char* ok;
+            const char* status;
+            const char* ip;
+            const char* port;
         };
     };
 };
 
-//struct CloseConnection {
-//    struct Parameters {
-//    };
-//};
+struct CloseConnection {
+    struct Parameters {
+    };
+};
 
 #endif // KATARENGA_COMMON_MESSAGES_MESSAGES_HPP

@@ -19,7 +19,12 @@ public:
 
 public:
     template< typename M >
-    void execute_message(const typename M::Parameters& parameters) {
+    void execute_receive_message(const typename M::Parameters& parameters) {
+        throw std::runtime_error("No implementation yet");
+    }
+
+    template< typename M >
+    void execute_send_message(typename M::Parameters* parameters) {
         throw std::runtime_error("No implementation yet");
     }
 

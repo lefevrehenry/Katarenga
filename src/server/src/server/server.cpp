@@ -49,7 +49,8 @@ Server::Server(const ServerInfo& server_info) :
     m_zmq_context(),
     m_poller(),
     m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint),
-    m_client_registry()
+    m_client_registry(),
+    m_game_registry()
 {
     m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
@@ -61,6 +62,7 @@ void Server::loop()
 
     while(true)
     {
+        msg_server("poll");
         if(m_poller.poll(5000))//zmqpp::poller::wait_forever))
         {
             if(m_poller.has_input(m_connection_socket))
@@ -77,6 +79,7 @@ void Server::loop()
                 // process_command_line(command);
             }
         } else {
+            msg_server("break");
             break;
         }
     }

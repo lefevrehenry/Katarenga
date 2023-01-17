@@ -5,6 +5,7 @@
 #include <common/messages/messages.hpp>
 
 #include <server/client_registry.hpp>
+#include <server/game_registry.hpp>
 #include <server/server_utils.hpp>
 #include <server/sockets/connection_socket.hpp>
 #include <server/sockets/player_socket.hpp>
@@ -30,6 +31,9 @@ public:
 public:
     ClientRegistry& client_registry();
 
+public:
+    GameRegistry& game_registry();
+
 private:
     // Socket-related content
     zmqpp::context      m_zmq_context;
@@ -42,6 +46,7 @@ private:
     ClientRegistry m_client_registry;
 
     // Game-related content
+    GameRegistry m_game_registry;
 
 };
 

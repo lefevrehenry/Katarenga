@@ -9,11 +9,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
-option(BUILD_SERVER "Whether to build the server executable" OFF)
+option(BUILD_SERVER "Whether to build the server executable" ON)
 if (BUILD_SERVER)
     message(STATUS "The server executable will be built")
 endif()
-option(BUILD_CLIENT "Whether to build the client executable" ON)
+option(BUILD_CLIENT "Whether to build the client executable" OFF)
 if (BUILD_CLIENT)
     message(STATUS "The client executable will be built")
 endif()
@@ -42,13 +42,13 @@ if (BUILD_SERVER OR BUILD_CLIENT)
 endif()
 
 # build the server executable
-if (BUILD_SERVER)
+if("${BUILD_SERVER}")
     message("-- Configuring server build")
     add_subdirectory(src/server)
 endif()
 
 # build the katarenga executable
-if (BUILD_CLIENT)
+if("${BUILD_CLIENT}")
     message("-- Configuring client build")
     add_subdirectory(src/katarenga)
 endif()
