@@ -4,6 +4,7 @@
 // Katarenga
 #include <common/messages/messages.hpp>
 
+#include <server/client_registry.hpp>
 #include <server/server_utils.hpp>
 #include <server/sockets/connection_socket.hpp>
 #include <server/sockets/player_socket.hpp>
@@ -27,7 +28,7 @@ public:
     void loop();
 
 public:
-    void add_player();
+    ClientRegistry& client_registry();
 
 private:
     // Socket-related content
@@ -36,6 +37,9 @@ private:
 
     ConnectionSocket    m_connection_socket;
     PlayerSockets       m_player_sockets;
+
+    // Client-related content
+    ClientRegistry m_client_registry;
 
     // Game-related content
 

@@ -49,7 +49,7 @@ Server::Server(const ServerInfo& server_info) :
     m_zmq_context(),
     m_poller(),
     m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint),
-    m_player_sockets()
+    m_client_registry()
 {
     m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
@@ -82,4 +82,9 @@ void Server::loop()
     }
 
     msg_server("Exiting main loop of the server");
+}
+
+ClientRegistry& Server::client_registry()
+{
+    return m_client_registry;
 }
