@@ -29,12 +29,18 @@ public:
     void loop();
 
 public:
-    ClientRegistry& client_registry();
+    ClientRegistry* client_registry();
 
 public:
-    GameRegistry& game_registry();
+    GameRegistry* game_registry();
 
 private:
+    void create_socket_for_client(const ClientRegistry::ClientId& id);
+
+private:
+    // Server-related content
+    ServerInfo m_server_info;
+
     // Socket-related content
     zmqpp::context      m_zmq_context;
     zmqpp::poller       m_poller;

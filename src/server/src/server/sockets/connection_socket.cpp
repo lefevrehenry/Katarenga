@@ -16,41 +16,31 @@ typename NewConnection::Reply::Parameters ConnectionSocket::execute_message<NewC
 {
     typename NewConnection::Reply::Parameters reply;
 
-    ClientRegistry& registry = m_server->client_registry();
+    reply.accepted = false;
+    reply.pair_endpoint = "";
+
+    ClientRegistry* registry = m_server->client_registry();
 
     using ClientId = ClientRegistry::ClientId;
     using ClientSocket = ClientRegistry::ClientSocket;
+    using ClientEndpoint = ClientRegistry::ClientEndpoint;
 
-    std::string name = request.name;
+    //std::string name = request.name;
     std::string ip = request.ip;
     std::string port = request.port;
 
     ClientId id = ClientRegistry::Id(request.ip, request.port);
 
-    if(registry.client_exists(id)) {
-    } else {
-        registry.add_client(id);
+    if(registry->client_exists(id))
+        return reply;
 
-        ClientSocket socket = registry.socket(id);
-        //socket.reset(new PlayerSocket());
-    }
+    registry->add_client(id);
 
-//    switch (action) {
-//    case GameAction::Create:
-//        // creer la game et fournir l'id
-//        break;
-//    case GameAction::Join:
-//        break;
-//    case GameAction::Spectate:
-//        break;
-//    default:
-//    }
+    //ClientSocket socket = registry->socket(id);
+    ClientEndpoint endpoint = registry->endpoint(id);
 
-    // 1. verifier si le client n'est pas déjà dans la base de donnee
-    // 2. l'ajouter et ouvrir une pair socket
-    // 3. répondre que c'est ok et lui communiquer le nouveau port de communication
-
-    reply.status = "connection ok";
+    reply.accepted = true;
+    reply.pair_endpoint = endpoint.c_str();
 
     return reply;
 }

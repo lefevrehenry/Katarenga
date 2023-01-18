@@ -46,6 +46,7 @@ static void process_command_line(const std::string& command)
 }
 
 Server::Server(const ServerInfo& server_info) :
+    m_server_info(server_info),
     m_zmq_context(),
     m_poller(),
     m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint),
@@ -54,6 +55,14 @@ Server::Server(const ServerInfo& server_info) :
 {
     m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
+
+//    using R = void(Server::*)(const ClientRegistry::ClientId&);
+//    R rr = &Server::handle_client_added;
+
+    using R = std::function<void(const ClientRegistry::ClientId&)>;
+    R react = std::bind(&Server::create_socket_for_client, this, std::placeholders::_1);
+
+    m_client_registry.client_added.connect(react);
 }
 
 void Server::loop()
@@ -87,7 +96,25 @@ void Server::loop()
     msg_server("Exiting main loop of the server");
 }
 
-ClientRegistry& Server::client_registry()
+ClientRegistry* Server::client_registry()
 {
-    return m_client_registry;
+    return &m_client_registry;
+}
+
+static zmqpp::endpoint_t GenerateEndpoint(const ServerInfo& server_info)
+{
+    static int N = 1;
+
+    zmqpp::endpoint_t endpoint = server_info.processus_endpoint + std::to_string(N++);
+
+    return endpoint;
+}
+
+void Server::create_socket_for_client(const ClientRegistry::ClientId& id)
+{
+    zmqpp::endpoint_t endpoint = GenerateEndpoint(m_server_info);
+
+    ClientRegistry::ClientSocket socket(new PlayerSocket(this, &m_zmq_context, endpoint));
+
+    m_client_registry.set_socket(id, socket);
 }

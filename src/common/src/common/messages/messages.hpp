@@ -101,9 +101,8 @@ struct NewConnection
 
     struct Reply {
         struct Parameters {
-            const char* status;
-            const char* ip;
-            const char* port;
+            bool accepted;
+            const char* pair_endpoint;
         };
     };
 };
