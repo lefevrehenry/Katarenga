@@ -102,7 +102,7 @@ struct NewConnection
     struct Reply {
         struct Parameters {
             bool accepted;
-            const char* pair_endpoint;
+            char pair_endpoint[128];
         };
     };
 };

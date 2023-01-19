@@ -17,13 +17,12 @@ typename NewConnection::Reply::Parameters ConnectionSocket::execute_message<NewC
     typename NewConnection::Reply::Parameters reply;
 
     reply.accepted = false;
-    reply.pair_endpoint = "";
+    std::strncpy(reply.pair_endpoint, "", sizeof(reply.pair_endpoint));
 
     ClientRegistry* registry = m_server->client_registry();
 
     using ClientId = ClientRegistry::ClientId;
     using ClientSocket = ClientRegistry::ClientSocket;
-    using ClientEndpoint = ClientRegistry::ClientEndpoint;
 
     //std::string name = request.name;
     std::string ip = request.ip;
@@ -34,13 +33,18 @@ typename NewConnection::Reply::Parameters ConnectionSocket::execute_message<NewC
     if(registry->client_exists(id))
         return reply;
 
-    registry->add_client(id);
+    zmqpp::endpoint_t endpoint = m_server->create_new_client_endpoint();
 
-    //ClientSocket socket = registry->socket(id);
-    ClientEndpoint endpoint = registry->endpoint(id);
+    if(endpoint.length() > sizeof(reply.pair_endpoint)-1)
+        return reply;
+
+    ClientSocket socket(new PlayerSocket(m_server, context(), endpoint));
+
+    if(!registry->add_client(id, socket))
+        return reply;
 
     reply.accepted = true;
-    reply.pair_endpoint = endpoint.c_str();
+    std::strncpy(reply.pair_endpoint, socket->endpoint().c_str(), sizeof(reply.pair_endpoint));
 
     return reply;
 }

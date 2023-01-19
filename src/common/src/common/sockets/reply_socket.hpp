@@ -2,6 +2,7 @@
 #define KATARENGA_COMMON_SOCKETS_REPLY_SOCKET_HPP
 
 // Katarenga
+#include <common/sockets/abstract_socket.hpp>
 #include <common/engines/reply_engine.hpp>
 
 // ZMQPP
@@ -11,17 +12,16 @@
  * @brief The ReplySocket class
  */
 template< typename T >
-class ReplySocket : public zmqpp::socket, public ReplyEngine<T>
+class ReplySocket : public AbstractSocket, public ReplyEngine<T>
 {
 public:
     ReplySocket(zmqpp::context* context, const zmqpp::endpoint_t& endpoint) :
-        zmqpp::socket(*context, zmqpp::socket_type::reply)
+        AbstractSocket(context, zmqpp::socket_type::reply, endpoint)
     {
-        bind(endpoint);
     }
 
 public:
-    void process_message() {
+    void process_input_message() {
         zmqpp::message input_message;
 
         // receive the request
@@ -34,6 +34,7 @@ public:
         // send the reply
         send(output_message);
     }
+
 };
 
 #endif // KATARENGA_COMMON_SOCKETS_REPLY_SOCKET_HPP

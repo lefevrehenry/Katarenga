@@ -34,8 +34,10 @@ public:
 public:
     GameRegistry* game_registry();
 
-private:
-    void create_socket_for_client(const ClientRegistry::ClientId& id);
+public:
+    zmqpp::endpoint_t create_new_client_endpoint() const;
+    void client_added(ClientRegistry::ClientId id);
+    void client_removed(ClientRegistry::ClientId id);
 
 private:
     // Server-related content

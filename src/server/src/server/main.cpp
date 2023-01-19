@@ -103,6 +103,7 @@ void client(const ServerInfo& server_info)
             typename NewConnection::Reply::Parameters reply = Message::Payload<NewConnection::Reply>(reply_message);
 
             msg_server("msg received from server '" + std::to_string(reply.accepted) + "'");
+            msg_server("msg received from server '" + std::string(reply.pair_endpoint) + "'");
         }
     }
     else

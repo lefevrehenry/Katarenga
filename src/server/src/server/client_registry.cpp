@@ -1,8 +1,7 @@
 #include "client_registry.hpp"
 
 ClientRegistry::ClientRegistry() :
-    m_client_sockets(),
-    m_client_endpoints()
+    m_client_sockets()
 {
 }
 
@@ -11,13 +10,28 @@ bool ClientRegistry::client_exists(ClientId id) const
     return m_client_sockets.find(id) != m_client_sockets.end();
 }
 
-bool ClientRegistry::add_client(ClientId id)
+bool ClientRegistry::has_input(zmqpp::poller* poller) const
+{
+    ClientSockets::const_iterator it;
+
+    for (it = m_client_sockets.begin(); it != m_client_sockets.end(); ++it)
+    {
+        ClientId id = it->first;
+        ClientSocket socket = it->second;
+
+        if(poller->has_input(*socket.get()))
+            return true;
+    }
+
+    return false;
+}
+
+bool ClientRegistry::add_client(ClientId id, const ClientSocket& socket)
 {
     if(client_exists(id))
         return false;
 
-    m_client_sockets.insert(std::make_pair(id, ClientSocket()));
-    m_client_endpoints.insert(std::make_pair(id, ""));
+    m_client_sockets.insert(std::make_pair(id, socket));
 
     client_added(id);
 
@@ -36,27 +50,8 @@ bool ClientRegistry::remove_client(ClientId id)
 
 ClientRegistry::ClientSocket ClientRegistry::socket(ClientId id) const
 {
-    VerifyClient(id);
-
-    return m_client_sockets.at(id);
-}
-
-void ClientRegistry::set_socket(ClientId id, const ClientSocket& socket)
-{
-    VerifyClient(id);
-
-    m_client_sockets[id] = socket;
-}
-
-ClientRegistry::ClientEndpoint ClientRegistry::endpoint(ClientId id) const
-{
-    VerifyClient(id);
-
-    return m_client_endpoints.at(id);
-}
-
-void ClientRegistry::VerifyClient(ClientId id) const
-{
     if(!client_exists(id))
         throw std::runtime_error("client doesn't exists");
+
+    return m_client_sockets.at(id);
 }

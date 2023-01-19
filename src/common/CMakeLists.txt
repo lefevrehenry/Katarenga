@@ -14,6 +14,7 @@ set(HEADER_FILES
 
     src/common/messages/messages.hpp
 
+    src/common/sockets/abstract_socket.hpp
     src/common/sockets/pair_socket.hpp
     src/common/sockets/reply_socket.hpp
 )
@@ -31,6 +32,7 @@ set(SOURCE_FILES
 
     src/common/messages/messages.cpp
 
+    src/common/sockets/abstract_socket.cpp
     src/common/sockets/pair_socket.cpp
     src/common/sockets/reply_socket.cpp
 )

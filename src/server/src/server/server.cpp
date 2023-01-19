@@ -57,12 +57,15 @@ Server::Server(const ServerInfo& server_info) :
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
 
 //    using R = void(Server::*)(const ClientRegistry::ClientId&);
-//    R rr = &Server::handle_client_added;
+//    R react = &Server::handle_client_added;
 
     using R = std::function<void(const ClientRegistry::ClientId&)>;
-    R react = std::bind(&Server::create_socket_for_client, this, std::placeholders::_1);
 
-    m_client_registry.client_added.connect(react);
+    R add = std::bind(&Server::client_added, this, std::placeholders::_1);
+    R remove = std::bind(&Server::client_removed, this, std::placeholders::_1);
+
+    m_client_registry.client_added.connect(add);
+    m_client_registry.client_removed.connect(remove);
 }
 
 void Server::loop()
@@ -77,7 +80,10 @@ void Server::loop()
             if(m_poller.has_input(m_connection_socket))
             {
                 msg_server("message received");
-                m_connection_socket.process_message();
+                m_connection_socket.process_input_message();
+            }
+            else if(m_client_registry.has_input(&m_poller))
+            {
             }
             else if(m_poller.has_input(STDIN_FILENO))
             {
@@ -101,20 +107,22 @@ ClientRegistry* Server::client_registry()
     return &m_client_registry;
 }
 
-static zmqpp::endpoint_t GenerateEndpoint(const ServerInfo& server_info)
+zmqpp::endpoint_t Server::create_new_client_endpoint() const
 {
     static int N = 1;
 
-    zmqpp::endpoint_t endpoint = server_info.processus_endpoint + std::to_string(N++);
+    zmqpp::endpoint_t endpoint = m_server_info.processus_endpoint + std::to_string(N++);
 
     return endpoint;
 }
 
-void Server::create_socket_for_client(const ClientRegistry::ClientId& id)
+void Server::client_added(ClientRegistry::ClientId id)
 {
-    zmqpp::endpoint_t endpoint = GenerateEndpoint(m_server_info);
+    ClientRegistry::ClientSocket socket = m_client_registry.socket(id);
+    m_poller.add(*socket.get(), zmqpp::poller::poll_in);
+}
 
-    ClientRegistry::ClientSocket socket(new PlayerSocket(this, &m_zmq_context, endpoint));
+void Server::client_removed(ClientRegistry::ClientId id)
+{
 
-    m_client_registry.set_socket(id, socket);
 }

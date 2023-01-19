@@ -2,6 +2,7 @@
 #define KATARENGA_COMMON_SOCKETS_PAIR_SOCKET_HPP
 
 // Katarenga
+#include <common/sockets/abstract_socket.hpp>
 #include <common/engines/pair_engine.hpp>
 
 // ZMQPP
@@ -11,17 +12,16 @@
  * @brief The PairSocket class
  */
 template< typename T >
-class PairSocket : public zmqpp::socket, public PairEngine<T>
+class PairSocket : public AbstractSocket, public PairEngine<T>
 {
 public:
     PairSocket(zmqpp::context* context, const zmqpp::endpoint_t& endpoint) :
-        zmqpp::socket(*context, zmqpp::socket_type::pair)
+        AbstractSocket(context, zmqpp::socket_type::pair, endpoint)
     {
-        bind(endpoint);
     }
 
 public:
-    void receive_message() {
+    void process_input_message() {
         zmqpp::message message;
 
         // receive the message
@@ -41,6 +41,7 @@ public:
         // send the message
         send(message);
     }
+
 };
 
 #endif // KATARENGA_COMMON_SOCKETS_PAIR_SOCKET_HPP
