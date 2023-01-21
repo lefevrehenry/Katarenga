@@ -4,11 +4,16 @@
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
 
+// Standard Library
+#include <memory>
+
 /**
  * @brief The AbstractSocket class
  */
 class AbstractSocket : public zmqpp::socket
 {
+public:
+    using SPtr = std::shared_ptr<AbstractSocket>;
 
 public:
     AbstractSocket(zmqpp::context* context, zmqpp::socket_type type, const zmqpp::endpoint_t& endpoint);

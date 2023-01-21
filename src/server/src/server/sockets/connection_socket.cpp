@@ -21,14 +21,11 @@ typename NewConnection::Reply::Parameters ConnectionSocket::execute_message<NewC
 
     ClientRegistry* registry = m_server->client_registry();
 
-    using ClientId = ClientRegistry::ClientId;
-    using ClientSocket = ClientRegistry::ClientSocket;
-
     //std::string name = request.name;
-    std::string ip = request.ip;
-    std::string port = request.port;
+    //std::string ip = request.ip;
+    //std::string port = request.port;
 
-    ClientId id = ClientRegistry::Id(request.ip, request.port);
+    ClientRegistry::ClientId id = ClientRegistry::Id(request.ip, request.port);
 
     if(registry->client_exists(id))
         return reply;
@@ -38,7 +35,7 @@ typename NewConnection::Reply::Parameters ConnectionSocket::execute_message<NewC
     if(endpoint.length() > sizeof(reply.pair_endpoint)-1)
         return reply;
 
-    ClientSocket socket(new PlayerSocket(m_server, context(), endpoint));
+    ClientRegistry::ClientSocket socket(new PlayerSocket(m_server, context(), endpoint));
 
     if(!registry->add_client(id, socket))
         return reply;

@@ -3,6 +3,7 @@
 
 // Katarenga
 #include <common/messages/messages.hpp>
+#include <common/sockets/abstract_socket.hpp>
 
 #include <server/client_registry.hpp>
 #include <server/game_registry.hpp>
@@ -20,7 +21,7 @@ class ConnectionSocket;
  */
 class Server
 {
-    using PlayerSockets = std::map<int, std::unique_ptr<PlayerSocket>>;
+    using ClientSockets = std::vector<PlayerSocket::SPtr>;
 
 public:
     Server(const ServerInfo& server_info);
@@ -36,8 +37,8 @@ public:
 
 public:
     zmqpp::endpoint_t create_new_client_endpoint() const;
-    void client_added(ClientRegistry::ClientId id);
-    void client_removed(ClientRegistry::ClientId id);
+    void start_monitor_client(ClientRegistry::ClientId id);
+    void stop_monitor_client(ClientRegistry::ClientId id);
 
 private:
     // Server-related content
@@ -48,7 +49,7 @@ private:
     zmqpp::poller       m_poller;
 
     ConnectionSocket    m_connection_socket;
-    PlayerSockets       m_player_sockets;
+    ClientSockets       m_client_sockets;
 
     // Client-related content
     ClientRegistry m_client_registry;

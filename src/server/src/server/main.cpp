@@ -56,8 +56,7 @@ ServerInfo ReadConfigFile()
 {
     std::string home = std::getenv("HOME");
 
-    fs::path config_directory = fs::path(home) / ".config" / "katarenga";
-    fs::path config_file = config_directory / "server.cfg";
+    fs::path config_file = fs::path(home) / ".config" / "katarenga" / "server.cfg";
 
     inih::INIReader ini(config_file);
 
@@ -78,11 +77,14 @@ void client(const ServerInfo& server_info)
 {
     zmqpp::context context;
 
-    zmqpp::socket socket_push(context, zmqpp::socket_type::request);
-    socket_push.connect(server_info.processus_endpoint);
+    zmqpp::socket socket_request(context, zmqpp::socket_type::request);
+    socket_request.connect(server_info.processus_endpoint);
+
+    zmqpp::socket socket_pair(context, zmqpp::socket_type::pair);
+//    socket_request.connect(server_info.processus_endpoint);
 
     zmqpp::poller poller;
-    poller.add(socket_push, zmqpp::poller::poll_in);
+    poller.add(socket_request, zmqpp::poller::poll_in);
 
     NewConnection::Request::Parameters R = {"jacky", "0.0.0.1", "28000"};
     zmqpp::message message1 = Message::Create<NewConnection::Request>(R);
@@ -91,19 +93,33 @@ void client(const ServerInfo& server_info)
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     msg_server("send 1");
-    socket_push.send(message1);
+    socket_request.send(message1);
 
     if(poller.poll(5000))
     {
-        if(poller.has_input(socket_push))
+        if(poller.has_input(socket_request))
         {
             zmqpp::message reply_message;
-            socket_push.receive(reply_message);
+            socket_request.receive(reply_message);
 
             typename NewConnection::Reply::Parameters reply = Message::Payload<NewConnection::Reply>(reply_message);
 
             msg_server("msg received from server '" + std::to_string(reply.accepted) + "'");
             msg_server("msg received from server '" + std::string(reply.pair_endpoint) + "'");
+
+            zmqpp::endpoint_t endpoint = std::string(reply.pair_endpoint);
+            socket_pair.connect(endpoint);
+            poller.add(socket_pair, zmqpp::poller::poll_in);
+
+            poller.remove(socket_request);
+        }
+
+        if(poller.has_input(socket_pair))
+        {
+            msg_server("socket_pair receive a message");
+
+            zmqpp::message input_message;
+            socket_pair.receive(input_message);
         }
     }
     else
@@ -112,7 +128,7 @@ void client(const ServerInfo& server_info)
     }
 }
 
-int main(int argc, char* argv[])
+int main()
 {
     // Let's parse the command-line arguments!
 //    ServerInfo server_info;

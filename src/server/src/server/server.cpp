@@ -50,22 +50,20 @@ Server::Server(const ServerInfo& server_info) :
     m_zmq_context(),
     m_poller(),
     m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint),
+    m_client_sockets(),
     m_client_registry(),
     m_game_registry()
 {
     m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
 
-//    using R = void(Server::*)(const ClientRegistry::ClientId&);
-//    R react = &Server::handle_client_added;
-
     using R = std::function<void(const ClientRegistry::ClientId&)>;
 
-    R add = std::bind(&Server::client_added, this, std::placeholders::_1);
-    R remove = std::bind(&Server::client_removed, this, std::placeholders::_1);
+    R start = std::bind(&Server::start_monitor_client, this, std::placeholders::_1);
+    R stop = std::bind(&Server::stop_monitor_client, this, std::placeholders::_1);
 
-    m_client_registry.client_added.connect(add);
-    m_client_registry.client_removed.connect(remove);
+    m_client_registry.client_added.connect(start);
+    m_client_registry.client_removed.connect(stop);
 }
 
 void Server::loop()
@@ -79,13 +77,18 @@ void Server::loop()
         {
             if(m_poller.has_input(m_connection_socket))
             {
-                msg_server("message received");
                 m_connection_socket.process_input_message();
             }
-            else if(m_client_registry.has_input(&m_poller))
-            {
+
+            for (const PlayerSocket::SPtr& socket : m_client_sockets) {
+                if(m_poller.has_input(*socket))
+                {
+                    msg_server("message received");
+                    socket->process_input_message();
+                }
             }
-            else if(m_poller.has_input(STDIN_FILENO))
+
+            if(m_poller.has_input(STDIN_FILENO))
             {
                 std::string command;
                 std::getline(std::cin, command);
@@ -116,13 +119,18 @@ zmqpp::endpoint_t Server::create_new_client_endpoint() const
     return endpoint;
 }
 
-void Server::client_added(ClientRegistry::ClientId id)
+void Server::start_monitor_client(ClientRegistry::ClientId id)
 {
     ClientRegistry::ClientSocket socket = m_client_registry.socket(id);
+
+    m_client_sockets.push_back(socket);
     m_poller.add(*socket.get(), zmqpp::poller::poll_in);
 }
 
-void Server::client_removed(ClientRegistry::ClientId id)
+void Server::stop_monitor_client(ClientRegistry::ClientId id)
 {
+//    ClientRegistry::ClientSocket socket = m_client_registry.socket(id);
 
+//    std::remove(m_open_sockets.begin(), m_open_sockets.end(), socket.get());
+//    m_poller.remove(*socket.get());
 }
