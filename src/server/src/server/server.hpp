@@ -21,7 +21,7 @@ class ConnectionSocket;
  */
 class Server
 {
-    using ClientSockets = std::vector<PlayerSocket::SPtr>;
+    using ClientSockets = std::vector<ClientRegistry::ClientSocket::SPtr>;
 
 public:
     Server(const ServerInfo& server_info);

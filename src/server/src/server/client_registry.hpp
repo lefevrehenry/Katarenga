@@ -17,9 +17,9 @@ class ClientRegistry
 {
 public:
     using ClientId = std::string;
-    using ClientSocket = std::shared_ptr<PlayerSocket>;
+    using ClientSocket = PlayerSocket;
 
-    using ClientSockets = std::map<ClientId, ClientSocket>;
+    using ClientSockets = std::map<ClientId, ClientSocket::SPtr>;
 
     static ClientId Id(const std::string& ip, const std::string& port)
     {
@@ -32,16 +32,17 @@ public:
     ClientRegistry(const ClientRegistry&) = delete;
     ClientRegistry& operator=(const ClientRegistry& other) = delete;
 
+    ClientRegistry(ClientRegistry&&) = delete;
+    ClientRegistry& operator=(ClientRegistry&& other) = delete;
+
 public:
     bool client_exists(ClientId id) const;
 
-    bool has_input(zmqpp::poller* poller) const;
-
-    bool add_client(ClientId id, const ClientSocket& socket);
+    bool add_client(ClientId id, const ClientSocket::SPtr& socket);
     bool remove_client(ClientId id);
 
 public:
-    ClientSocket socket(ClientId id) const;
+    ClientSocket::SPtr socket(ClientId id) const;
 
 public:
     nod::signal<void(ClientId)> client_added;

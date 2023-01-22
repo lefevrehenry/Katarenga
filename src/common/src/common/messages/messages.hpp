@@ -1,6 +1,9 @@
 #ifndef KATARENGA_COMMON_MESSAGES_MESSAGES_HPP
 #define KATARENGA_COMMON_MESSAGES_MESSAGES_HPP
 
+// Katrenga
+#include <common/common_utils.hpp>
+
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
 
@@ -71,16 +74,16 @@ public:
     }
 };
 
-struct MovePlayer {
-    struct Parameters {
-        int a;
-    };
-};
+//struct MovePlayer {
+//    struct Parameters {
+//        int a;
+//    };
+//};
 
-struct GameStatus {
-    struct Parameters {
-    };
-};
+//struct GameStatus {
+//    struct Parameters {
+//    };
+//};
 
 struct NewConnection
 {
@@ -107,9 +110,26 @@ struct NewConnection
     };
 };
 
-struct CloseConnection {
+struct CreateGame {
     struct Parameters {
     };
 };
+
+struct JoinGame {
+    struct Parameters {
+        Common::GameId game_id;
+    };
+};
+
+struct SpectateGame {
+    struct Parameters {
+        Common::GameId game_id;
+    };
+};
+
+//struct CloseConnection {
+//    struct Parameters {
+//    };
+//};
 
 #endif // KATARENGA_COMMON_MESSAGES_MESSAGES_HPP

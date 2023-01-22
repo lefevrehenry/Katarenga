@@ -77,6 +77,7 @@ void Server::loop()
         {
             if(m_poller.has_input(m_connection_socket))
             {
+                msg_server("new connection request");
                 m_connection_socket.process_input_message();
             }
 
@@ -121,7 +122,7 @@ zmqpp::endpoint_t Server::create_new_client_endpoint() const
 
 void Server::start_monitor_client(ClientRegistry::ClientId id)
 {
-    ClientRegistry::ClientSocket socket = m_client_registry.socket(id);
+    const ClientRegistry::ClientSocket::SPtr& socket = m_client_registry.socket(id);
 
     m_client_sockets.push_back(socket);
     m_poller.add(*socket.get(), zmqpp::poller::poll_in);
