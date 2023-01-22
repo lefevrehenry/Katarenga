@@ -1,13 +1,13 @@
 #include "client_registry.hpp"
 
 ClientRegistry::ClientRegistry() :
-    m_client_sockets()
+    m_clients()
 {
 }
 
 bool ClientRegistry::client_exists(ClientId id) const
 {
-    return m_client_sockets.find(id) != m_client_sockets.end();
+    return m_clients.find(id) != m_clients.end();
 }
 
 bool ClientRegistry::add_client(ClientId id, const ClientSocket::SPtr& socket)
@@ -15,7 +15,7 @@ bool ClientRegistry::add_client(ClientId id, const ClientSocket::SPtr& socket)
     if(client_exists(id) || !socket)
         return false;
 
-    m_client_sockets.insert(std::make_pair(id, socket));
+    m_clients.insert(std::make_pair(id, socket));
 
     client_added(id);
 
@@ -27,7 +27,9 @@ bool ClientRegistry::remove_client(ClientId id)
     if(!client_exists(id))
         return false;
 
-    m_client_sockets.erase(id);
+    m_clients.erase(id);
+
+    client_removed(id);
 
     return true;
 }
@@ -37,5 +39,5 @@ ClientRegistry::ClientSocket::SPtr ClientRegistry::socket(ClientId id) const
     if(!client_exists(id))
         throw std::runtime_error("client doesn't exist");
 
-    return m_client_sockets.at(id);
+    return m_clients.at(id);
 }

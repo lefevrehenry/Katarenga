@@ -111,6 +111,11 @@ ClientRegistry* Server::client_registry()
     return &m_client_registry;
 }
 
+GameRegistry* Server::game_registry()
+{
+    return &m_game_registry;
+}
+
 zmqpp::endpoint_t Server::create_new_client_endpoint() const
 {
     static int N = 1;

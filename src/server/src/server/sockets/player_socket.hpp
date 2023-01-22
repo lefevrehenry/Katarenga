@@ -12,7 +12,7 @@ class Server;
 /**
  * @brief The PlayerSocket class
  */
-class PlayerSocket : public PairSocket<PlayerSocket>
+class PlayerSocket : public PairSocket<PlayerSocket>, public std::enable_shared_from_this<PlayerSocket>
 {
 public:
     PlayerSocket(Server* server, zmqpp::context* context, const zmqpp::endpoint_t& endpoint);

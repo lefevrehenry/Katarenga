@@ -40,16 +40,16 @@ protected:
         (this->*executor)(input_message);
     }
 
-    zmqpp::message route_send(int id) {
-        if(map.find(id) == map.end())
-            throw std::runtime_error("Cannot route an unknown message");
+//    zmqpp::message route_send(int id) {
+//        if(map.find(id) == map.end())
+//            throw std::runtime_error("Cannot route an unknown message");
 
-        const SendExecutor& executor = map[id].second;
-        if(!executor)
-            throw std::runtime_error("Cannot call an unknown executor");
+//        const SendExecutor& executor = map[id].second;
+//        if(!executor)
+//            throw std::runtime_error("Cannot call an unknown executor");
 
-        (this->*executor)();
-    }
+//        (this->*executor)();
+//    }
 private:
     template<typename M>
     void execute_receive(const zmqpp::message& input_message) {

@@ -8,6 +8,7 @@
 #include <nod/nod.hpp>
 
 // Standard Library
+#include <map>
 #include <memory>
 
 /**
@@ -19,7 +20,7 @@ public:
     using ClientId = std::string;
     using ClientSocket = PlayerSocket;
 
-    using ClientSockets = std::map<ClientId, ClientSocket::SPtr>;
+    using Clients = std::map<ClientId, ClientSocket::SPtr>;
 
     static ClientId Id(const std::string& ip, const std::string& port)
     {
@@ -49,7 +50,7 @@ public:
     nod::signal<void(ClientId)> client_removed;
 
 private:
-    ClientSockets m_client_sockets;
+    Clients m_clients;
 
 };
 

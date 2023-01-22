@@ -33,10 +33,11 @@ public:
     }
 
     template< typename M >
-    void send_message() {
-        int id = Message::Id<M>();
+    void send_message(const typename M::Parameters& parameters) {
+//        int id = Message::Id<M>();
+        zmqpp::message message = Message::Create<M>(parameters);
 
-        zmqpp::message message = PairEngine<T>::route_send(id);
+//        zmqpp::message message = PairEngine<T>::route_send(id);
 
         // send the message
         send(message);

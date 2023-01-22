@@ -31,5 +31,6 @@ struct ServerCommon
 };
 
 void msg_server(const std::string& msg);
+void msg_client(const std::string& msg);
 
 #endif // KATARENGA_SERVER_UTILS_HPP

@@ -67,7 +67,7 @@ public:
         if (id != Message::Id<M>())
             throw std::runtime_error("the message does not match the target '" + Message::Name<M>() + "'");
 
-        // read the payload of the message as parameters of M
+        // read the payload of the message like a M::Parameters
         const P* ptr = static_cast<const P*>(message.raw_data(1));
 
         return *ptr;
@@ -87,19 +87,12 @@ public:
 
 struct NewConnection
 {
-    enum class GameAction {
-        Create,
-        Join,
-        Spectate
-    };
-
     struct Request {
         struct Parameters {
             const char* name;
             const char* ip;
             const char* port;
         };
-
     };
 
     struct Reply {
@@ -112,6 +105,12 @@ struct NewConnection
 
 struct CreateGame {
     struct Parameters {
+    };
+};
+
+struct GameCreated {
+    struct Parameters {
+        Common::GameId id;
     };
 };
 

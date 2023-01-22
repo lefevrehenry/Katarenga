@@ -92,40 +92,51 @@ void client(const ServerInfo& server_info)
 //    zmqpp::message message3 = Message::Create<MovePlayer>(50);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    msg_server("send 1");
+    msg_client("send 1");
     socket_request.send(message1);
 
-    if(poller.poll(5000))
+    while(true)
     {
-        if(poller.has_input(socket_request))
+        if(poller.poll(5000))
         {
-            zmqpp::message reply_message;
-            socket_request.receive(reply_message);
+            if(poller.has_input(socket_request))
+            {
+                zmqpp::message reply_message;
+                socket_request.receive(reply_message);
 
-            typename NewConnection::Reply::Parameters reply = Message::Payload<NewConnection::Reply>(reply_message);
+                typename NewConnection::Reply::Parameters reply = Message::Payload<NewConnection::Reply>(reply_message);
 
-            msg_server("msg received from server '" + std::to_string(reply.accepted) + "'");
-            msg_server("msg received from server '" + std::string(reply.pair_endpoint) + "'");
+                msg_client("msg received from server '" + std::to_string(reply.accepted) + "'");
+                msg_client("msg received from server '" + std::string(reply.pair_endpoint) + "'");
 
-            zmqpp::endpoint_t endpoint = std::string(reply.pair_endpoint);
-            socket_pair.connect(endpoint);
-            poller.add(socket_pair, zmqpp::poller::poll_in);
+                zmqpp::endpoint_t endpoint = std::string(reply.pair_endpoint);
+                msg_client("pair connect");
+                socket_pair.connect(endpoint);
+                poller.add(socket_pair, zmqpp::poller::poll_in);
 
-            poller.remove(socket_request);
+                zmqpp::message m = Message::Create<CreateGame>();
+                socket_pair.send(m);
+            }
+
+            if(poller.has_input(socket_pair))
+            {
+                msg_client("socket_pair receive a message");
+
+                zmqpp::message input_message;
+                socket_pair.receive(input_message);
+
+                const GameCreated::Parameters& p = Message::Payload<GameCreated>(input_message);
+                msg_client("game created " + std::to_string(p.id));
+            }
         }
-
-        if(poller.has_input(socket_pair))
+        else
         {
-            msg_server("socket_pair receive a message");
-
-            zmqpp::message input_message;
-            socket_pair.receive(input_message);
+            msg_client("server not responding");
+            break;
         }
     }
-    else
-    {
-        msg_server("server not responding");
-    }
+
+    msg_client("client ending");
 }
 
 int main()

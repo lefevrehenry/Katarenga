@@ -2,7 +2,8 @@
 
 set(HEADER_FILES
     src/server/client_registry.hpp
-    src/server/game_registry.hpp
+    src/server/game.hpp
+    src/server/game_registry.cpp
     src/server/server.hpp
     src/server/server_utils.hpp
 
@@ -14,6 +15,7 @@ set(SOURCE_FILES
     src/server/main.cpp
 
     src/server/client_registry.cpp
+    src/server/game.cpp
     src/server/game_registry.cpp
     src/server/server.cpp
     src/server/server_utils.cpp
