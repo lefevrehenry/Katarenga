@@ -8,7 +8,7 @@
 #include <zmqpp/zmqpp.hpp>
 
 /**
- * @brief The ReplyEngine class
+ * @brief The PairEngine class
  */
 template< typename T >
 class PairEngine
@@ -66,8 +66,8 @@ private:
         using P = typename M::Parameters;
         P payload;
 
-        T* self = static_cast<T*>(this);
-        self->template execute_send_message<M>(&payload);
+//        T* self = static_cast<T*>(this);
+//        self->template execute_send_message<M>(&payload);
 
         return Message::Create<M>(payload);
     }

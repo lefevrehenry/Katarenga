@@ -35,7 +35,7 @@ typename NewConnection::Reply::Parameters ConnectionSocket::execute_message<NewC
     if(endpoint.length() > sizeof(reply.pair_endpoint)-1)
         return reply;
 
-    ClientRegistry::ClientSocket::SPtr socket(new PlayerSocket(m_server, context(), endpoint));
+    ClientRegistry::ClientSocket::SPtr socket(new ClientRegistry::ClientSocket(m_server, context(), endpoint));
 
     if(!registry->add_client(id, socket))
         return reply;

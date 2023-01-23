@@ -7,6 +7,12 @@
 struct Common
 {
     using GameId = unsigned int;
+
+    enum class GameActor {
+        White,
+        Black,
+        Default
+    };
 };
 
 #endif // KATARENGA_COMMON_COMMON_UTILS_HPP

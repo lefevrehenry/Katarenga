@@ -105,24 +105,38 @@ struct NewConnection
 
 struct CreateGame {
     struct Parameters {
+        Common::GameActor actor;
     };
 };
 
 struct GameCreated {
     struct Parameters {
+        bool accepted;
         Common::GameId id;
     };
 };
 
 struct JoinGame {
     struct Parameters {
-        Common::GameId game_id;
+        Common::GameId id;
+    };
+};
+
+struct GameJoined {
+    struct Parameters {
+        bool accepted;
     };
 };
 
 struct SpectateGame {
     struct Parameters {
-        Common::GameId game_id;
+        Common::GameId id;
+    };
+};
+
+struct GameSpectated {
+    struct Parameters {
+        bool accepted;
     };
 };
 

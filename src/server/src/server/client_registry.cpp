@@ -1,5 +1,8 @@
 #include "client_registry.hpp"
 
+// Katarenga
+#include <server/server.hpp>
+
 ClientRegistry::ClientRegistry() :
     m_clients()
 {
@@ -13,6 +16,9 @@ bool ClientRegistry::client_exists(ClientId id) const
 bool ClientRegistry::add_client(ClientId id, const ClientSocket::SPtr& socket)
 {
     if(client_exists(id) || !socket)
+        return false;
+
+    if(m_clients.size() >= MAX_CLIENT)
         return false;
 
     m_clients.insert(std::make_pair(id, socket));
