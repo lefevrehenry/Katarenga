@@ -8,6 +8,8 @@ ConnectionSocket::ConnectionSocket(Server* server, zmqpp::context *context, cons
     ReplySocket(context, endpoint),
     m_server(server)
 {
+    bind(endpoint);
+
     registerMessage<NewConnection>();
 }
 

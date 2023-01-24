@@ -12,6 +12,8 @@ PlayerSocket::PlayerSocket(Server* server, zmqpp::context* context, const zmqpp:
     m_server(server),
     m_is_busy(false)
 {
+    bind(endpoint);
+
     registerMessage<CreateGame>();
     registerMessage<JoinGame>();
     registerMessage<SpectateGame>();

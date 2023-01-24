@@ -60,4 +60,3 @@ private:
 };
 
 #endif // KATARENGA_SERVER_SERVER_HPP
-

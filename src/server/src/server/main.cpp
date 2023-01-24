@@ -1,18 +1,15 @@
 // Katarenga
+#include <common/common_utils.hpp>
 #include <server/server.hpp>
-#include <server/server_utils.hpp>
 
 // docopt
 //#include <docopt/docopt.h>
 
-// Standard Library
-#include <iostream>
-#include <map>
-#include <string>
-#include <filesystem>
-
-// Ini
-#include <ini/ini.h>
+//// Standard Library
+//#include <iostream>
+//#include <map>
+//#include <string>
+//#include <filesystem>
 
 //static int parse_arguments(int argc, char * argv[], ServerInfo &server_info)
 //{
@@ -49,29 +46,6 @@
 
 //    return 0;
 //}
-
-namespace fs = std::filesystem;
-
-ServerInfo ReadConfigFile()
-{
-    std::string home = std::getenv("HOME");
-
-    fs::path config_file = fs::path(home) / ".config" / "katarenga" / "server.cfg";
-
-    inih::INIReader ini(config_file);
-
-    // Get and parse the ini value
-    std::string thread_port = ini.Get<std::string>("thread", "port");
-    std::string processus_port = ini.Get<std::string>("processus", "port");
-    std::string tcp_port = ini.Get<std::string>("tcp", "port");
-
-    ServerInfo config;
-    config.thread_endpoint = "inproc://" + thread_port;
-    config.processus_endpoint = "ipc://" + processus_port;
-    config.network_endpoint = "tcp://*:" + tcp_port;
-
-    return config;
-}
 
 void client(const ServerInfo& server_info)
 {

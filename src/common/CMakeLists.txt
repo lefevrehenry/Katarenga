@@ -17,6 +17,7 @@ set(HEADER_FILES
     src/common/sockets/abstract_socket.hpp
     src/common/sockets/pair_socket.hpp
     src/common/sockets/reply_socket.hpp
+    src/common/sockets/request_socket.hpp
 )
 
 set(SOURCE_FILES
@@ -35,10 +36,12 @@ set(SOURCE_FILES
     src/common/sockets/abstract_socket.cpp
     src/common/sockets/pair_socket.cpp
     src/common/sockets/reply_socket.cpp
+    src/common/sockets/request_socket.cpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

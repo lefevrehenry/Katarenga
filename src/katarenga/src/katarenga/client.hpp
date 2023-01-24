@@ -1,0 +1,35 @@
+#ifndef KATARENGA_CLIENT_CLIENT_HPP
+#define KATARENGA_CLIENT_CLIENT_HPP
+
+// Katarenga
+#include <common/common_utils.hpp>
+
+#include <katarenga/sockets/connection_socket.hpp>
+
+// ZMQPP
+#include <zmqpp/zmqpp.hpp>
+
+/**
+ * @brief The Client class
+ */
+class Client
+{
+public:
+    Client(const ServerInfo& server_info);
+
+public:
+    int exec();
+
+private:
+    // Server-related content
+    ServerInfo m_server_info;
+
+    // Socket-related content
+    zmqpp::context      m_zmq_context;
+    zmqpp::poller       m_poller;
+
+    ConnectionSocket    m_connection_socket;
+
+};
+
+#endif // KATARENGA_CLIENT_CLIENT_HPP
