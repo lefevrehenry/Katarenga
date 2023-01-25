@@ -1,5 +1,9 @@
 #include "common_utils.hpp"
 
+// Katarenga
+#include <common/messages/message.hpp>
+#include <common/messages/messages.hpp>
+
 // Ini
 #include <ini/ini.h>
 
@@ -30,4 +34,19 @@ ServerInfo ReadConfigFile()
     config.network_endpoint = "tcp://*:" + tcp_port;
 
     return config;
+}
+
+void Initialize()
+{
+    Message::Id<NewConnection>();
+    Message::Id<typename NewConnection::Request>();
+    Message::Id<typename NewConnection::Reply>();
+
+    Message::Id<CreateGame>();
+    Message::Id<JoinGame>();
+    Message::Id<SpectateGame>();
+
+    Message::Id<GameCreated>();
+    Message::Id<GameJoined>();
+    Message::Id<GameSpectated>();
 }

@@ -1,7 +1,5 @@
 // Katarenga
 #include <common/common_utils.hpp>
-#include <common/messages/message.hpp>
-#include <common/messages/messages.hpp>
 
 #include <server/server.hpp>
 
@@ -123,17 +121,17 @@ int main()
 //    if (parse_arguments(argc, argv, server_info))
 //        return 1;
 
-    Message::Id<NewConnection>();
+    Initialize();
 
     ServerInfo server_info = ReadConfigFile();
 
     Server server(server_info);
 
-    std::thread t1(client, server_info);
+//    std::thread t1(client, server_info);
 
     server.loop();
 
-    t1.join();
+//    t1.join();
 
     return 0;
 }

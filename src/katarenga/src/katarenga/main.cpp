@@ -5,6 +5,8 @@
 
 int main()
 {
+    Initialize();
+
     ServerInfo server_info = ReadConfigFile();
 
     Client client(server_info);

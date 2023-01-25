@@ -34,7 +34,7 @@ public:
     template< typename M >
     void request()
     {
-        zmqpp::message request_message = RequestEngine<T>::template route_request<M>();
+        zmqpp::message request_message = RequestEngine<T>::template route_request<typename M::Request>();
 
         // send the request
         send(request_message);

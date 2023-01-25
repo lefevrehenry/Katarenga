@@ -24,6 +24,8 @@ struct ServerInfo
 
 ServerInfo ReadConfigFile();
 
+void Initialize();
+
 /**
  * @brief The Common struct
  */

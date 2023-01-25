@@ -4,24 +4,13 @@
 // Katrenga
 #include <common/common_utils.hpp>
 
-//struct MovePlayer {
-//    struct Parameters {
-//        int a;
-//    };
-//};
-
-//struct GameStatus {
-//    struct Parameters {
-//    };
-//};
-
 struct NewConnection
 {
     struct Request {
         struct Parameters {
-            const char* name;
-            const char* ip;
-            const char* port;
+            char name[32];
+            char ip[32];
+            char port[32];
         };
     };
 
@@ -69,10 +58,5 @@ struct GameSpectated {
         bool accepted;
     };
 };
-
-//struct CloseConnection {
-//    struct Parameters {
-//    };
-//};
 
 #endif // KATARENGA_COMMON_MESSAGES_MESSAGES_HPP

@@ -19,6 +19,39 @@ Client::Client(const ServerInfo& server_info) :
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
 }
 
+ConnectionSocket::SPtr Client::connection_socket() const
+{
+    return nullptr;
+}
+
+ServerSocket::SPtr Client::server_socket() const
+{
+    if(!m_server_socket)
+        return nullptr;
+
+    return m_server_socket;
+}
+
+void Client::open_server_socket(const zmqpp::endpoint_t& endpoint)
+{
+    if(m_server_socket)
+        return;
+
+    m_server_socket = std::make_shared<ServerSocket>(this, &m_zmq_context, endpoint);
+
+    m_poller.add(*m_server_socket.get(), zmqpp::poller::poll_in);
+}
+
+void Client::close_server_socket()
+{
+    if(!m_server_socket)
+        return;
+
+    m_poller.remove(*m_server_socket.get());
+
+    m_server_socket.reset();
+}
+
 int Client::exec()
 {
     msg_client("Starting main loop of the client");
@@ -37,6 +70,11 @@ int Client::exec()
             if(m_poller.has_input(m_connection_socket))
             {
                 m_connection_socket.process_input_message();
+            }
+
+            if(m_server_socket && m_poller.has_input(*m_server_socket.get()))
+            {
+                m_server_socket->process_input_message();
             }
 
             if(m_poller.has_input(STDIN_FILENO))

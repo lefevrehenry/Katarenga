@@ -9,6 +9,9 @@
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
 
+// Standard Library
+#include <memory>
+
 class Client;
 
 /**
@@ -16,6 +19,9 @@ class Client;
  */
 class ConnectionSocket : public RequestSocket<ConnectionSocket>
 {
+public:
+    using SPtr = std::shared_ptr<ConnectionSocket>;
+
 public:
     ConnectionSocket(Client* client, zmqpp::context* context, const zmqpp::endpoint_t& endpoint);
 

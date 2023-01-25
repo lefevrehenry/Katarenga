@@ -14,16 +14,16 @@ template< typename T >
 class RequestEngine
 {
     using RequestExecutor = zmqpp::message(RequestEngine::*)();
-    using ReplyExecutor = void(RequestEngine::*)(const zmqpp::message&);
-    using DoubleExecutor = std::pair<RequestExecutor, ReplyExecutor>;
-//    using DoubleExecutor = std::pair<int,int>;
+    using RequestMap = std::map<int, RequestExecutor>;
 
-    using RegistryMap = std::map<int, DoubleExecutor>;
+    using ReplyExecutor = void(RequestEngine::*)(const zmqpp::message&);
+    using ReplyMap = std::map<int, ReplyExecutor>;
 
 public:
     template<typename M>
     void registerMessage() {
-        map[Message::Id<M>()] = std::make_pair(&RequestEngine<T>::execute_request<M>, &RequestEngine<T>::execute_reply<M>);
+        request_map[Message::Id<typename M::Request>()] = &RequestEngine<T>::execute_request<M>;
+        reply_map[Message::Id<typename M::Reply>()] = &RequestEngine<T>::execute_reply<M>;
     }
 
 protected:
@@ -31,10 +31,10 @@ protected:
     zmqpp::message route_request() {
         int id = Message::Id<M>();
 
-        if(map.find(id) == map.end())
+        if(request_map.find(id) == request_map.end())
             throw std::runtime_error("Cannot route an unknown message");
 
-        const RequestExecutor& executor = map[id].first;
+        const RequestExecutor& executor = request_map[id];
 
         if(!executor)
             throw std::runtime_error("Cannot call an unknown executor");
@@ -46,10 +46,10 @@ protected:
         int id;
         input_message.get(id, 0);
 
-        if(map.find(id) == map.end())
+        if(reply_map.find(id) == reply_map.end())
             throw std::runtime_error("Cannot route an unknown message");
 
-        const ReplyExecutor& executor = map[id].second;
+        const ReplyExecutor& executor = reply_map[id];
 
         if(!executor)
             throw std::runtime_error("Cannot call an unknown executor");
@@ -82,7 +82,8 @@ private:
     }
 
 private:
-    RegistryMap map;
+    RequestMap request_map;
+    ReplyMap reply_map;
 
 };
 

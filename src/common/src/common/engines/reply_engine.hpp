@@ -17,7 +17,7 @@ class ReplyEngine
     using RegistryMap = std::map<int, Executor>;
 
 public:
-    template<typename M>
+    template< typename M >
     void registerMessage() {
         map[Message::Id<typename M::Request>()] = &ReplyEngine<T>::execute<M>;
     }
@@ -38,7 +38,7 @@ protected:
     }
 
 private:
-    template<typename M>
+    template< typename M >
     zmqpp::message execute(const zmqpp::message& input_message) {
         using Request = typename M::Request;
         using Reply = typename M::Reply;

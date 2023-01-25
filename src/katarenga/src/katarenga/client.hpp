@@ -5,6 +5,7 @@
 #include <common/common_utils.hpp>
 
 #include <katarenga/sockets/connection_socket.hpp>
+#include <katarenga/sockets/server_socket.hpp>
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
@@ -18,6 +19,14 @@ public:
     Client(const ServerInfo& server_info);
 
 public:
+    ConnectionSocket::SPtr connection_socket() const;
+    ServerSocket::SPtr server_socket() const;
+
+public:
+    void open_server_socket(const zmqpp::endpoint_t& endpoint);
+    void close_server_socket();
+
+public:
     int exec();
 
 private:
@@ -29,7 +38,7 @@ private:
     zmqpp::poller       m_poller;
 
     ConnectionSocket    m_connection_socket;
-//    ServerSocket        m_server_socket;
+    ServerSocket::SPtr  m_server_socket;
 
 };
 

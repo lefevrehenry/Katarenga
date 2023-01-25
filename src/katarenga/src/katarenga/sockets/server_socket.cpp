@@ -9,6 +9,10 @@ ServerSocket::ServerSocket(Client* client, zmqpp::context* context, const zmqpp:
 {
     connect(endpoint);
 
+    registerMessage<CreateGame>();
+    registerMessage<JoinGame>();
+    registerMessage<SpectateGame>();
+
     registerMessage<GameCreated>();
     registerMessage<GameJoined>();
     registerMessage<GameSpectated>();
