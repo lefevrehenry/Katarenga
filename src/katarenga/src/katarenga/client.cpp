@@ -1,6 +1,7 @@
 #include "client.hpp"
 
 // Katarenga
+#include <common/messages/message.hpp>
 #include <common/messages/messages.hpp>
 #include <katarenga/client_utils.hpp>
 
@@ -25,10 +26,7 @@ int Client::exec()
     msg_client("sending connection request ...");
 
     {
-        NewConnection::Request::Parameters R = {"jacky", "0.0.0.1", "28000"};
-        zmqpp::message request = Message::Create<NewConnection::Request>(R);
-
-        m_connection_socket.send(request);
+        m_connection_socket.request<NewConnection>();
     }
 
     while(true)
@@ -38,8 +36,7 @@ int Client::exec()
         {
             if(m_poller.has_input(m_connection_socket))
             {
-                zmqpp::message reply;
-                m_connection_socket.receive(reply);
+                m_connection_socket.process_input_message();
             }
 
             if(m_poller.has_input(STDIN_FILENO))

@@ -11,7 +11,9 @@ set(HEADER_FILES
 
     src/common/engines/pair_engine.hpp
     src/common/engines/reply_engine.hpp
+    src/common/engines/request_engine.hpp
 
+    src/common/messages/message.hpp
     src/common/messages/messages.hpp
 
     src/common/sockets/abstract_socket.hpp
@@ -30,8 +32,10 @@ set(SOURCE_FILES
 
     src/common/engines/pair_engine.cpp
     src/common/engines/reply_engine.cpp
+    src/common/engines/request_engine.cpp
 
-    src/common/messages/messages.cpp
+    src/common/messages/message.cpp
+    src/common/messages/messages.hpp
 
     src/common/sockets/abstract_socket.cpp
     src/common/sockets/pair_socket.cpp

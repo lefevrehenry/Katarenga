@@ -2,7 +2,7 @@
 #define KATARENGA_COMMON_ENGINES_REPLY_ENGINE_HPP
 
 // Katarenga
-#include <common/messages/messages.hpp>
+#include <common/messages/message.hpp>
 
 // ZMQPPP
 #include <zmqpp/zmqpp.hpp>

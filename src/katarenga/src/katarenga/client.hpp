@@ -29,6 +29,7 @@ private:
     zmqpp::poller       m_poller;
 
     ConnectionSocket    m_connection_socket;
+//    ServerSocket        m_server_socket;
 
 };
 

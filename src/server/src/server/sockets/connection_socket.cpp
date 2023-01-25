@@ -1,6 +1,8 @@
 #include "connection_socket.hpp"
 
 // Katarenga
+#include <common/messages/messages.hpp>
+
 #include <server/server.hpp>
 #include <server/client_registry.hpp>
 

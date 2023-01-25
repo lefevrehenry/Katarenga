@@ -16,7 +16,8 @@ class ReplySocket : public AbstractSocket, public ReplyEngine<T>
 {
 public:
     ReplySocket(zmqpp::context* context, const zmqpp::endpoint_t& endpoint) :
-        AbstractSocket(context, zmqpp::socket_type::reply, endpoint)
+        AbstractSocket(context, zmqpp::socket_type::reply, endpoint),
+        ReplyEngine<T>()
     {
     }
 
@@ -27,8 +28,6 @@ public:
         // receive the request
         receive(input_message);
 
-        // call the callback corresponding to the message type
-        // or does nothing if it has not been registered
         zmqpp::message output_message = ReplyEngine<T>::route(input_message);
 
         // send the reply

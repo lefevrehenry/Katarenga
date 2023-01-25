@@ -2,7 +2,7 @@
 #define KATARENGA_COMMON_ENGINES_PAIR_ENGINE_HPP
 
 // Katarenga
-#include <common/messages/messages.hpp>
+#include <common/messages/message.hpp>
 
 // ZMQPPP
 #include <zmqpp/zmqpp.hpp>
@@ -50,10 +50,10 @@ protected:
 
 //        (this->*executor)();
 //    }
+
 private:
     template<typename M>
     void execute_receive(const zmqpp::message& input_message) {
-
         using P = typename M::Parameters;
         P payload = Message::Payload<M>(input_message);
 

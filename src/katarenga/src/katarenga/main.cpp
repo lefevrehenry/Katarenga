@@ -1,6 +1,6 @@
-
 // Katarenga
 #include <common/common_utils.hpp>
+
 #include <katarenga/client.hpp>
 
 int main()

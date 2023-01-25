@@ -1,5 +1,8 @@
 // Katarenga
 #include <common/common_utils.hpp>
+#include <common/messages/message.hpp>
+#include <common/messages/messages.hpp>
+
 #include <server/server.hpp>
 
 // docopt

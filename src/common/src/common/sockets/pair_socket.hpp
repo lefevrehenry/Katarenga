@@ -2,8 +2,9 @@
 #define KATARENGA_COMMON_SOCKETS_PAIR_SOCKET_HPP
 
 // Katarenga
-#include <common/sockets/abstract_socket.hpp>
 #include <common/engines/pair_engine.hpp>
+#include <common/messages/message.hpp>
+#include <common/sockets/abstract_socket.hpp>
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
