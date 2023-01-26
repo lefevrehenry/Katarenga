@@ -13,7 +13,8 @@ Client::Client(const ServerInfo& server_info) :
     m_server_info(server_info),
     m_zmq_context(),
     m_poller(),
-    m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint)
+    m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint),
+    m_game(nullptr)
 {
     m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
@@ -26,10 +27,12 @@ ConnectionSocket::SPtr Client::connection_socket() const
 
 ServerSocket::SPtr Client::server_socket() const
 {
-    if(!m_server_socket)
-        return nullptr;
-
     return m_server_socket;
+}
+
+Game::SPtr Client::game() const
+{
+    return m_game;
 }
 
 void Client::open_server_socket(const zmqpp::endpoint_t& endpoint)
@@ -50,6 +53,18 @@ void Client::close_server_socket()
     m_poller.remove(*m_server_socket.get());
 
     m_server_socket.reset();
+}
+
+Game::SPtr Client::create_game()
+{
+    m_game = std::make_shared<Game>();
+
+    return m_game;
+}
+
+void Client::destroy_game()
+{
+    m_game.reset();
 }
 
 int Client::exec()

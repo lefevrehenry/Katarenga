@@ -3,6 +3,7 @@
 set(HEADER_FILES
     src/katarenga/client.hpp
     src/katarenga/client_utils.hpp
+    src/katarenga/game.hpp
 
     src/katarenga/sockets/connection_socket.hpp
     src/katarenga/sockets/server_socket.hpp
@@ -13,6 +14,7 @@ set(SOURCE_FILES
 
     src/katarenga/client.cpp
     src/katarenga/client_utils.cpp
+    src/katarenga/game.cpp
 
     src/katarenga/sockets/connection_socket.cpp
     src/katarenga/sockets/server_socket.cpp

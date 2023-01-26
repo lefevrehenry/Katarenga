@@ -36,10 +36,10 @@ public:
         throw std::runtime_error("No implementation yet");
     }
 
-//    template< typename M >
-//    void execute_send_message(typename M::Parameters* parameters) {
-//        throw std::runtime_error("No implementation yet");
-//    }
+    template< typename M >
+    typename M::Parameters execute_send_message() {
+        throw std::runtime_error("No implementation yet");
+    }
 
 private:
     Server* m_server;

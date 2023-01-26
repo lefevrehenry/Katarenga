@@ -34,16 +34,22 @@ public:
     }
 
     template< typename M >
-    void send_message(const typename M::Parameters& parameters) {
-//        int id = Message::Id<M>();
+    void send_message(const typename M::Parameters& parameters)
+    {
         zmqpp::message message = Message::Create<M>(parameters);
-
-//        zmqpp::message message = PairEngine<T>::route_send(id);
 
         // send the message
         send(message);
     }
 
+//    template< typename M >
+//    void send_message()
+//    {
+//        zmqpp::message message = PairEngine<T>::template route_send<M>();
+
+//        // send the message
+//        send(message);
+//    }
 };
 
 #endif // KATARENGA_COMMON_SOCKETS_PAIR_SOCKET_HPP

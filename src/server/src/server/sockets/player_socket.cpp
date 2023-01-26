@@ -14,9 +14,9 @@ PlayerSocket::PlayerSocket(Server* server, zmqpp::context* context, const zmqpp:
 {
     bind(endpoint);
 
-    registerMessage<CreateGame>();
-    registerMessage<JoinGame>();
-    registerMessage<SpectateGame>();
+    registerReceiveMessage<CreateGame>();
+    registerReceiveMessage<JoinGame>();
+    registerReceiveMessage<SpectateGame>();
 }
 
 bool PlayerSocket::busy() const

@@ -16,19 +16,19 @@ class Message
     static int pid;
 
 public:
-    template<typename M>
+    template< typename M >
     static int Id() {
         static int _id = pid++;
         return _id;
     }
 
-    template<typename M>
+    template< typename M >
     static std::string Name() {
         static const char* _name = typeid(M).name();
         return _name;
     }
 
-    template<typename M, class P = typename M::Parameters>
+    template< typename M, class P = typename M::Parameters >
     static zmqpp::message Create(P& parameters)
     {
         zmqpp::message message;
@@ -37,13 +37,14 @@ public:
 
         // the first part of the message is the id of M
         message.add(id);
+
         // the second part of the message is the payload of M
         message.add_raw<P>(&parameters, sizeof(P));
 
         return message;
     }
 
-    template<typename M, class ... Args>
+    template< typename M, class ... Args >
     static zmqpp::message Create(Args&&... args)
     {
         using P = typename M::Parameters;
@@ -52,7 +53,7 @@ public:
         return Create<M>(parameters);
     }
 
-    template<typename M, class P = typename M::Parameters>
+    template< typename M, class P = typename M::Parameters >
     static P Payload(const zmqpp::message& message)
     {
         int id;

@@ -29,6 +29,11 @@ public:
         throw std::runtime_error("No implementation yet");
     }
 
+    template< typename M >
+    typename M::Parameters execute_send_message() {
+        throw std::runtime_error("No implementation yet");
+    }
+
 private:
     Client* m_client;
 
