@@ -24,6 +24,9 @@ public:
     ServerSocket::SPtr server_socket() const;
 
 public:
+    int exec();
+
+public:
     Game::SPtr game() const;
 
 public:
@@ -34,12 +37,13 @@ public:
     Game::SPtr create_game();
     void destroy_game();
 
-public:
-    int exec();
+private:
+    void process_command_line(const std::string& command);
 
 private:
     // Server-related content
-    ServerInfo m_server_info;
+    ServerInfo  m_server_info;
+    bool        m_should_quit;
 
     // Socket-related content
     zmqpp::context      m_zmq_context;

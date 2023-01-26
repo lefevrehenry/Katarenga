@@ -41,8 +41,12 @@ public:
     void stop_monitor_client(ClientRegistry::ClientId id);
 
 private:
+    void process_command_line(const std::string& command);
+
+private:
     // Server-related content
-    ServerInfo m_server_info;
+    ServerInfo  m_server_info;
+    bool        m_should_quit;
 
     // Socket-related content
     zmqpp::context      m_zmq_context;

@@ -17,6 +17,7 @@ PlayerSocket::PlayerSocket(Server* server, zmqpp::context* context, const zmqpp:
     registerReceiveMessage<CreateGame>();
     registerReceiveMessage<JoinGame>();
     registerReceiveMessage<SpectateGame>();
+    registerReceiveMessage<CloseConnection>();
 }
 
 bool PlayerSocket::busy() const
@@ -112,4 +113,9 @@ void PlayerSocket::execute_receive_message<SpectateGame>(const typename Spectate
     }
 
     send_message<GameSpectated>(reply);
+}
+
+template<>
+void PlayerSocket::execute_receive_message<CloseConnection>(const typename CloseConnection::Parameters& p)
+{
 }

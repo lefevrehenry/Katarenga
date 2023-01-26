@@ -8,45 +8,9 @@
 #include <string>
 #include <unistd.h>
 
-static void process_command_line(const std::string& command)
-{
-    if(command.size() == 0)
-        return;
-
-    // all available options here
-    static std::list<std::string> options = {"help", "h", "print", "p", "move", "m", "close", "c"};
-
-    std::string option_found = "";
-
-    // try to find the option matching the command
-    for (const std::string& option : options)
-    {
-        size_t option_size = option.size();
-
-        if(command.size() >= option_size && command.substr(0, option_size) == option) {
-            option_found = option;
-            break;
-        }
-    }
-
-    if(option_found.size() == 0) {
-        msg_server("Unknow command '" + command + "'");
-        return;
-    }
-
-    if(option_found == "h" || option_found == "help")
-    {
-        msg_server("h,help for help");
-        msg_server("c,close to close the server");
-    }
-    else
-    {
-        msg_server("Unknow command '" + command + "'");
-    }
-}
-
 Server::Server(const ServerInfo& server_info) :
     m_server_info(server_info),
+    m_should_quit(false),
     m_zmq_context(),
     m_poller(),
     m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint),
@@ -70,10 +34,11 @@ void Server::loop()
 {
     msg_server("Starting main loop of the server");
 
-    while(true)
+    while(!m_should_quit)
     {
-        msg_server("poll");
-        if(m_poller.poll(5000))//zmqpp::poller::wait_forever))
+//        msg_server("poll");
+        std::cout << ">>> " << std::flush;
+        if(m_poller.poll(zmqpp::poller::wait_forever))
         {
             if(m_poller.has_input(m_connection_socket))
             {
@@ -95,11 +60,8 @@ void Server::loop()
                 std::getline(std::cin, command);
 
                 // process the command read from std::cin
-                // process_command_line(command);
+                process_command_line(command);
             }
-        } else {
-            msg_server("break");
-            break;
         }
     }
 
@@ -138,5 +100,24 @@ void Server::stop_monitor_client(ClientRegistry::ClientId id)
 //    ClientRegistry::ClientSocket socket = m_client_registry.socket(id);
 
 //    std::remove(m_open_sockets.begin(), m_open_sockets.end(), socket.get());
-//    m_poller.remove(*socket.get());
+    //    m_poller.remove(*socket.get());
+}
+
+void Server::process_command_line(const std::string& command)
+{
+//    msg_server("running '" + command + "'");
+
+    if(command == "h" || command == "help")
+    {
+        msg_server("h,help for help");
+        msg_server("q,quit for quit the server");
+    }
+    else if(command == "q" || command == "quit")
+    {
+        m_should_quit = true;
+    }
+    else
+    {
+        msg_server("unknow command '" + command + "'");
+    }
 }

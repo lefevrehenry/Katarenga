@@ -22,6 +22,12 @@ struct NewConnection
     };
 };
 
+struct CloseConnection
+{
+    struct Parameters {
+    };
+};
+
 struct CreateGame {
     struct Parameters {
         Common::GameActor actor;

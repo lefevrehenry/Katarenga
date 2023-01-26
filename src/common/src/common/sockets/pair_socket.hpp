@@ -34,7 +34,7 @@ public:
     }
 
     template< typename M >
-    void send_message(const typename M::Parameters& parameters)
+    void send_message(const typename M::Parameters& parameters = {})
     {
         zmqpp::message message = Message::Create<M>(parameters);
 

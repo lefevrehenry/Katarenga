@@ -11,6 +11,7 @@
 
 Client::Client(const ServerInfo& server_info) :
     m_server_info(server_info),
+    m_should_quit(false),
     m_zmq_context(),
     m_poller(),
     m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint),
@@ -18,6 +19,48 @@ Client::Client(const ServerInfo& server_info) :
 {
     m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
+}
+
+int Client::exec()
+{
+    msg_client("Starting main loop of the client");
+
+    msg_client("sending connection request ...");
+
+//    {
+//        m_connection_socket.request<NewConnection>();
+//    }
+
+    while(!m_should_quit)
+    {
+//        msg_client("poll");
+        std::cout << ">>> " << std::flush;
+        if(m_poller.poll(zmqpp::poller::wait_forever))
+        {
+            if(m_poller.has_input(m_connection_socket))
+            {
+                m_connection_socket.process_input_message();
+            }
+
+            if(m_server_socket && m_poller.has_input(*m_server_socket.get()))
+            {
+                m_server_socket->process_input_message();
+            }
+
+            if(m_poller.has_input(STDIN_FILENO))
+            {
+                std::string command;
+                std::getline(std::cin, command);
+
+                // process the command read from std::cin
+                process_command_line(command);
+            }
+        }
+    }
+
+    msg_client("client ending");
+
+    return 0;
 }
 
 ConnectionSocket::SPtr Client::connection_socket() const
@@ -67,50 +110,57 @@ void Client::destroy_game()
     m_game.reset();
 }
 
-int Client::exec()
+void Client::process_command_line(const std::string& command)
 {
-    msg_client("Starting main loop of the client");
+//    msg_client("running '" + command + "'");
 
-    msg_client("sending connection request ...");
-
+    if(command == "h" || command == "help")
     {
-        m_connection_socket.request<NewConnection>();
+        msg_client("h,help for help");
+//        msg_client("c,click for click in a case");
+        msg_client("p,print to print the board");
+        msg_client("co,connect for start a connection with the server");
+        msg_client("disco,disconnect for disconnect with the server");
+        msg_client("q,quit for quit the Katarenga");
     }
+//    else if(command == "c" || command == "click")
+//    {
+//        std::cout << "Enter your string as the index of the cell '<src_cell_index>' ";
 
-    while(true)
+//        std::string move_str;
+//        std::cin >> move_str;
+//    }
+    else if(command == "p" || command == "print")
     {
-        msg_client("poll");
-        if(m_poller.poll(5000))//zmqpp::poller::wait_forever))
-        {
-            if(m_poller.has_input(m_connection_socket))
-            {
-                m_connection_socket.process_input_message();
-            }
-
-            if(m_server_socket && m_poller.has_input(*m_server_socket.get()))
-            {
-                m_server_socket->process_input_message();
-            }
-
-            if(m_poller.has_input(STDIN_FILENO))
-            {
-                std::string command;
-                std::getline(std::cin, command);
-
-                msg_client("command '" + command + "'");
-
-                // process the command read from std::cin
-                // process_command_line(command);
-            }
-        }
-        else
-        {
-            msg_client("server not responding");
-            break;
+        if(!m_game) {
+            msg_client("No current game");
+        } else {
+            // TODO: print the board
+            msg_client("incoming ...");
         }
     }
-
-    msg_client("client ending");
-
-    return 0;
+    else if(command == "co" || command == "connect")
+    {
+        if(m_server_socket) {
+            msg_client("nothing done");
+        } else {
+            m_connection_socket.request<NewConnection>();
+        }
+    }
+    else if(command == "disco" || command == "disconnect")
+    {
+        if(!m_server_socket) {
+            msg_client("nothing done");
+        } else {
+            m_server_socket->send_message<CloseConnection>();
+        }
+    }
+    else if(command == "q" || command == "quit")
+    {
+        m_should_quit = true;
+    }
+    else
+    {
+        msg_client("unknow command '" + command + "'");
+    }
 }
