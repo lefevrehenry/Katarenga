@@ -4,6 +4,19 @@
 // Katrenga
 #include <common/common_utils.hpp>
 
+struct Ping
+{
+    struct Request {
+        struct Parameters {
+        };
+    };
+
+    struct Reply {
+        struct Parameters {
+        };
+    };
+};
+
 struct NewConnection
 {
     struct Request {
@@ -22,8 +35,7 @@ struct NewConnection
     };
 };
 
-struct CloseConnection
-{
+struct CloseConnection {
     struct Parameters {
     };
 };

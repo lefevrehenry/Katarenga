@@ -118,4 +118,15 @@ void PlayerSocket::execute_receive_message<SpectateGame>(const typename Spectate
 template<>
 void PlayerSocket::execute_receive_message<CloseConnection>(const typename CloseConnection::Parameters& p)
 {
+    PlayerSocket::SPtr socket = shared_from_this();
+
+    ClientRegistry* registry = m_server->client_registry();
+    ClientRegistry::ClientId id = registry->id(socket);
+
+    if(id == ClientRegistry::ClientId()) {
+        msg_server("PlayerSocket id not registered");
+        return;
+    }
+
+    registry->remove_client(id);
 }

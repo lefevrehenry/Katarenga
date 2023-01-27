@@ -13,6 +13,7 @@ ConnectionSocket::ConnectionSocket(Server* server, zmqpp::context *context, cons
     bind(endpoint);
 
     registerMessage<NewConnection>();
+    registerMessage<Ping>();
 }
 
 template<>
@@ -48,4 +49,10 @@ typename NewConnection::Reply::Parameters ConnectionSocket::execute_message<NewC
     std::strncpy(reply.pair_endpoint, socket->endpoint().c_str(), sizeof(reply.pair_endpoint));
 
     return reply;
+}
+
+template<>
+typename Ping::Reply::Parameters ConnectionSocket::execute_message<Ping>(const typename Ping::Request::Parameters&)
+{
+    return {};
 }

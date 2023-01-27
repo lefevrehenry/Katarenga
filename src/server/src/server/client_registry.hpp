@@ -44,6 +44,7 @@ public:
 
 public:
     ClientSocket::SPtr socket(ClientId id) const;
+    ClientId id(const ClientSocket::SPtr& socket) const;
 
 public:
     nod::signal<void(ClientId)> client_added;

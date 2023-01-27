@@ -37,6 +37,8 @@ public:
 
 public:
     zmqpp::endpoint_t create_new_client_endpoint() const;
+
+private:
     void start_monitor_client(ClientRegistry::ClientId id);
     void stop_monitor_client(ClientRegistry::ClientId id);
 

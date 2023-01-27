@@ -25,12 +25,6 @@ int Client::exec()
 {
     msg_client("Starting main loop of the client");
 
-    msg_client("sending connection request ...");
-
-//    {
-//        m_connection_socket.request<NewConnection>();
-//    }
-
     while(!m_should_quit)
     {
 //        msg_client("poll");
@@ -42,7 +36,7 @@ int Client::exec()
                 m_connection_socket.process_input_message();
             }
 
-            if(m_server_socket && m_poller.has_input(*m_server_socket.get()))
+            if(m_server_socket && m_poller.has_input(*m_server_socket))
             {
                 m_server_socket->process_input_message();
             }
@@ -85,7 +79,7 @@ void Client::open_server_socket(const zmqpp::endpoint_t& endpoint)
 
     m_server_socket = std::make_shared<ServerSocket>(this, &m_zmq_context, endpoint);
 
-    m_poller.add(*m_server_socket.get(), zmqpp::poller::poll_in);
+    m_poller.add(*m_server_socket, zmqpp::poller::poll_in);
 }
 
 void Client::close_server_socket()
@@ -93,7 +87,7 @@ void Client::close_server_socket()
     if(!m_server_socket)
         return;
 
-    m_poller.remove(*m_server_socket.get());
+    m_poller.remove(*m_server_socket);
 
     m_server_socket.reset();
 }
@@ -118,7 +112,8 @@ void Client::process_command_line(const std::string& command)
     {
         msg_client("h,help for help");
 //        msg_client("c,click for click in a case");
-        msg_client("p,print to print the board");
+        msg_client("p,ping to ping the server");
+        msg_client("b,board to print the board");
         msg_client("co,connect for start a connection with the server");
         msg_client("disco,disconnect for disconnect with the server");
         msg_client("q,quit for quit the Katarenga");
@@ -130,7 +125,11 @@ void Client::process_command_line(const std::string& command)
 //        std::string move_str;
 //        std::cin >> move_str;
 //    }
-    else if(command == "p" || command == "print")
+    else if(command == "p" || command == "ping")
+    {
+        m_connection_socket.request<Ping>();
+    }
+    else if(command == "b" || command == "board")
     {
         if(!m_game) {
             msg_client("No current game");
@@ -144,6 +143,7 @@ void Client::process_command_line(const std::string& command)
         if(m_server_socket) {
             msg_client("nothing done");
         } else {
+            msg_client("sending connection request ...");
             m_connection_socket.request<NewConnection>();
         }
     }
@@ -152,7 +152,9 @@ void Client::process_command_line(const std::string& command)
         if(!m_server_socket) {
             msg_client("nothing done");
         } else {
+            msg_client("close connection ...");
             m_server_socket->send_message<CloseConnection>();
+            close_server_socket();
         }
     }
     else if(command == "q" || command == "quit")

@@ -42,7 +42,7 @@ void Server::loop()
         {
             if(m_poller.has_input(m_connection_socket))
             {
-                msg_server("new connection request");
+//                msg_server("new connection request");
                 m_connection_socket.process_input_message();
             }
 
@@ -92,15 +92,22 @@ void Server::start_monitor_client(ClientRegistry::ClientId id)
     const ClientRegistry::ClientSocket::SPtr& socket = m_client_registry.socket(id);
 
     m_client_sockets.push_back(socket);
-    m_poller.add(*socket.get(), zmqpp::poller::poll_in);
+    m_poller.add(*socket, zmqpp::poller::poll_in);
 }
 
 void Server::stop_monitor_client(ClientRegistry::ClientId id)
 {
-//    ClientRegistry::ClientSocket socket = m_client_registry.socket(id);
+    const ClientRegistry::ClientSocket::SPtr& socket = m_client_registry.socket(id);
 
-//    std::remove(m_open_sockets.begin(), m_open_sockets.end(), socket.get());
-    //    m_poller.remove(*socket.get());
+    auto it = std::find(m_client_sockets.begin(), m_client_sockets.end(), socket);
+
+    if(it == m_client_sockets.end()) {
+        msg_server("PlayerSocket id not registered");
+        return;
+    }
+
+    m_client_sockets.erase(it);
+    m_poller.remove(*socket);
 }
 
 void Server::process_command_line(const std::string& command)
@@ -110,7 +117,12 @@ void Server::process_command_line(const std::string& command)
     if(command == "h" || command == "help")
     {
         msg_server("h,help for help");
+        msg_server("s,status");
         msg_server("q,quit for quit the server");
+    }
+    else if(command == "s" || command == "status")
+    {
+        msg_server(std::to_string(m_client_sockets.size()) + " clients connected");
     }
     else if(command == "q" || command == "quit")
     {

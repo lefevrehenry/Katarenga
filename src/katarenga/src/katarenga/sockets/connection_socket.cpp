@@ -12,6 +12,21 @@ ConnectionSocket::ConnectionSocket(Client* client, zmqpp::context* context, cons
     connect(endpoint);
 
     registerMessage<NewConnection>();
+    registerMessage<Ping>();
+}
+
+template<>
+typename Ping::Request::Parameters ConnectionSocket::execute_request_message<Ping>()
+{
+    msg_client("client ping");
+
+    return {};
+}
+
+template<>
+void ConnectionSocket::execute_reply_message<Ping>(const typename Ping::Reply::Parameters&)
+{
+    msg_client("server pong");
 }
 
 template<>
