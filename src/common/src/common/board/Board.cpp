@@ -94,6 +94,8 @@ const std::string Board::getBoardConfiguration() const
             else
                 s += " ";
         }
+
+        s += "\n";
     }
 
     // Populate the camp cells

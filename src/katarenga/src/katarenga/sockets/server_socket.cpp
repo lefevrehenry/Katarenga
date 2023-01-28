@@ -26,9 +26,13 @@ ServerSocket::ServerSocket(Client* client, zmqpp::context* context, const zmqpp:
 template<>
 void ServerSocket::execute_receive_message<GameCreated>(const typename GameCreated::Parameters& p)
 {
-    msg_client("GameCreated " + std::to_string(p.accepted) + " | " + std::to_string(p.id));
+//    msg_client("GameCreated " + std::to_string(p.accepted) + " | " + std::to_string(p.id));
 
-    Game::SPtr game = m_client->create_game();
+    Game::SPtr game = m_client->create_game(p.actor);
+
+    ServerSocket::SPtr socket = shared_from_this();
+
+    game->set_server_socket(socket);
 
     // TODO: init le board
 }

@@ -22,7 +22,8 @@ public:
     }
 
 public:
-    void process_input_message() {
+    void process_input_message()
+    {
         zmqpp::message message;
 
         // receive the message

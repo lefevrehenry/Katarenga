@@ -18,7 +18,7 @@ ConnectionSocket::ConnectionSocket(Client* client, zmqpp::context* context, cons
 template<>
 typename Ping::Request::Parameters ConnectionSocket::execute_request_message<Ping>()
 {
-    msg_client("client ping");
+//    msg_client("client ping");
 
     return {};
 }
@@ -26,7 +26,7 @@ typename Ping::Request::Parameters ConnectionSocket::execute_request_message<Pin
 template<>
 void ConnectionSocket::execute_reply_message<Ping>(const typename Ping::Reply::Parameters&)
 {
-    msg_client("server pong");
+//    msg_client("server pong");
 }
 
 template<>
@@ -45,14 +45,20 @@ template<>
 void ConnectionSocket::execute_reply_message<NewConnection>(const typename NewConnection::Reply::Parameters& reply)
 {
     bool accepted = reply.accepted;
+
+    if(!accepted)
+    {
+        msg_client("connection refused");
+        return;
+    }
+
     zmqpp::endpoint_t endpoint = reply.pair_endpoint;
 
     m_client->open_server_socket(endpoint);
 
-    msg_client("NewConnection ok " + std::to_string(accepted));
-    msg_client("NewConnection ok " + endpoint);
-
     ServerSocket::SPtr socket = m_client->server_socket();
+
+    msg_client("connection etablished (" + endpoint + ")");
 
     if(socket)
     {

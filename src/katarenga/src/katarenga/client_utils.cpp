@@ -17,3 +17,8 @@ void msg_client(const std::string& msg)
 {
     std::cout << GREEN << "[client]" << DEFAULT_COLOR << " " << msg << std::endl;
 }
+
+void warning_client(const std::string& msg)
+{
+    std::cout << CYAN << "[client]" << DEFAULT_COLOR << " " << msg << std::endl;
+}

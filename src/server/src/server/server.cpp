@@ -49,7 +49,7 @@ void Server::loop()
             for (const PlayerSocket::SPtr& socket : m_client_sockets) {
                 if(m_poller.has_input(*socket))
                 {
-                    msg_server("message received");
+//                    msg_server("message received");
                     socket->process_input_message();
                 }
             }

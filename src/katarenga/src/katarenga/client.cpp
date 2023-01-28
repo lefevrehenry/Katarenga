@@ -1,8 +1,11 @@
 #include "client.hpp"
 
 // Katarenga
+#include <common/board/Board.hpp>
+#include <common/board/board_utils.hpp>
 #include <common/messages/message.hpp>
 #include <common/messages/messages.hpp>
+
 #include <katarenga/client_utils.hpp>
 
 // Standard Library
@@ -19,6 +22,11 @@ Client::Client(const ServerInfo& server_info) :
 {
     m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
+}
+
+Client::~Client()
+{
+    close_server_socket();
 }
 
 int Client::exec()
@@ -92,9 +100,9 @@ void Client::close_server_socket()
     m_server_socket.reset();
 }
 
-Game::SPtr Client::create_game()
+Game::SPtr Client::create_game(GameActor actor)
 {
-    m_game = std::make_shared<Game>();
+    m_game = std::make_shared<Game>(actor);
 
     return m_game;
 }
@@ -134,8 +142,8 @@ void Client::process_command_line(const std::string& command)
         if(!m_game) {
             msg_client("No current game");
         } else {
-            // TODO: print the board
-            msg_client("incoming ...");
+            const Board* board = m_game->board();
+            print_board(board);
         }
     }
     else if(command == "co" || command == "connect")

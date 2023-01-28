@@ -83,5 +83,4 @@ void Game::update_status()
         m_status = Status::Running;
     else
         m_status = Status::Pending;
-
 }

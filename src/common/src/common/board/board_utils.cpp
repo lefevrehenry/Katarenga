@@ -1,4 +1,7 @@
-#include "Board.hpp"
+#include "board_utils.hpp"
+
+#include <common/board/Board.hpp>
+#include <iostream>
 
 const char board_tiles[8][4][4] = {
                           {{'R', 'B', 'K', 'N'}, // 0
@@ -182,4 +185,14 @@ std::string to_string(const BoardPlayer &player)
     else
         s = "None";
     return s;
+}
+
+void print_board(const Board* board)
+{
+    if(!board)
+        return;
+
+    std::string configuration = board->getBoardConfiguration();
+
+    std::cout << configuration << std::endl;
 }

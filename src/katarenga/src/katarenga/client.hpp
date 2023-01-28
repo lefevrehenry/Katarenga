@@ -16,8 +16,11 @@
  */
 class Client
 {
+    using GameActor = Common::GameActor;
+
 public:
     Client(const ServerInfo& server_info);
+    virtual ~Client();
 
 public:
     ConnectionSocket::SPtr connection_socket() const;
@@ -34,7 +37,7 @@ public:
     void close_server_socket();
 
 public:
-    Game::SPtr create_game();
+    Game::SPtr create_game(GameActor actor);
     void destroy_game();
 
 private:

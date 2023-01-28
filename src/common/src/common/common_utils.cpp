@@ -1,6 +1,7 @@
 #include "common_utils.hpp"
 
 // Katarenga
+#include <common/board/Board.hpp>
 #include <common/messages/message.hpp>
 #include <common/messages/messages.hpp>
 
@@ -38,9 +39,15 @@ ServerInfo ReadConfigFile()
 
 void Initialize()
 {
+    Message::Id<Ping>();
+    Message::Id<typename Ping::Request>();
+    Message::Id<typename Ping::Reply>();
+
     Message::Id<NewConnection>();
     Message::Id<typename NewConnection::Request>();
     Message::Id<typename NewConnection::Reply>();
+
+    Message::Id<CloseConnection>();
 
     Message::Id<CreateGame>();
     Message::Id<JoinGame>();

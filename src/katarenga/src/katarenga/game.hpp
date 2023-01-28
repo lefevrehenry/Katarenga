@@ -2,11 +2,13 @@
 #define KATARENGA_CLIENT_GAME_HPP
 
 // Katarenga
-//#include <server/server_utils.hpp>
-//#include <server/sockets/player_socket.hpp>
+#include <common/board/Board.hpp>
+#include <common/common_utils.hpp>
+
+#include <katarenga/sockets/server_socket.hpp>
 
 // Nod
-//#include <nod/nod.hpp>
+#include <nod/nod.hpp>
 
 // Standard Library
 #include <memory>
@@ -16,35 +18,46 @@ class Game
 public:
     using SPtr = std::shared_ptr<Game>;
 
+private:
+    using GameActor = Common::GameActor;
+
+    enum class Status {
+        Pending,        // waiting for connection with the server
+        Running,        // game is running with the server
+        Finished        // game is over
+    };
+
 public:
-    Game();
+    Game(GameActor actor);
 
-//public:
-//    bool is_pending() { return m_status == Status::Pending; }
-//    bool is_running() { return m_status == Status::Running; }
-//    bool is_over() { return m_status == Status::Finished; }
+public:
+    bool is_pending() { return m_status == Status::Pending; }
+    bool is_running() { return m_status == Status::Running; }
+    bool is_over() { return m_status == Status::Finished; }
 
-//    bool has_white_player() const;
-//    bool has_black_player() const;
+    bool has_server_socket() const;
 
-//public:
-//    void set_white_socket(const PlayerSocket::SPtr& socket);
-//    void set_black_socket(const PlayerSocket::SPtr& socket);
+public:
+    void set_server_socket(const ServerSocket::SPtr& socket);
 
-//public:
-//    nod::signal<void()> white_player_joined;
-//    nod::signal<void()> white_player_left;
+public:
+    const Board* board() const { return &m_board; }
 
-//    nod::signal<void()> black_player_joined;
-//    nod::signal<void()> black_player_left;
-
-//private:
-//    void update_status();
+public:
+    nod::signal<void()> server_joined;
+    nod::signal<void()> server_left;
 
 private:
-//    Status m_status;
+    void update_status();
 
-//    ServerSocket::SPtr m_server_socket;
+private:
+    // board-related content
+    Status      m_status;
+    GameActor   m_actor;
+    Board       m_board;
+
+    // socket-related content
+    ServerSocket::SPtr m_server_socket;
 
 };
 

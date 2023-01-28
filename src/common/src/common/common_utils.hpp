@@ -4,6 +4,8 @@
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
 
+class Board;
+
 struct ServerInfo
 {
     /**

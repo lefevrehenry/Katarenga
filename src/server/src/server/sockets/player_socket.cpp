@@ -57,6 +57,7 @@ void PlayerSocket::execute_receive_message<CreateGame>(const typename CreateGame
 
         reply.accepted = true;
         reply.id = id;
+        reply.actor = p.actor;
     }
 
     send_message<GameCreated>(reply);
