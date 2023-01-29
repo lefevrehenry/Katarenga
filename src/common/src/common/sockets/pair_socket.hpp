@@ -34,14 +34,15 @@ public:
         PairEngine<T>::route_receive(message);
     }
 
-//    template< typename M >
-//    void send_message(const typename M::Parameters& parameters = {})
-//    {
-//        zmqpp::message message = Message::Create<M>(parameters);
+    // Caution ! Using this signature by-pass the engine mechanism
+    template< typename M >
+    void send_message(const typename M::Parameters& parameters)
+    {
+        zmqpp::message message = Message::Create<M>(parameters);
 
-//        // send the message
-//        send(message);
-//    }
+        // send the message
+        send(message);
+    }
 
     template< typename M >
     void send_message()

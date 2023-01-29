@@ -56,14 +56,5 @@ void ConnectionSocket::execute_reply_message<NewConnection>(const typename NewCo
 
     m_client->open_server_socket(endpoint);
 
-//    ServerSocket::SPtr socket = m_client->server_socket();
-
     msg_client("connection etablished (" + endpoint + ")");
-
-//    if(socket)
-//    {
-//        socket->set_actor(Common::GameActor::White);
-
-//        socket->send_message<CreateGame>();
-//    }
 }

@@ -10,7 +10,7 @@
 class Server;
 
 /**
- * @brief The ConnectionSocket class
+ * @brief The ConnectionSocket class (server side)
  */
 class ConnectionSocket : public ReplySocket<ConnectionSocket>
 {

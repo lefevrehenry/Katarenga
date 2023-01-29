@@ -3,6 +3,10 @@
 
 #include "Cell.hpp"
 
+// Katarenga
+#include <common/common_utils.hpp>
+
+// Standard Library
 #include <string>
 
 using Move = std::pair<const Cell&,const Cell&>;
@@ -24,6 +28,8 @@ std::string generateBoardCellTypes();
 
 std::string format_board(const std::string& board_configuration);
 
-void print_board(const Board* board);
+bool is_valid_move(const Common::Move& move);
+
+Common::Move convert_to_move(const std::string& move);
 
 #endif // BOARD_UTILS_HPP

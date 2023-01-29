@@ -4,6 +4,11 @@
 // Katrenga
 #include <common/common_utils.hpp>
 
+/**
+ * Requet/Reply form
+ *   - setup connecion with the server
+ *   - ping it
+ */
 struct Ping
 {
     struct Request {
@@ -35,6 +40,12 @@ struct NewConnection
     };
 };
 
+/**
+ * One way message form
+ *   - close connection with the server
+ *   - setup a game (create, join or spectate)
+ *   - play a move
+ */
 struct CloseConnection {
     struct Parameters {
     };
@@ -77,6 +88,19 @@ struct SpectateGame {
 struct GameSpectated {
     struct Parameters {
         bool accepted;
+    };
+};
+
+struct PlayMove {
+    struct Parameters {
+        Common::Move move;
+    };
+};
+
+struct MovePlayed {
+    struct Parameters {
+        bool accepted;
+        Common::Move move;
     };
 };
 

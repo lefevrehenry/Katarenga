@@ -15,7 +15,7 @@
 class Client;
 
 /**
- * @brief The ConnectionSocket class
+ * @brief The ConnectionSocket class (client side)
  */
 class ConnectionSocket : public RequestSocket<ConnectionSocket>
 {

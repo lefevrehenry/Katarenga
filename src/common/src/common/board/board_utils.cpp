@@ -2,6 +2,8 @@
 
 #include <common/board/Board.hpp>
 #include <iostream>
+#include <sstream>
+#include <vector>
 
 const char board_tiles[8][4][4] = {
                           {{'R', 'B', 'K', 'N'}, // 0
@@ -187,12 +189,61 @@ std::string to_string(const BoardPlayer &player)
     return s;
 }
 
-void print_board(const Board* board)
+static std::vector<std::string> split(const std::string& s, char delimiter)
 {
-    if(!board)
-        return;
+   std::vector<std::string> result;
 
-    std::string configuration = board->getBoardConfiguration();
+   std::istringstream tokenStream(s);
+   std::string token;
 
-    std::cout << configuration << std::endl;
+   while (std::getline(tokenStream, token, delimiter))
+      result.push_back(token);
+
+   return result;
+}
+
+static bool is_valid_cell(const std::string& str_cell)
+{
+    if(str_cell.size() != 2)
+        return false;
+
+    return true;
+}
+
+bool is_valid_move(const Common::Move& move)
+{
+    int from_line = std::get<0>(move);
+    int from_row = std::get<1>(move);
+
+    int to_line = std::get<2>(move);
+    int to_row = std::get<3>(move);
+
+    return (from_line >= 0 && from_line <= 8 &&
+            from_row >= 0 && from_row <= 8 &&
+            to_line >= 0 && to_line <= 8 &&
+            to_row >= 0 && to_row <= 8);
+}
+
+Common::Move convert_to_move(const std::string& str_move)
+{
+    Common::Move move;
+
+    if(str_move.length() != 5)
+        return move;
+
+    std::vector<std::string> splitted = split(str_move, ':');
+
+    if(splitted.size() != 2)
+        return move;
+
+    const std::string& from_cell = splitted[0];
+    const std::string& to_cell = splitted[1];
+
+    int from_line = int(from_cell[0]) - int('a');
+    int from_row = int(from_cell[1]) - int('0');
+
+    int to_line = int(to_cell[0]) - int('a');
+    int to_row = int(to_cell[1]) - int('0');
+
+    return Common::Move({from_line, from_row, to_line, to_row});
 }

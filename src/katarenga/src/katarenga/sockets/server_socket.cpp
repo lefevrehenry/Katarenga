@@ -20,9 +20,13 @@ ServerSocket::ServerSocket(Client* client, zmqpp::context* context, const zmqpp:
     registerSendMessage<JoinGame>();
     registerSendMessage<SpectateGame>();
 
+    registerSendMessage<PlayMove>();
+
     registerReceiveMessage<GameCreated>();
     registerReceiveMessage<GameJoined>();
     registerReceiveMessage<GameSpectated>();
+
+    registerReceiveMessage<MovePlayed>();
 }
 
 template<>
@@ -61,6 +65,8 @@ void ServerSocket::execute_receive_message<GameCreated>(const typename GameCreat
 
     if(game)
     {
+        msg_client("Game created");
+
         ServerSocket::SPtr socket = shared_from_this();
 
         game->set_server_socket(socket);
@@ -79,4 +85,13 @@ template<>
 void ServerSocket::execute_receive_message<GameSpectated>(const typename GameSpectated::Parameters& p)
 {
     // TODO
+}
+
+template<>
+void ServerSocket::execute_receive_message<MovePlayed>(const typename MovePlayed::Parameters& p)
+{
+    if(p.accepted)
+        msg_client("move has been played");
+    else
+        msg_client("move has been rejected");
 }

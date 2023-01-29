@@ -46,6 +46,10 @@ public:
     void set_server_socket(const ServerSocket::SPtr& socket);
 
 public:
+    void print_board() const;
+    void play(const Common::Move& move);
+
+public:
     nod::signal<void()> server_joined;
     nod::signal<void()> server_left;
 

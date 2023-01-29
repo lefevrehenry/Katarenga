@@ -117,20 +117,36 @@ void Client::process_command_line(const std::string& command)
     if(command == "h" || command == "help")
     {
         msg_client("h,help for help");
-//        msg_client("c,click for click in a case");
+        msg_client("m,move for play a move");
         msg_client("p,ping to ping the server");
         msg_client("b,board to print the board");
+        msg_client("ct,create to create a party");
+        msg_client("dt,board to destroy a party");
         msg_client("co,connect for start a connection with the server");
         msg_client("disco,disconnect for disconnect with the server");
         msg_client("q,quit for quit the Katarenga");
     }
-//    else if(command == "c" || command == "click")
-//    {
-//        std::cout << "Enter your string as the index of the cell '<src_cell_index>' ";
+    else if(command == "m" || command == "move")
+    {
+        if(m_game) {
+            std::cout << "Enter your move 'from':'to' (example a2:c4): ";
 
-//        std::string move_str;
-//        std::cin >> move_str;
-//    }
+            std::string str_move;
+            std::cin >> str_move;
+
+            Common::Move move = convert_to_move(str_move);
+
+            if(is_valid_move(move)) {
+                m_game->play(move);
+                msg_client("play '" + str_move + "'");
+            } else {
+                msg_client("invalid move '" + str_move + "'");
+            }
+
+        } else {
+            msg_client("No current game");
+        }
+    }
     else if(command == "p" || command == "ping")
     {
         m_connection_socket.request<Ping>();
@@ -138,10 +154,24 @@ void Client::process_command_line(const std::string& command)
     else if(command == "b" || command == "board")
     {
         if(m_game) {
-//            const Board* board = m_game->board();
-//            m_game->print_board(board);
+            m_game->print_board();
         } else {
             msg_client("No current game");
+        }
+    }
+    else if(command == "ct" || command == "create")
+    {
+        if(m_server_socket) {
+            m_server_socket->send_message<CreateGame>();
+        } else {
+            msg_client("client is not connected");
+        }
+    }
+    else if(command == "dt" || command == "destroy")
+    {
+        if(m_server_socket) {
+        } else {
+            msg_client("client is not connected");
         }
     }
     else if(command == "co" || command == "connect")

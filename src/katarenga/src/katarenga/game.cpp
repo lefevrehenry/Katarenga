@@ -2,6 +2,7 @@
 
 // Katarenga
 #include <common/board/board_utils.hpp>
+#include <common/messages/messages.hpp>
 #include <katarenga/client_utils.hpp>
 
 Game::Game(GameActor actor) :
@@ -43,6 +44,26 @@ void Game::set_server_socket(const ServerSocket::SPtr& socket)
         server_joined();
     else
         server_left();
+}
+
+void Game::print_board() const
+{
+    std::string configuration = m_board.getBoardConfiguration();
+
+    std::cout << configuration << std::endl;
+}
+
+void Game::play(const Common::Move& move)
+{
+    if(!is_running()) {
+        msg_client("Cannot play");
+        return;
+    }
+
+    typename PlayMove::Parameters p;
+    p.move = move;
+
+    m_server_socket->send_message<PlayMove>(p);
 }
 
 void Game::update_status()

@@ -4,6 +4,9 @@
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>
 
+// Standard Library
+#include <tuple>
+
 class Board;
 
 struct ServerInfo
@@ -34,6 +37,7 @@ void Initialize();
 struct Common
 {
     using GameId = unsigned int;
+    using Move = std::tuple<int,int,int,int>;
 
     enum class GameActor {
         White,

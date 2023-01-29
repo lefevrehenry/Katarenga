@@ -21,9 +21,14 @@ PlayerSocket::PlayerSocket(Server* server, zmqpp::context* context, const zmqpp:
     registerReceiveMessage<JoinGame>();
     registerReceiveMessage<SpectateGame>();
 
+    registerReceiveMessage<PlayMove>();
+
     registerSendMessage<GameCreated>();
     registerSendMessage<GameJoined>();
     registerSendMessage<GameSpectated>();
+
+    registerSendMessage<PlayMove>();
+
 }
 
 template<>
@@ -134,6 +139,26 @@ void PlayerSocket::execute_receive_message<SpectateGame>(const typename Spectate
     }
 
     send_message<GameSpectated>();
+}
+
+template<>
+void PlayerSocket::execute_receive_message<PlayMove>(const typename PlayMove::Parameters& p)
+{
+    Common::Move move = p.move;
+
+    msg_server(std::to_string(std::get<0>(move)));
+    msg_server(std::to_string(std::get<1>(move)));
+    msg_server(std::to_string(std::get<2>(move)));
+    msg_server(std::to_string(std::get<3>(move)));
+
+    // TODO: play on board
+
+    // confirm the move has been played
+    typename MovePlayed::Parameters reply;
+    reply.accepted = true;
+    reply.move = move;
+
+    send_message<MovePlayed>(reply);
 }
 
 template<>
