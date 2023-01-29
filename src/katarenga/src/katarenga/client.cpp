@@ -100,11 +100,9 @@ void Client::close_server_socket()
     m_server_socket.reset();
 }
 
-Game::SPtr Client::create_game(GameActor actor)
+void Client::create_game(GameActor actor)
 {
     m_game = std::make_shared<Game>(actor);
-
-    return m_game;
 }
 
 void Client::destroy_game()
@@ -139,30 +137,30 @@ void Client::process_command_line(const std::string& command)
     }
     else if(command == "b" || command == "board")
     {
-        if(!m_game) {
-            msg_client("No current game");
+        if(m_game) {
+//            const Board* board = m_game->board();
+//            m_game->print_board(board);
         } else {
-            const Board* board = m_game->board();
-            print_board(board);
+            msg_client("No current game");
         }
     }
     else if(command == "co" || command == "connect")
     {
-        if(m_server_socket) {
-            msg_client("nothing done");
-        } else {
+        if(!m_server_socket) {
             msg_client("sending connection request ...");
             m_connection_socket.request<NewConnection>();
+        } else {
+            msg_client("client is already connected");
         }
     }
     else if(command == "disco" || command == "disconnect")
     {
-        if(!m_server_socket) {
-            msg_client("nothing done");
-        } else {
+        if(m_server_socket) {
             msg_client("close connection ...");
             m_server_socket->send_message<CloseConnection>();
             close_server_socket();
+        } else {
+            msg_client("client is not connected");
         }
     }
     else if(command == "q" || command == "quit")

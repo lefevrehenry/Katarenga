@@ -34,23 +34,23 @@ public:
         PairEngine<T>::route_receive(message);
     }
 
-    template< typename M >
-    void send_message(const typename M::Parameters& parameters = {})
-    {
-        zmqpp::message message = Message::Create<M>(parameters);
-
-        // send the message
-        send(message);
-    }
-
 //    template< typename M >
-//    void send_message()
+//    void send_message(const typename M::Parameters& parameters = {})
 //    {
-//        zmqpp::message message = PairEngine<T>::template route_send<M>();
+//        zmqpp::message message = Message::Create<M>(parameters);
 
 //        // send the message
 //        send(message);
 //    }
+
+    template< typename M >
+    void send_message()
+    {
+        zmqpp::message message = PairEngine<T>::template route_send<M>();
+
+        // send the message
+        send(message);
+    }
 };
 
 #endif // KATARENGA_COMMON_SOCKETS_PAIR_SOCKET_HPP

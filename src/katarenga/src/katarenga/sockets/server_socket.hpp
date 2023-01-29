@@ -2,6 +2,7 @@
 #define KATARENGA_CLIENT_SOCKETS_SERVER_SOCKET_HPP
 
 // Katarenga
+#include <common/common_utils.hpp>
 #include <common/sockets/pair_socket.hpp>
 
 // ZMQPP
@@ -17,6 +18,8 @@ class Client;
  */
 class ServerSocket : public PairSocket<ServerSocket>, public std::enable_shared_from_this<ServerSocket>
 {
+    using GameActor = Common::GameActor;
+
 public:
     using SPtr = std::shared_ptr<ServerSocket>;
 

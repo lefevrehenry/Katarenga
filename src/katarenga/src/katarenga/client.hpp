@@ -37,7 +37,7 @@ public:
     void close_server_socket();
 
 public:
-    Game::SPtr create_game(GameActor actor);
+    void create_game(GameActor actor);
     void destroy_game();
 
 private:
@@ -55,7 +55,7 @@ private:
     ConnectionSocket    m_connection_socket;
     ServerSocket::SPtr  m_server_socket;
 
-    //Game-related content
+    // Game-related content
     Game::SPtr m_game;
 
 };

@@ -13,6 +13,9 @@
 // Standard Library
 #include <memory>
 
+/**
+ * @brief The Game class (client side)
+ */
 class Game
 {
 public:
@@ -35,13 +38,12 @@ public:
     bool is_running() { return m_status == Status::Running; }
     bool is_over() { return m_status == Status::Finished; }
 
+public:
+    GameActor actor() const;
+
+public:
     bool has_server_socket() const;
-
-public:
     void set_server_socket(const ServerSocket::SPtr& socket);
-
-public:
-    const Board* board() const { return &m_board; }
 
 public:
     nod::signal<void()> server_joined;

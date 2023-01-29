@@ -37,9 +37,6 @@ bool Game::has_black_player() const
 
 void Game::set_white_socket(const PlayerSocket::SPtr& socket)
 {
-    if(!socket)
-        throw std::runtime_error("socket is null");
-
     if(m_white_socket)
         m_white_socket->unmark_busy();
 
@@ -56,16 +53,13 @@ void Game::set_white_socket(const PlayerSocket::SPtr& socket)
 
 void Game::set_black_socket(const PlayerSocket::SPtr& socket)
 {
-    if(!socket)
-        throw std::runtime_error("socket is null");
-
     if(m_black_socket)
         m_black_socket->unmark_busy();
 
     m_black_socket = socket;
 
     if(m_black_socket)
-        m_black_socket->unmark_busy();
+        m_black_socket->mark_busy();
 
     if(socket)
         black_player_joined();

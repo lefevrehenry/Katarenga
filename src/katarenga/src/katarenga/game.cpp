@@ -2,6 +2,7 @@
 
 // Katarenga
 #include <common/board/board_utils.hpp>
+#include <katarenga/client_utils.hpp>
 
 Game::Game(GameActor actor) :
     m_status(Status::Pending),
@@ -18,6 +19,11 @@ Game::Game(GameActor actor) :
     m_board.setBoardCellTypes(config);
 }
 
+Game::GameActor Game::actor() const
+{
+    return m_actor;
+}
+
 bool Game::has_server_socket() const
 {
     return bool(m_server_socket);
@@ -25,10 +31,13 @@ bool Game::has_server_socket() const
 
 void Game::set_server_socket(const ServerSocket::SPtr& socket)
 {
-    if(!socket)
-        throw std::runtime_error("socket is null");
+//    if(m_server_socket)
+//        m_server_socket->unmark_busy();
 
     m_server_socket = socket;
+
+//    if(m_server_socket)
+//        m_server_socket->mark_busy();
 
     if(socket)
         server_joined();

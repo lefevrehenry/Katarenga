@@ -11,6 +11,9 @@
 // Standard Library
 #include <memory>
 
+/**
+ * @brief The Game class (server side)
+ */
 class Game
 {
 public:

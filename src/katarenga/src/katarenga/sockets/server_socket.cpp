@@ -14,6 +14,8 @@ ServerSocket::ServerSocket(Client* client, zmqpp::context* context, const zmqpp:
 {
     connect(endpoint);
 
+    registerSendMessage<CloseConnection>();
+
     registerSendMessage<CreateGame>();
     registerSendMessage<JoinGame>();
     registerSendMessage<SpectateGame>();
@@ -24,15 +26,45 @@ ServerSocket::ServerSocket(Client* client, zmqpp::context* context, const zmqpp:
 }
 
 template<>
+typename CloseConnection::Parameters ServerSocket::execute_send_message<CloseConnection>()
+{
+    Game::SPtr game = m_client->game();
+
+    if(game)
+    {
+        game->set_server_socket(nullptr);
+
+        m_client->destroy_game();
+    }
+
+    return {};
+}
+
+template<>
+typename CreateGame::Parameters ServerSocket::execute_send_message<CreateGame>()
+{
+    CreateGame::Parameters p;
+
+    p.actor = GameActor::White;
+
+    return p;
+}
+
+template<>
 void ServerSocket::execute_receive_message<GameCreated>(const typename GameCreated::Parameters& p)
 {
-//    msg_client("GameCreated " + std::to_string(p.accepted) + " | " + std::to_string(p.id));
+    m_client->destroy_game();
 
-    Game::SPtr game = m_client->create_game(p.actor);
+    m_client->create_game(p.actor);
 
-    ServerSocket::SPtr socket = shared_from_this();
+    Game::SPtr game = m_client->game();
 
-    game->set_server_socket(socket);
+    if(game)
+    {
+        ServerSocket::SPtr socket = shared_from_this();
+
+        game->set_server_socket(socket);
+    }
 
     // TODO: init le board
 }
@@ -40,9 +72,11 @@ void ServerSocket::execute_receive_message<GameCreated>(const typename GameCreat
 template<>
 void ServerSocket::execute_receive_message<GameJoined>(const typename GameJoined::Parameters& p)
 {
+    // TODO
 }
 
 template<>
 void ServerSocket::execute_receive_message<GameSpectated>(const typename GameSpectated::Parameters& p)
 {
+    // TODO
 }
