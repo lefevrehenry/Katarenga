@@ -56,4 +56,24 @@ void Initialize()
     Message::Id<GameCreated>();
     Message::Id<GameJoined>();
     Message::Id<GameSpectated>();
+
+    Message::Id<PlayMove>();
+    Message::Id<MovePlayed>();
+}
+
+bool is_valid_move(const Common::Move& move)
+{
+    int from_line = std::get<0>(move);
+    int from_row = std::get<1>(move);
+
+    int to_line = std::get<2>(move);
+    int to_row = std::get<3>(move);
+
+    if(from_line == to_line && from_row == to_row)
+        return false;
+
+    return (from_line >= 0 && from_line <= 7 &&
+            from_row >= 0 && from_row <= 7 &&
+            to_line >= 0 && to_line <= 7 &&
+            to_row >= 0 && to_row <= 7);
 }

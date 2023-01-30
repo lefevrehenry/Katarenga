@@ -2,7 +2,6 @@
 
 // Katarenga
 #include <common/board/Board.hpp>
-#include <common/board/board_utils.hpp>
 #include <common/messages/message.hpp>
 #include <common/messages/messages.hpp>
 
@@ -114,7 +113,11 @@ void Client::process_command_line(const std::string& command)
 {
 //    msg_client("running '" + command + "'");
 
-    if(command == "h" || command == "help")
+    if(command.empty())
+    {
+        // does nothing
+    }
+    else if(command == "h" || command == "help")
     {
         msg_client("h,help for help");
         msg_client("m,move for play a move");
@@ -183,7 +186,7 @@ void Client::process_command_line(const std::string& command)
             msg_client("client is already connected");
         }
     }
-    else if(command == "disco" || command == "disconnect")
+    else if(command == "deco" || command == "disconnect")
     {
         if(m_server_socket) {
             msg_client("close connection ...");

@@ -28,8 +28,4 @@ std::string generateBoardCellTypes();
 
 std::string format_board(const std::string& board_configuration);
 
-bool is_valid_move(const Common::Move& move);
-
-Common::Move convert_to_move(const std::string& move);
-
 #endif // BOARD_UTILS_HPP

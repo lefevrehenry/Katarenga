@@ -46,4 +46,6 @@ struct Common
     };
 };
 
+bool is_valid_move(const Common::Move& move);
+
 #endif // KATARENGA_COMMON_COMMON_UTILS_HPP

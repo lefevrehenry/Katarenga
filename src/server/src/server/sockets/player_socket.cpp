@@ -27,8 +27,7 @@ PlayerSocket::PlayerSocket(Server* server, zmqpp::context* context, const zmqpp:
     registerSendMessage<GameJoined>();
     registerSendMessage<GameSpectated>();
 
-    registerSendMessage<PlayMove>();
-
+    registerSendMessage<MovePlayed>();
 }
 
 template<>
@@ -158,6 +157,7 @@ void PlayerSocket::execute_receive_message<PlayMove>(const typename PlayMove::Pa
     reply.accepted = true;
     reply.move = move;
 
+    // by-pass the engine
     send_message<MovePlayed>(reply);
 }
 
@@ -193,4 +193,10 @@ typename GameSpectated::Parameters PlayerSocket::execute_send_message<GameSpecta
     p.accepted = false;
 
     return p;
+}
+
+template<>
+typename MovePlayed::Parameters PlayerSocket::execute_send_message<MovePlayed>()
+{
+    return {};
 }
