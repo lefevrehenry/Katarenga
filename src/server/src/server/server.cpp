@@ -42,6 +42,8 @@ void Server::loop()
         {
             if(m_poller.has_input(m_connection_socket))
             {
+                std::cout << std::endl;
+
 //                msg_server("new connection request");
                 m_connection_socket.process_input_message();
             }
@@ -49,6 +51,8 @@ void Server::loop()
             for (const PlayerSocket::SPtr& socket : m_client_sockets) {
                 if(m_poller.has_input(*socket))
                 {
+                    std::cout << std::endl;
+
 //                    msg_server("message received");
                     socket->process_input_message();
                 }
@@ -114,7 +118,11 @@ void Server::process_command_line(const std::string& command)
 {
 //    msg_server("running '" + command + "'");
 
-    if(command == "h" || command == "help")
+    if(command.empty())
+    {
+        // does nothing
+    }
+    else if(command == "h" || command == "help")
     {
         msg_server("h,help for help");
         msg_server("s,status");

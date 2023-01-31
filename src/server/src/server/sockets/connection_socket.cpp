@@ -32,8 +32,14 @@ typename NewConnection::Reply::Parameters ConnectionSocket::execute_message<NewC
 
     ClientRegistry::ClientId id = ClientRegistry::Id(request.ip, request.port);
 
-    if(registry->client_exists(id))
+    if(registry->client_exists(id)) {
+        ClientRegistry::ClientSocket::SPtr socket = registry->socket(id);
+
+        reply.accepted = true;
+        std::strncpy(reply.pair_endpoint, socket->endpoint().c_str(), sizeof(reply.pair_endpoint));
+
         return reply;
+    }
 
     zmqpp::endpoint_t endpoint = m_server->create_new_client_endpoint();
 

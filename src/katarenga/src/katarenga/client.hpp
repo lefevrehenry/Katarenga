@@ -32,6 +32,9 @@ public:
 public:
     Game::SPtr game() const;
 
+    bool server_connected() const { return bool(m_server_socket); }
+    bool in_game() const { return bool(m_game); }
+
 public:
     void open_server_socket(const zmqpp::endpoint_t& endpoint);
     void close_server_socket();

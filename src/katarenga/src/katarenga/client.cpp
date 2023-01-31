@@ -40,11 +40,15 @@ int Client::exec()
         {
             if(m_poller.has_input(m_connection_socket))
             {
+                std::cout << std::endl;
+
                 m_connection_socket.process_input_message();
             }
 
             if(m_server_socket && m_poller.has_input(*m_server_socket))
             {
+                std::cout << std::endl;
+
                 m_server_socket->process_input_message();
             }
 
@@ -120,6 +124,7 @@ void Client::process_command_line(const std::string& command)
     else if(command == "h" || command == "help")
     {
         msg_client("h,help for help");
+        msg_client("s,status");
         msg_client("m,move for play a move");
         msg_client("p,ping to ping the server");
         msg_client("b,board to print the board");
@@ -128,6 +133,16 @@ void Client::process_command_line(const std::string& command)
         msg_client("co,connect for start a connection with the server");
         msg_client("disco,disconnect for disconnect with the server");
         msg_client("q,quit for quit the Katarenga");
+    }
+    else if(command == "s" || command == "status")
+    {
+//        msg_client(std::string("server connected: ") + (server_connected() ? "🟢" : "🔴"));
+        std::cout << "connected: " << (server_connected() ? u8"\xF0\x9F\x9F\xA2" : u8"\xF0\x9F\x94\xB4") << std::endl;
+        std::cout << "endpoint: " << (server_connected() ? m_server_socket->endpoint() : "\\") << std::endl;
+        if(in_game())
+            m_game->print_board();
+        else
+            std::cout << "board: \\" << std::endl;
     }
     else if(command == "m" || command == "move")
     {
