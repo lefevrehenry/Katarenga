@@ -11,7 +11,7 @@ PlayerSocket::PlayerSocket(Server* server, zmqpp::context* context, const zmqpp:
     m_server(server),
     m_is_busy(false),
     m_id(GameId()),
-    m_actor(GameActor::Default)
+    m_actor(GameActor::None)
 {
     bind(endpoint);
 
@@ -55,7 +55,7 @@ template<>
 void PlayerSocket::execute_receive_message<CreateGame>(const typename CreateGame::Parameters& p)
 {
     m_id = GameId();
-    m_actor = GameActor::Default;
+    m_actor = GameActor::None;
 
     // the socket is not already busy by a game ?
     if(!busy())
@@ -115,7 +115,7 @@ void PlayerSocket::execute_receive_message<JoinGame>(const typename JoinGame::Pa
                     m_actor = GameActor::White;
                 } else {
                     m_id = GameId();
-                    m_actor = GameActor::Default;
+                    m_actor = GameActor::None;
                 }
             }
         }
@@ -147,8 +147,6 @@ void PlayerSocket::execute_receive_message<PlayMove>(const typename PlayMove::Pa
 
     msg_server(std::to_string(std::get<0>(move)));
     msg_server(std::to_string(std::get<1>(move)));
-    msg_server(std::to_string(std::get<2>(move)));
-    msg_server(std::to_string(std::get<3>(move)));
 
     // TODO: play on board
 
@@ -166,9 +164,13 @@ typename GameCreated::Parameters PlayerSocket::execute_send_message<GameCreated>
 {
     GameCreated::Parameters p;
 
+    Game::SPtr game = m_server->game_registry()->game(m_id);
+    const std::string& position = game->position();
+
     p.accepted = m_id ? true : false;
     p.id = m_id;
     p.actor = m_actor;
+    std::strncpy(p.position, position.c_str(), sizeof(p.position));
 
     return p;
 }

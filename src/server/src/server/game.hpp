@@ -2,6 +2,7 @@
 #define KATARENGA_SERVER_GAME_HPP
 
 // Katarenga
+#include <common/board/Board.hpp>
 #include <server/server_utils.hpp>
 #include <server/sockets/player_socket.hpp>
 
@@ -45,6 +46,9 @@ public:
     void set_black_socket(const PlayerSocket::SPtr& socket);
 
 public:
+    std::string position() const { return m_board.getBoardConfiguration(); }
+
+public:
     nod::signal<void()> white_player_joined;
     nod::signal<void()> white_player_left;
 
@@ -55,8 +59,11 @@ private:
     void update_status();
 
 private:
+    // board-related content
     Status m_status;
+    Board  m_board;
 
+    // socket-related content
     PlayerSocket::SPtr m_white_socket;
     PlayerSocket::SPtr m_black_socket;
 

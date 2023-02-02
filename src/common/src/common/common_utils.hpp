@@ -5,6 +5,7 @@
 #include <zmqpp/zmqpp.hpp>
 
 // Standard Library
+#include <string>
 #include <tuple>
 
 class Board;
@@ -37,15 +38,16 @@ void Initialize();
 struct Common
 {
     using GameId = unsigned int;
-    using Move = std::tuple<int,int,int,int>;
+    using Move = std::tuple<int,int>;
 
     enum class GameActor {
+        None,
         White,
-        Black,
-        Default
+        Black
     };
 };
 
-bool is_valid_move(const Common::Move& move);
+Common::Move convert_to_move(const std::string& str_move);
+bool is_valid_index(const Common::Move& move);
 
 #endif // KATARENGA_COMMON_COMMON_UTILS_HPP

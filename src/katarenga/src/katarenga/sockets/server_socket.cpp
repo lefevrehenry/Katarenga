@@ -66,6 +66,8 @@ void ServerSocket::execute_receive_message<GameCreated>(const typename GameCreat
     if(game)
     {
         msg_client("Game created");
+//        std::cout << p.position << std::endl;
+//        m_game->init_from_position();
 
         ServerSocket::SPtr socket = shared_from_this();
 

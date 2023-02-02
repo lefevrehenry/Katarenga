@@ -165,22 +165,22 @@ std::string format_board(const std::string& board_configuration)
     return s;
 }
 
-BoardPlayer otherPlayer(const BoardPlayer& player)
+Common::GameActor otherPlayer(const Common::GameActor& player)
 {
-    if (player == BoardPlayer::White)
-        return BoardPlayer::Black;
-    else if (player == BoardPlayer::Black)
-        return BoardPlayer::White;
+    if (player == Common::GameActor::White)
+        return Common::GameActor::Black;
+    else if (player == Common::GameActor::Black)
+        return Common::GameActor::White;
    else
-        return BoardPlayer::None;
+        return Common::GameActor::None;
 }
 
-std::string to_string(const BoardPlayer& player)
+std::string to_string(const Common::GameActor& player)
 {
     std::string s;
-    if (player == BoardPlayer::White)
+    if (player == Common::GameActor::White)
         s = "White";
-    else if (player == BoardPlayer::Black)
+    else if (player == Common::GameActor::Black)
         s = "Black";
     else
         s = "None";

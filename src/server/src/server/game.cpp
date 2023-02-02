@@ -2,6 +2,7 @@
 
 Game::Game() :
     m_status(Status::Pending),
+    m_board(),
     m_white_socket(),
     m_black_socket()
 {
@@ -12,6 +13,9 @@ Game::Game() :
 
     black_player_joined.connect(std::bind(update_status));
     black_player_left.connect(std::bind(update_status));
+
+    std::string config = generateBoardCellTypes();
+    m_board.setBoardCellTypes(config);
 }
 
 ServerCommon::GameId Game::GenerateId()

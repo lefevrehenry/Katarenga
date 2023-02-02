@@ -50,6 +50,7 @@ void Game::print_board() const
 {
     std::string configuration = m_board.getBoardConfiguration();
 
+    std::cout << configuration.size() << std::endl;
     std::cout << configuration << std::endl;
 }
 

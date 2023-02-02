@@ -1,27 +1,25 @@
-﻿#ifndef PIECE_HPP
-#define PIECE_HPP
+﻿#ifndef KATARENGA_COMMON_BOARD_PIECE_HPP
+#define KATARENGA_COMMON_BOARD_PIECE_HPP
 
-#include "board_utils.hpp"
+// Katarenga
+#include <common/board/board_utils.hpp>
+#include <common/common_utils.hpp>
 
 class Cell;
 
-class Piece
+/**
+ * @brief The Piece struct
+ */
+struct Piece
 {
 
 public:
-    Piece(BoardPlayer player, Cell* cell);
-    virtual ~Piece();
+    Piece(Common::GameActor player, Cell* cell);
 
 public:
-    BoardPlayer getPlayer() const;
-
-    Cell* getCell() const;
-    void setCell(Cell* cell);
-
-private:
-    BoardPlayer _player;
-    Cell* _cell;
+    Common::GameActor player;
+    Cell* cell;
 
 };
 
-#endif // PIECE_HPP
+#endif // KATARENGA_COMMON_BOARD_PIECE_HPP

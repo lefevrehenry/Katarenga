@@ -11,6 +11,8 @@
 // Standard Library
 #include <filesystem>
 #include <iostream>
+#include <sstream>
+#include <vector>
 #include <map>
 #include <string>
 
@@ -61,19 +63,60 @@ void Initialize()
     Message::Id<MovePlayed>();
 }
 
-bool is_valid_move(const Common::Move& move)
+static std::vector<std::string> split(const std::string& s, char delimiter)
 {
-    int from_line = std::get<0>(move);
-    int from_row = std::get<1>(move);
+   std::vector<std::string> result;
 
-    int to_line = std::get<2>(move);
-    int to_row = std::get<3>(move);
+   std::istringstream tokenStream(s);
+   std::string token;
 
-    if(from_line == to_line && from_row == to_row)
+   while (std::getline(tokenStream, token, delimiter))
+      result.push_back(token);
+
+   return result;
+}
+
+Common::Move convert_to_move(const std::string& str_move)
+{
+    if(str_move.length() != 5)
+        return {-1,-1};
+
+    std::vector<std::string> splitted = split(str_move, ':');
+
+    if(splitted.size() != 2)
+        return {-1,-1};
+
+    const std::string& from_cell = splitted[0];
+    const std::string& to_cell = splitted[1];
+
+    int from_col = int(from_cell[0]) - int('a');
+    int from_row = int(from_cell[1]) - int('1');
+
+    int to_col = int(to_cell[0]) - int('a');
+    int to_row = int(to_cell[1]) - int('1');
+
+    int from = (from_row * 8) + from_col;
+    int to = (to_row * 8) + to_col;
+
+    return {from, to};
+}
+
+bool is_valid_index(const Common::Move& move)
+{
+    int from = std::get<0>(move);
+    int to = std::get<1>(move);
+
+    if(from == to)
         return false;
 
-    return (from_line >= 0 && from_line <= 7 &&
-            from_row >= 0 && from_row <= 7 &&
-            to_line >= 0 && to_line <= 7 &&
-            to_row >= 0 && to_row <= 7);
+//    int from_row = from / 8;
+//    int from_col = from % 8;
+
+//    int to_row = to / 8;
+//    int to_col = to % 8;
+
+    bool from_valid = (from >= 0 && from < 64);
+    bool to_valid = ((from >= 0 && from < 64) || to == -8 || to == -1 || to == 64 || to == 71);
+
+    return from_valid && to_valid;
 }

@@ -4,7 +4,6 @@
 #include <common/board/Board.hpp>
 #include <common/messages/message.hpp>
 #include <common/messages/messages.hpp>
-
 #include <katarenga/client_utils.hpp>
 
 // Standard Library
@@ -146,7 +145,7 @@ void Client::process_command_line(const std::string& command)
     }
     else if(command == "m" || command == "move")
     {
-        if(m_game) {
+//        if(m_game) {
             std::cout << "Enter your move 'from':'to' (example a2:c4): ";
 
             std::string str_move;
@@ -154,16 +153,16 @@ void Client::process_command_line(const std::string& command)
 
             Common::Move move = convert_to_move(str_move);
 
-            if(is_valid_move(move)) {
-                m_game->play(move);
+            if(is_valid_index(move)) {
+//                m_game->play(move);
                 msg_client("play '" + str_move + "'");
             } else {
                 msg_client("invalid move '" + str_move + "'");
             }
 
-        } else {
-            msg_client("No current game");
-        }
+//        } else {
+//            msg_client("No current game");
+//        }
     }
     else if(command == "p" || command == "ping")
     {

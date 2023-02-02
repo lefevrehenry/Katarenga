@@ -62,12 +62,14 @@ struct GameCreated {
         bool accepted;
         Common::GameId id;
         Common::GameActor actor;
+        char position[160];
     };
 };
 
 struct JoinGame {
     struct Parameters {
         Common::GameId id;
+        char position[160];
     };
 };
 
