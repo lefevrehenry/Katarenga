@@ -65,17 +65,17 @@ void PlayerSocket::execute_receive_message<CreateGame>(const typename CreateGame
         GameRegistry::GameId id = Game::GenerateId();
         Game::SPtr game = Game::Create();
 
-        PlayerSocket::SPtr sp = shared_from_this();
+        PlayerSocket::SPtr socket = shared_from_this();
 
         switch (p.actor) {
         case GameActor::White:
-            game->set_white_socket(sp);
+            game->set_white_socket(socket);
             break;
         case GameActor::Black:
-            game->set_black_socket(sp);
+            game->set_black_socket(socket);
             break;
         default:
-            game->set_white_socket(sp);
+            game->set_white_socket(socket);
         }
 
         registry->add_game(id, game);
@@ -92,25 +92,33 @@ void PlayerSocket::execute_receive_message<JoinGame>(const typename JoinGame::Pa
 {
     GameRegistry* registry = m_server->game_registry();
 
-    Game::SPtr game = registry->game(p.id);
+    Game::SPtr game = registry->find_game(p.id);
 
     // game exists obviously ?
     if(game)
     {
-        // is game waiting for players ?
-        if(game->is_pending())
+        PlayerSocket::SPtr socket = shared_from_this();
+
+        // if player is already in the game
+        if(game->is_white_player(socket)) {
+            m_id = p.id;
+            m_actor = GameActor::White;
+        } else if(game->is_black_player(socket)) {
+            m_id = p.id;
+            m_actor = GameActor::Black;
+        }
+        // otherwise is game waiting for players ?
+        else if(game->is_pending())
         {
             // the socket is not already busy by a game ?
             if(!busy())
             {
-                PlayerSocket::SPtr sp = shared_from_this();
-
                 if(game->has_white_player()) {
-                    game->set_black_socket(sp);
+                    game->set_black_socket(socket);
                     m_id = p.id;
                     m_actor = GameActor::Black;
                 } else if(game->has_black_player()) {
-                    game->set_white_socket(sp);
+                    game->set_white_socket(socket);
                     m_id = p.id;
                     m_actor = GameActor::White;
                 } else {
@@ -172,14 +180,20 @@ template<>
 typename GameCreated::Parameters PlayerSocket::execute_send_message<GameCreated>()
 {
     GameCreated::Parameters p;
+    p.accepted = false;
 
-    Game::SPtr game = m_server->game_registry()->game(m_id);
-    const std::string& position = game->position();
+    GameRegistry* registry = m_server->game_registry();
+    Game::SPtr game = registry->find_game(m_id);
 
-    p.accepted = m_id ? true : false;
-    p.id = m_id;
-    p.actor = m_actor;
-    std::strncpy(p.position, position.c_str(), sizeof(p.position));
+    if(game)
+    {
+        const std::string& position = game->position();
+
+        p.accepted = true;
+        p.id = m_id;
+        p.actor = m_actor;
+        std::strncpy(p.position, position.c_str(), sizeof(p.position));
+    }
 
     return p;
 }
@@ -188,10 +202,20 @@ template<>
 typename GameJoined::Parameters PlayerSocket::execute_send_message<GameJoined>()
 {
     GameJoined::Parameters p;
+    p.accepted = false;
 
-    p.accepted = m_id ? true : false;
-    p.id = m_id;
-    p.actor = m_actor;
+    GameRegistry* registry = m_server->game_registry();
+    Game::SPtr game = registry->find_game(m_id);
+
+    if(game)
+    {
+        const std::string& position = game->position();
+
+        p.accepted = true;
+        p.id = m_id;
+        p.actor = m_actor;
+        std::strncpy(p.position, position.c_str(), sizeof(p.position));
+    }
 
     return p;
 }

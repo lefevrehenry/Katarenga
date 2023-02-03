@@ -69,7 +69,6 @@ struct GameCreated {
 struct JoinGame {
     struct Parameters {
         Common::GameId id;
-        char position[160];
     };
 };
 
@@ -78,6 +77,7 @@ struct GameJoined {
         bool accepted;
         Common::GameId id;
         Common::GameActor actor;
+        char position[160];
     };
 };
 

@@ -56,6 +56,17 @@ typename CreateGame::Parameters ServerSocket::execute_send_message<CreateGame>()
 }
 
 template<>
+typename JoinGame::Parameters ServerSocket::execute_send_message<JoinGame>()
+{
+    JoinGame::Parameters p;
+
+    // TODO
+    p.id = 1;//Common::GameId();
+
+    return p;
+}
+
+template<>
 void ServerSocket::execute_receive_message<GameCreated>(const typename GameCreated::Parameters& p)
 {
     m_client->destroy_game();
@@ -66,22 +77,43 @@ void ServerSocket::execute_receive_message<GameCreated>(const typename GameCreat
 
     if(game)
     {
-        msg_client("Game created");
-//        std::cout << p.position << std::endl;
-//        m_game->init_from_position();
+        if(p.accepted) {
+            ServerSocket::SPtr socket = shared_from_this();
 
-        ServerSocket::SPtr socket = shared_from_this();
+            game->set_server_socket(socket);
 
-        game->set_server_socket(socket);
+            game->init_from_position(p.position, p.actor);
+
+            msg_client("Game created");
+        } else {
+            msg_client("create game has been rejected");
+        }
     }
-
-    // TODO: init le board
 }
 
 template<>
 void ServerSocket::execute_receive_message<GameJoined>(const typename GameJoined::Parameters& p)
 {
-    // TODO
+    m_client->destroy_game();
+
+    m_client->create_game(p.actor);
+
+    Game::SPtr game = m_client->game();
+
+    if(game)
+    {
+        if(p.accepted) {
+            ServerSocket::SPtr socket = shared_from_this();
+
+            game->set_server_socket(socket);
+
+            game->init_from_position(p.position, p.actor);
+
+            msg_client("Game joined");
+        } else {
+            msg_client("join game has been rejected");
+        }
+    }
 }
 
 template<>
@@ -95,7 +127,10 @@ void ServerSocket::execute_receive_message<PlayMove::Reply>(const typename PlayM
 {
     Game::SPtr game = m_client->game();
 
-    if(game && p.accepted) {
+    if(!game)
+        return;
+
+    if(p.accepted) {
         Common::Move m = p.move;
 
         bool ok = game->play(m);

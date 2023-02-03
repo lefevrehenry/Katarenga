@@ -46,6 +46,9 @@ public:
     void set_server_socket(const ServerSocket::SPtr& socket);
 
 public:
+    void init_from_position(const std::string& position, GameActor actor);
+
+public:
     bool request_play(const Common::Move& move);
     bool play(const Common::Move& move);
     void print_board() const;

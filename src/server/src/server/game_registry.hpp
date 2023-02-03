@@ -32,6 +32,7 @@ public:
     GameRegistry& operator=(GameRegistry&& other) = delete;
 
 public:
+    Game::SPtr find_game(GameId id) const;
     bool game_exists(GameId id) const;
 
     bool add_game(GameId id, const Game::SPtr& game);

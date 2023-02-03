@@ -5,6 +5,14 @@ GameRegistry::GameRegistry() :
 {
 }
 
+Game::SPtr GameRegistry::find_game(GameId id) const
+{
+    if(!game_exists(id))
+        return nullptr;
+
+    return game(id);
+}
+
 bool GameRegistry::game_exists(GameId id) const
 {
     return m_games.find(id) != m_games.end();

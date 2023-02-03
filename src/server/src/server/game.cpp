@@ -42,6 +42,16 @@ bool Game::has_black_player() const
     return bool(m_black_socket);
 }
 
+bool Game::is_white_player(const PlayerSocket::SPtr socket) const
+{
+    return m_white_socket == socket;
+}
+
+bool Game::is_black_player(const PlayerSocket::SPtr socket) const
+{
+    return m_black_socket == socket;
+}
+
 void Game::set_white_socket(const PlayerSocket::SPtr& socket)
 {
     if(m_white_socket)

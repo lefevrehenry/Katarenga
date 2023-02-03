@@ -10,9 +10,8 @@ using GameActor = Common::GameActor;
 Board::Board() :
     _plateau(),
     _campCell(),
-    _piecesW(8),
-    _piecesB(8),
-    _gameFinished(false),
+    _piecesW(),
+    _piecesB(),
     _currentPlayer(GameActor::White),
     _winningPlayer(GameActor::None)
 {
@@ -27,9 +26,9 @@ Board::Board() :
     Cell::Type type = Cell::Type::CampCell;
     _campCell = { Cell(type,-1,0), Cell(type,-1,7), Cell(type,8,0), Cell(type,8,7) };
 
-	// Initialization of Black and White Pieces
+    // Initialization of Black and White Pieces
     for(int col = 0; col < 8; ++col)
-	{
+    {
         // For White
         _plateau[0][col].player = GameActor::White;
         _piecesW.push_back(&_plateau[0][col]);
@@ -37,7 +36,7 @@ Board::Board() :
         // For Black
         _plateau[7][col].player = GameActor::Black;
         _piecesB.push_back(&_plateau[7][col]);
-	}
+    }
 }
 
 /* Returns the current configuration of the board with for each cell
@@ -104,6 +103,118 @@ const std::string Board::getBoardConfiguration() const
     return s;
 }
 
+void Board::setFromBoardConfiguration(const std::string& configuration)
+{
+    clear();
+
+    using iter = std::string::const_iterator;
+
+    iter plateau_begin = configuration.begin();
+    iter plateau_end = plateau_begin + 136;
+
+    iter camp_cell_begin = plateau_end;
+    iter camp_cell_end = camp_cell_begin + 4;
+
+    iter current_player_begin = camp_cell_end;
+    iter current_player_end = current_player_begin + 1;
+
+    iter winning_player_begin = current_player_end;
+    iter winning_player_end = winning_player_begin + 1;
+
+    if(winning_player_end != configuration.end())
+        throw std::runtime_error("bad configuration format");
+
+    iter it;
+    char c;
+
+    // Plateau
+    {
+        int index = 0;
+
+        for (it = plateau_begin; it != plateau_end; ++it) {
+            int row = index / 8;
+            int col = index % 8;
+
+            Cell& cell = _plateau[row][col];
+
+            if(*it == '\n')
+                continue;
+
+            // cell type
+            c = *it;
+
+            switch(c)
+            {
+            case 'K':
+                cell.type = Cell::Type::King;
+                break;
+            case 'B':
+                cell.type = Cell::Type::Bishop;
+                break;
+            case 'N':
+                cell.type = Cell::Type::Knight;
+                break;
+            case 'R':
+                cell.type = Cell::Type::Rook;
+                break;
+            default:
+                throw std::runtime_error("unknown character");
+            }
+
+            // cell player
+            c = *(++it);
+
+            switch(c)
+            {
+            case '+':
+                cell.player = GameActor::White;
+                _piecesW.push_back(&cell);
+                break;
+            case '-':
+                cell.player = GameActor::Black;
+                _piecesB.push_back(&cell);
+                break;
+            }
+
+            index++;
+        }
+    }
+
+    // CampCell
+    {
+        it = camp_cell_begin;
+
+        Cell& whiteLeft = _campCell[0];
+        Cell& whiteRight = _campCell[1];
+        Cell& blackLeft = _campCell[2];
+        Cell& blackRight = _campCell[3];
+
+        c = *it;
+        whiteLeft.player = (c == '-' ? GameActor::Black : GameActor::None); ++it;
+
+        c = *it;
+        whiteRight.player = (c == '-' ? GameActor::Black : GameActor::None); ++it;
+
+        c = *it;
+        blackLeft.player = (c == '+' ? GameActor::White : GameActor::None); ++it;
+
+        c = *it;
+        blackRight.player = (c == '+' ? GameActor::White : GameActor::None); ++it;
+    }
+
+    // Current Player
+    {
+        it = current_player_begin;
+        _currentPlayer = (*it == '+' ? GameActor::White : GameActor::Black);
+    }
+
+    // Winning Player
+    {
+        it = winning_player_begin;
+        _winningPlayer = (*it == ' ' ? GameActor::None : (*it == '+' ? GameActor::White : GameActor::Black));
+    }
+}
+
 void Board::setBoardCellTypes(const std::string& boardString)
 {
     int index = 0;
@@ -139,6 +250,29 @@ void Board::setBoardCellTypes(const std::string& boardString)
     }
 
     updateGameFinished();
+}
+
+void Board::clear()
+{
+    _piecesW.clear();
+    _piecesB.clear();
+
+    for (int row = 0; row < 8; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            Cell& cell = _plateau[row][col];
+            cell.player = GameActor::None;
+        }
+    }
+
+    Cell& whiteLeft = _campCell[0];
+    Cell& whiteRight = _campCell[1];
+    Cell& blackLeft = _campCell[2];
+    Cell& blackRight = _campCell[3];
+
+    whiteLeft.player = GameActor::None;
+    whiteRight.player = GameActor::None;
+    blackLeft.player = GameActor::None;
+    blackRight.player = GameActor::None;
 }
 
 bool Board::isValidMove(const Move& m, GameActor player) const
@@ -371,20 +505,18 @@ void Board::updateGameFinished()
     if ((blackLeft && blackRight) || _piecesB.size() == 0)
     {
         _winningPlayer = GameActor::White;
-        _gameFinished = true;
     }
 
     // Check if Black won
     else if ((whiteLeft && whiteRight) || _piecesW.size() == 0)
     {
         _winningPlayer = GameActor::Black;
-        _gameFinished = true;
     }
 }
 
 bool Board::isGameFinished() const
 {
-    return _gameFinished;
+    return _winningPlayer != GameActor::None;
 }
 
 GameActor Board::whoWon() const

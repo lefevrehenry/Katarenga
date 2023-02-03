@@ -46,6 +46,12 @@ void Game::set_server_socket(const ServerSocket::SPtr& socket)
         server_left();
 }
 
+void Game::init_from_position(const std::string& position, GameActor actor)
+{
+    m_actor = actor;
+    m_board.setFromBoardConfiguration(position);
+}
+
 bool Game::request_play(const Common::Move& move)
 {
     if(!is_running())

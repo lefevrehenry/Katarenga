@@ -128,6 +128,7 @@ void Client::process_command_line(const std::string& command)
         msg_client("p,ping to ping the server");
         msg_client("b,board to print the board");
         msg_client("ct,create to create a party");
+        msg_client("jn,join an existing party");
         msg_client("dt,board to destroy a party");
         msg_client("co,connect for start a connection with the server");
         msg_client("disco,disconnect for disconnect with the server");
@@ -181,6 +182,14 @@ void Client::process_command_line(const std::string& command)
     {
         if(m_server_socket) {
             m_server_socket->send_message<CreateGame>();
+        } else {
+            msg_client("client is not connected");
+        }
+    }
+    else if(command == "jn" || command == "join")
+    {
+        if(m_server_socket) {
+            m_server_socket->send_message<JoinGame>();
         } else {
             msg_client("client is not connected");
         }

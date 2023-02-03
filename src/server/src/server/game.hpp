@@ -42,6 +42,9 @@ public:
     bool has_white_player() const;
     bool has_black_player() const;
 
+    bool is_white_player(const PlayerSocket::SPtr socket) const;
+    bool is_black_player(const PlayerSocket::SPtr socket) const;
+
 public:
     void set_white_socket(const PlayerSocket::SPtr& socket);
     void set_black_socket(const PlayerSocket::SPtr& socket);

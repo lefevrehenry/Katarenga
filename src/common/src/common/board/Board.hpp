@@ -25,7 +25,10 @@ public:
 
 public:
     const std::string getBoardConfiguration() const;
+    void setFromBoardConfiguration(const std::string& configuration);
+
     void setBoardCellTypes(const std::string& boardString);
+    void clear();
 
 public:
     bool isValidMove(const Common::Move& m, Common::GameActor player) const;
@@ -57,8 +60,6 @@ private:
 
     std::vector<Cell*>  _piecesW;       // The list of White cells
     std::vector<Cell*>  _piecesB;		// The list of Black cells
-
-    bool _gameFinished;
 
     Common::GameActor _currentPlayer;
     Common::GameActor _winningPlayer;
