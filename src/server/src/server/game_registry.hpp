@@ -16,6 +16,8 @@
  */
 class GameRegistry
 {
+    friend class Server;
+
 public:
     using GameId = ServerCommon::GameId;
     using Games = std::map<GameId, Game::SPtr>;

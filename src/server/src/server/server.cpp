@@ -126,11 +126,23 @@ void Server::process_command_line(const std::string& command)
     {
         msg_server("h,help for help");
         msg_server("s,status");
+        msg_server("b,board");
         msg_server("q,quit for quit the server");
     }
     else if(command == "s" || command == "status")
     {
         msg_server(std::to_string(m_client_sockets.size()) + " clients connected");
+    }
+    else if(command == "b" || command == "board")
+    {
+        ServerCommon::GameId id = 1;
+        Game::SPtr game = m_game_registry.m_games.count(id) ? m_game_registry.m_games.at(id) : nullptr;
+        if(game) {
+            game->print_board();
+        } else {
+            msg_server("No curent game");
+        }
+
     }
     else if(command == "q" || command == "quit")
     {

@@ -39,28 +39,34 @@ ServerInfo ReadConfigFile()
     return config;
 }
 
+template< typename M >
+static void registerMessage()
+{
+    std::cout << Message::Id<M>() << " -> " << Message::Name<M>() << std::endl;
+}
+
 void Initialize()
 {
-    Message::Id<Ping>();
-    Message::Id<typename Ping::Request>();
-    Message::Id<typename Ping::Reply>();
+    registerMessage<Ping>();
+    registerMessage<typename Ping::Request>();
+    registerMessage<typename Ping::Reply>();
 
-    Message::Id<NewConnection>();
-    Message::Id<typename NewConnection::Request>();
-    Message::Id<typename NewConnection::Reply>();
+    registerMessage<NewConnection>();
+    registerMessage<typename NewConnection::Request>();
+    registerMessage<typename NewConnection::Reply>();
 
-    Message::Id<CloseConnection>();
+    registerMessage<CloseConnection>();
 
-    Message::Id<CreateGame>();
-    Message::Id<JoinGame>();
-    Message::Id<SpectateGame>();
+    registerMessage<CreateGame>();
+    registerMessage<JoinGame>();
+    registerMessage<SpectateGame>();
 
-    Message::Id<GameCreated>();
-    Message::Id<GameJoined>();
-    Message::Id<GameSpectated>();
+    registerMessage<GameCreated>();
+    registerMessage<GameJoined>();
+    registerMessage<GameSpectated>();
 
-    Message::Id<PlayMove>();
-    Message::Id<MovePlayed>();
+    registerMessage<typename PlayMove::Request>();
+    registerMessage<typename PlayMove::Reply>();
 }
 
 static std::vector<std::string> split(const std::string& s, char delimiter)

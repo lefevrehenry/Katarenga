@@ -37,7 +37,7 @@ protected:
         input_message.get(id, 0);
 
         if(receive_map.find(id) == receive_map.end())
-            throw std::runtime_error("Cannot route an unknown message");
+            throw std::runtime_error("Cannot route_receive an unknown message (" + std::to_string(id) + ")");
 
         const ReceiveExecutor& executor = receive_map[id];
 
@@ -53,7 +53,7 @@ protected:
         int id = Message::Id<M>();
 
         if(send_map.find(id) == send_map.end())
-            throw std::runtime_error("Cannot route an unknown message");
+            throw std::runtime_error("Cannot route_send an unknown message (" + std::to_string(id) + ")");
 
         const SendExecutor& executor = send_map[id];
 

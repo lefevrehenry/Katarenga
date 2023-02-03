@@ -6,7 +6,6 @@ set(HEADER_FILES
 
     src/common/board/Board.hpp
     src/common/board/Cell.hpp
-    src/common/board/Piece.hpp
     src/common/board/board_utils.hpp
 
     src/common/engines/pair_engine.hpp
@@ -27,7 +26,6 @@ set(SOURCE_FILES
 
     src/common/board/Board.cpp
     src/common/board/Cell.cpp
-    src/common/board/Piece.cpp
     src/common/board/board_utils.cpp
 
     src/common/engines/pair_engine.cpp

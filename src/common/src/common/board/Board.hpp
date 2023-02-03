@@ -22,7 +22,6 @@ class Board
 
 public:
     Board();
-    virtual ~Board();
 
 public:
     const std::string getBoardConfiguration() const;
@@ -44,11 +43,10 @@ public:
 
 private:
     void nextPlayer();
-    void removePiece(Piece* p);
-    const Cell& indexToCell(int cell_index) const;
+    void removePiece(const Cell& cell);
+
     Cell& indexToCell(int cell_index);
-//    const CampCell& indexToCampCell(int campcell_index) const;
-//    CampCell& indexToCampCell(int campcell_index);
+    const Cell& indexToCell(int cell_index) const;
 
 private:
     BoardMove boardMoveFromMove(const Common::Move& move);
@@ -57,8 +55,8 @@ private:
     Cell                _plateau[8][8];
     std::array<Cell,4>  _campCell;
 
-    std::vector<Piece*> _piecesW;       // The list of White Pieces
-    std::vector<Piece*> _piecesB;		// The list of Black Pieces
+    std::vector<Cell*>  _piecesW;       // The list of White cells
+    std::vector<Cell*>  _piecesB;		// The list of Black cells
 
     bool _gameFinished;
 

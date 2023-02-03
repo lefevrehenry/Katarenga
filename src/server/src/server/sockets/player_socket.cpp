@@ -21,13 +21,13 @@ PlayerSocket::PlayerSocket(Server* server, zmqpp::context* context, const zmqpp:
     registerReceiveMessage<JoinGame>();
     registerReceiveMessage<SpectateGame>();
 
-    registerReceiveMessage<PlayMove>();
+    registerReceiveMessage<PlayMove::Request>();
 
     registerSendMessage<GameCreated>();
     registerSendMessage<GameJoined>();
     registerSendMessage<GameSpectated>();
 
-    registerSendMessage<MovePlayed>();
+    registerSendMessage<PlayMove::Reply>();
 }
 
 template<>
@@ -141,22 +141,31 @@ void PlayerSocket::execute_receive_message<SpectateGame>(const typename Spectate
 }
 
 template<>
-void PlayerSocket::execute_receive_message<PlayMove>(const typename PlayMove::Parameters& p)
+void PlayerSocket::execute_receive_message<PlayMove::Request>(const typename PlayMove::Request::Parameters& p)
 {
-    Common::Move move = p.move;
+    typename PlayMove::Reply::Parameters reply;
+    reply.accepted = false;
+    reply.move = Common::Move();
 
-    msg_server(std::to_string(std::get<0>(move)));
-    msg_server(std::to_string(std::get<1>(move)));
+    GameRegistry* registry = m_server->game_registry();
 
-    // TODO: play on board
+    Game::SPtr game = registry->game(m_id);
 
-    // confirm the move has been played
-    typename MovePlayed::Parameters reply;
-    reply.accepted = true;
-    reply.move = move;
+    // game exists obviously ?
+    if(game)
+    {
+        Common::Move move = p.move;
+
+        if(game->play(move, m_actor))
+        {
+            // confirm the move has been played
+            reply.accepted = true;
+            reply.move = move;
+        }
+    }
 
     // by-pass the engine
-    send_message<MovePlayed>(reply);
+    send_message<PlayMove::Reply>(reply);
 }
 
 template<>
@@ -198,7 +207,7 @@ typename GameSpectated::Parameters PlayerSocket::execute_send_message<GameSpecta
 }
 
 template<>
-typename MovePlayed::Parameters PlayerSocket::execute_send_message<MovePlayed>()
+typename PlayMove::Reply::Parameters PlayerSocket::execute_send_message<PlayMove::Reply>()
 {
     return {};
 }

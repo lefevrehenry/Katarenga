@@ -1,5 +1,8 @@
 #include "game.hpp"
 
+using Move = Common::Move;
+using GameActor = Common::GameActor;
+
 Game::Game() :
     m_status(Status::Pending),
     m_board(),
@@ -70,6 +73,14 @@ void Game::set_black_socket(const PlayerSocket::SPtr& socket)
     else
         black_player_left();
 
+}
+
+bool Game::play(const Move& move, GameActor player)
+{
+    if(m_board.getCurrentPlayer() != player)
+        return false;
+
+    return m_board.playMove(move);
 }
 
 void Game::update_status()

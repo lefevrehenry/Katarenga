@@ -3,6 +3,7 @@
 
 // Katarenga
 #include <common/board/Board.hpp>
+#include <common/common_utils.hpp>
 #include <server/server_utils.hpp>
 #include <server/sockets/player_socket.hpp>
 
@@ -44,6 +45,15 @@ public:
 public:
     void set_white_socket(const PlayerSocket::SPtr& socket);
     void set_black_socket(const PlayerSocket::SPtr& socket);
+
+public:
+    bool play(const Common::Move& move, Common::GameActor player);
+    void print_board() const
+    {
+        std::string configuration = m_board.getBoardConfiguration();
+
+        std::cout << configuration << std::endl;
+    }
 
 public:
     std::string position() const { return m_board.getBoardConfiguration(); }

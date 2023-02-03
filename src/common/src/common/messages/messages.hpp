@@ -93,16 +93,19 @@ struct GameSpectated {
     };
 };
 
-struct PlayMove {
-    struct Parameters {
-        Common::Move move;
+struct PlayMove
+{
+    struct Request {
+        struct Parameters {
+            Common::Move move;
+        };
     };
-};
 
-struct MovePlayed {
-    struct Parameters {
-        bool accepted;
-        Common::Move move;
+    struct Reply {
+        struct Parameters {
+            bool accepted;
+            Common::Move move;
+        };
     };
 };
 

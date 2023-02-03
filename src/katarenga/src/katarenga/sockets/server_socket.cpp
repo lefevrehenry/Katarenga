@@ -14,19 +14,20 @@ ServerSocket::ServerSocket(Client* client, zmqpp::context* context, const zmqpp:
 {
     connect(endpoint);
 
+
     registerSendMessage<CloseConnection>();
 
     registerSendMessage<CreateGame>();
     registerSendMessage<JoinGame>();
     registerSendMessage<SpectateGame>();
 
-    registerSendMessage<PlayMove>();
+    registerSendMessage<typename PlayMove::Request>();
 
     registerReceiveMessage<GameCreated>();
     registerReceiveMessage<GameJoined>();
     registerReceiveMessage<GameSpectated>();
 
-    registerReceiveMessage<MovePlayed>();
+    registerReceiveMessage<typename PlayMove::Reply>();
 }
 
 template<>
@@ -90,10 +91,21 @@ void ServerSocket::execute_receive_message<GameSpectated>(const typename GameSpe
 }
 
 template<>
-void ServerSocket::execute_receive_message<MovePlayed>(const typename MovePlayed::Parameters& p)
+void ServerSocket::execute_receive_message<PlayMove::Reply>(const typename PlayMove::Reply::Parameters& p)
 {
-    if(p.accepted)
-        msg_client("move has been played");
-    else
+    Game::SPtr game = m_client->game();
+
+    if(game && p.accepted) {
+        Common::Move m = p.move;
+
+        bool ok = game->play(m);
+
+        if(ok)
+            msg_client("move has been played");
+        else
+            msg_client("server is not synchronized");
+    }
+    else {
         msg_client("move has been rejected");
+    }
 }
