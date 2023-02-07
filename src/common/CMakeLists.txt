@@ -2,47 +2,49 @@ cmake_minimum_required(VERSION 3.2)
 project(katarenga_common)
 
 set(HEADER_FILES
-    shared_utils.hpp
+    src/common/common_utils.hpp
 
-    board/Board.hpp
-    board/Cell.hpp
-    board/Piece.hpp
-    board/board_utils.hpp
+    src/common/board/Board.hpp
+    src/common/board/Cell.hpp
+    src/common/board/board_utils.hpp
 
-    messages/message_utils.hpp
-    messages/MessageReactor.hpp
-    messages/MessageWrapper.hpp
-    messages/CheckConnectivity.hpp
-    messages/ReplyConnectivity.hpp
-    messages/GameStatus.hpp
-    messages/MoveMessage.hpp
-    messages/QuitMessage.hpp
-    messages/OtherMessage.hpp
-    messages/CaseClicked.hpp
+    src/common/engines/pair_engine.hpp
+    src/common/engines/reply_engine.hpp
+    src/common/engines/request_engine.hpp
+
+    src/common/messages/message.hpp
+    src/common/messages/messages.hpp
+
+    src/common/sockets/abstract_socket.hpp
+    src/common/sockets/pair_socket.hpp
+    src/common/sockets/reply_socket.hpp
+    src/common/sockets/request_socket.hpp
 )
 
 set(SOURCE_FILES
-    shared_utils.cpp
+    src/common/common_utils.cpp
 
-    board/Board.cpp
-    board/Cell.cpp
-    board/Piece.cpp
-    board/board_utils.cpp
+    src/common/board/Board.cpp
+    src/common/board/Cell.cpp
+    src/common/board/board_utils.cpp
 
-    messages/MessageReactor.cpp
-    messages/MessageWrapper.cpp
-    messages/CheckConnectivity.cpp
-    messages/ReplyConnectivity.cpp
-    messages/GameStatus.cpp
-    messages/MoveMessage.cpp
-    messages/QuitMessage.cpp
-    messages/OtherMessage.cpp
-    messages/CaseClicked.cpp
+    src/common/engines/pair_engine.cpp
+    src/common/engines/reply_engine.cpp
+    src/common/engines/request_engine.cpp
+
+    src/common/messages/message.cpp
+    src/common/messages/messages.hpp
+
+    src/common/sockets/abstract_socket.cpp
+    src/common/sockets/pair_socket.cpp
+    src/common/sockets/reply_socket.cpp
+    src/common/sockets/request_socket.cpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILES} ${SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/..)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ZMQPP
