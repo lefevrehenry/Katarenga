@@ -28,7 +28,7 @@ public:
         // receive the request
         receive(input_message);
 
-        zmqpp::message output_message = ReplyEngine<T>::route(input_message);
+        zmqpp::message output_message = ReplyEngine<T>::process(input_message);
 
         // send the reply
         send(output_message);

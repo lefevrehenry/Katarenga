@@ -31,7 +31,7 @@ public:
 
         // call the callback corresponding to the message type
         // or does nothing if it has not been registered
-        PairEngine<T>::route_receive(message);
+        PairEngine<T>::process_receive(message);
     }
 
     // Caution ! Using this signature by-pass the engine mechanism
@@ -47,7 +47,7 @@ public:
     template< typename M >
     void send_message()
     {
-        zmqpp::message message = PairEngine<T>::template route_send<M>();
+        zmqpp::message message = PairEngine<T>::template process_send<M>();
 
         // send the message
         send(message);

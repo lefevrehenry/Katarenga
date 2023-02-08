@@ -39,7 +39,7 @@ public:
         // receive the reply
         receive(reply_message);
 
-        RequestEngine<T>::route_reply(reply_message);
+        RequestEngine<T>::process_reply(reply_message);
 
         m_status = Status::WaitingForRequest;
     }
@@ -50,7 +50,7 @@ public:
         if(m_status != Status::WaitingForRequest)
             throw std::runtime_error("the socket can't send a message of type '" + Message::Name<M>() + "'. It is waiting for a reply");
 
-        zmqpp::message request_message = RequestEngine<T>::template route_request<typename M::Request>();
+        zmqpp::message request_message = RequestEngine<T>::template process_request<typename M::Request>();
 
         // send the request
         send(request_message);
