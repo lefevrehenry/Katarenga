@@ -1,23 +1,23 @@
 ﻿project(katarenga)
 
 set(HEADER_FILES
-    src/katarenga/client.hpp
-    src/katarenga/client_utils.hpp
-    src/katarenga/game.hpp
+    src/client/client.hpp
+    src/client/client_utils.hpp
+    src/client/game.hpp
 
-    src/katarenga/sockets/connection_socket.hpp
-    src/katarenga/sockets/server_socket.hpp
+    src/client/sockets/connection_socket.hpp
+    src/client/sockets/server_socket.hpp
 )
 
 set(SOURCE_FILES
-    src/katarenga/main.cpp
+    src/client/main.cpp
 
-    src/katarenga/client.cpp
-    src/katarenga/client_utils.cpp
-    src/katarenga/game.cpp
+    src/client/client.cpp
+    src/client/client_utils.cpp
+    src/client/game.cpp
 
-    src/katarenga/sockets/connection_socket.cpp
-    src/katarenga/sockets/server_socket.cpp
+    src/client/sockets/connection_socket.cpp
+    src/client/sockets/server_socket.cpp
 )
 
 ## Threads dependency
