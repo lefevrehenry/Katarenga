@@ -2,8 +2,8 @@
 
 // Katarenga
 #include <common/messages/messages.hpp>
-#include <katarenga/client.hpp>
-#include <katarenga/client_utils.hpp>
+#include <client/client.hpp>
+#include <client/client_utils.hpp>
 
 ConnectionSocket::ConnectionSocket(Client* client, zmqpp::context* context, const zmqpp::endpoint_t& endpoint) :
     RequestSocket(context, endpoint),
