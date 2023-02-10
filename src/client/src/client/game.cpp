@@ -3,7 +3,7 @@
 // Katarenga
 #include <common/board/board_utils.hpp>
 #include <common/messages/messages.hpp>
-#include <katarenga/client_utils.hpp>
+#include <client/client_utils.hpp>
 
 Game::Game(GameActor actor) :
     m_status(Status::Pending),

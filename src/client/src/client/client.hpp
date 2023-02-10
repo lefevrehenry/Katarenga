@@ -4,9 +4,9 @@
 // Katarenga
 #include <common/common_utils.hpp>
 
-#include <katarenga/game.hpp>
-#include <katarenga/sockets/connection_socket.hpp>
-#include <katarenga/sockets/server_socket.hpp>
+#include <client/game.hpp>
+#include <client/sockets/connection_socket.hpp>
+#include <client/sockets/server_socket.hpp>
 
 // ZMQPP
 #include <zmqpp/zmqpp.hpp>

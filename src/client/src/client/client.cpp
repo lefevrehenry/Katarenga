@@ -4,7 +4,7 @@
 #include <common/board/Board.hpp>
 #include <common/messages/message.hpp>
 #include <common/messages/messages.hpp>
-#include <katarenga/client_utils.hpp>
+#include <client/client_utils.hpp>
 
 // Standard Library
 #include <string>

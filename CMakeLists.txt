@@ -48,8 +48,8 @@ if("${BUILD_SERVER}")
     add_subdirectory(src/server)
 endif()
 
-# build the katarenga executable
+# build the client executable
 if("${BUILD_CLIENT}")
     message("-- Configuring client build")
-    add_subdirectory(src/katarenga)
+    add_subdirectory(src/client)
 endif()

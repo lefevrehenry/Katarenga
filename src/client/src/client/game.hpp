@@ -5,7 +5,7 @@
 #include <common/board/Board.hpp>
 #include <common/common_utils.hpp>
 
-#include <katarenga/sockets/server_socket.hpp>
+#include <client/sockets/server_socket.hpp>
 
 // Nod
 #include <nod/nod.hpp>
