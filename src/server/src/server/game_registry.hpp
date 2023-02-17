@@ -5,9 +5,6 @@
 #include <server/game.hpp>
 #include <server/server_utils.hpp>
 
-// Nod
-#include <nod/nod.hpp>
-
 // Standard Library
 #include <map>
 
@@ -40,10 +37,6 @@ public:
 
 public:
     Game::SPtr game(GameId id) const;
-
-public:
-    nod::signal<void(GameId)> game_added;
-    nod::signal<void(GameId)> game_removed;
 
 private:
     Games m_games;
