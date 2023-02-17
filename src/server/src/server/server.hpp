@@ -30,12 +30,13 @@ class Server
     using GameId = Common::GameId;
     using GameActor = Common::GameActor;
     using Move = Common::Move;
+    using Position = Common::Position;
 
 public:
     Server(const ServerInfo& server_info);
 
 private:
-    zmqpp::context* context();
+    zmqpp::context* context() const;
     zmqpp::endpoint_t endpoint() const;
 
 public:
@@ -46,10 +47,11 @@ public:
     void close_connection(const ClientSocket::SPtr& socket);
 
     GameId create_game(GameActor actor, const ClientSocket::SPtr& socket);
-    void join_game(GameId id, const ClientSocket::SPtr& socket);
-    void spectate_game(GameId id, const ClientSocket::SPtr& socket);
+    GameId join_game(GameId id, const ClientSocket::SPtr& socket);
+    GameId spectate_game(GameId id, const ClientSocket::SPtr& socket);
 
-    std::string game_position(GameId id) const;
+    Position game_position(GameId id) const;
+    GameActor game_actor(GameId id, const ClientSocket::SPtr& socket) const;
 
     bool play_move(GameId id, Move move, GameActor actor);
 
@@ -66,7 +68,6 @@ private:
     bool        m_should_quit;
 
     // Socket-related content
-    zmqpp::context      m_zmq_context;
     zmqpp::poller       m_poller;
 
     ConnectionSocket    m_connection_socket;

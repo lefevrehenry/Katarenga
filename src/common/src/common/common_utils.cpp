@@ -1,7 +1,6 @@
 #include "common_utils.hpp"
 
 // Katarenga
-#include <common/board/Board.hpp>
 #include <common/messages/message.hpp>
 #include <common/messages/messages.hpp>
 
@@ -32,6 +31,7 @@ ServerInfo ReadConfigFile()
     std::string tcp_port = ini.Get<std::string>("tcp", "port");
 
     ServerInfo config;
+
     config.thread_endpoint = "inproc://" + thread_port;
     config.processus_endpoint = "ipc://" + processus_port;
     config.network_endpoint = "tcp://*:" + tcp_port;
@@ -109,20 +109,252 @@ Common::Move convert_to_move(const std::string& str_move)
 
 bool is_valid_index(const Common::Move& move)
 {
-    int from = std::get<0>(move);
-    int to = std::get<1>(move);
+    Common::Case from = move_from(move);
+    Common::Case to = move_to(move);
 
     if(from == to)
         return false;
-
-//    int from_row = from / 8;
-//    int from_col = from % 8;
-
-//    int to_row = to / 8;
-//    int to_col = to % 8;
 
     bool from_valid = (from >= 0 && from < 64);
     bool to_valid = ((from >= 0 && from < 64) || to == -8 || to == -1 || to == 64 || to == 71);
 
     return from_valid && to_valid;
+}
+
+static int plateau_begin_offset = 0;
+static int plateau_end_offset = plateau_begin_offset + 136;
+
+static int camp_cells_begin_offset = plateau_end_offset;
+static int camp_cells_end_offset = camp_cells_begin_offset + 4;
+
+static int current_player_begin_offset = camp_cells_end_offset;
+static int current_player_end_offset = current_player_begin_offset + 1;
+
+static int winning_player_begin_offset = current_player_end_offset;
+static int winning_player_end_offset = winning_player_begin_offset + 1;
+
+bool has_valid_format(const Common::Position& position)
+{
+    return ((position.begin() + winning_player_end_offset) == position.end());
+}
+
+void yield_cases(const Common::Position& position, std::function<void(Common::Case, Common::CellType, Common::GameActor)> callback)
+{
+    using iter = Common::Position::const_iterator;
+
+    iter plateau_begin = position.begin() + plateau_begin_offset;
+    iter plateau_end = position.begin() + plateau_end_offset;
+
+    int index = 0;
+
+    for (iter it = plateau_begin; it != plateau_end; ++it)
+    {
+        if(*it == '\n')
+            continue;
+
+        Common::Case c = (index++);
+
+        char ch = *it;
+        Common::CellType type = to_cell_type(ch);
+
+        if(type == Common::CellType::None)
+            throw std::runtime_error("unknown character '" + std::to_string(ch) + "'");
+
+        ch = *(++it);
+        Common::GameActor actor = to_game_actor(ch);
+
+        callback(c,type, actor);
+    }
+}
+
+void yield_camp_cells(const Common::Position& position, std::function<void(Common::Case, Common::GameActor)> callback)
+{
+    using iter = Common::Position::const_iterator;
+
+    iter camp_cells_begin = position.begin() + camp_cells_begin_offset;
+    iter camp_cells_end = position.begin() + camp_cells_end_offset;
+
+    int index = 0;
+    const Common::Case camp_cells[4] = {-8, -1, 64, 71};
+
+    for (iter it = camp_cells_begin; it != camp_cells_end; ++it)
+    {
+        if(*it == '\n')
+            continue;
+
+        Common::Case c = camp_cells[index++];
+
+        char ch = *it;
+        Common::GameActor actor = to_game_actor(ch);
+
+        callback(c, actor);
+    }
+}
+
+void yield_current_player(const Common::Position& position, std::function<void(Common::GameActor)> callback)
+{
+    using iter = Common::Position::const_iterator;
+
+    iter current_player_begin = position.begin() + current_player_begin_offset;
+
+    iter it = current_player_begin;
+    Common::GameActor actor;
+
+    switch(*it)
+    {
+    case '+':
+        actor = Common::GameActor::White;
+        break;
+    case '-':
+        actor = Common::GameActor::Black;
+        break;
+    default:
+        actor = Common::GameActor::None;
+    };
+
+    callback(actor);
+}
+
+void yield_winning_player(const Common::Position& position, std::function<void(Common::GameActor)> callback)
+{
+    using iter = Common::Position::const_iterator;
+
+    iter winning_player_begin = position.begin() + winning_player_begin_offset;
+
+    iter it = winning_player_begin;
+    Common::GameActor actor;
+
+    switch(*it)
+    {
+    case '+':
+        actor = Common::GameActor::White;
+        break;
+    case '-':
+        actor = Common::GameActor::Black;
+        break;
+    default:
+        actor = Common::GameActor::None;
+    };
+
+    callback(actor);
+}
+
+void yield_pawns(const Common::Position& position, std::function<void(Common::Case, Common::GameActor)> callback)
+{
+    using iter = Common::Position::const_iterator;
+
+    iter plateau_begin = position.begin();
+    iter plateau_end = plateau_begin + 136;
+
+    int index = 0;
+
+    for (iter it = plateau_begin; it != plateau_end; ++it)
+    {
+        if(*it == '\n')
+            continue;
+
+        char c = *(++it);
+
+        switch(c)
+        {
+        case '+':
+            callback(index, Common::GameActor::White);
+            break;
+        case '-':
+            callback(index, Common::GameActor::Black);
+            break;
+        }
+
+        index++;
+    }
+}
+
+char from_game_actor(Common::GameActor actor)
+{
+    switch(actor)
+    {
+    case Common::GameActor::White:
+        return '+';
+    case Common::GameActor::Black:
+        return '-';
+    default:
+        return ' ';
+    }
+}
+
+Common::GameActor to_game_actor(char c)
+{
+    switch(c)
+    {
+    case '+':
+        return Common::GameActor::White;
+    case '-':
+        return Common::GameActor::Black;
+    default:
+        return Common::GameActor::None;
+    }
+}
+
+char from_cell_type(Common::CellType type)
+{
+    switch(type)
+    {
+    case Common::CellType::King:
+        return 'K';
+    case Common::CellType::Bishop:
+        return 'B';
+    case Common::CellType::Knight:
+        return 'N';
+    case Common::CellType::Rook:
+        return 'R';
+    default:
+        return char();
+    }
+}
+
+Common::CellType to_cell_type(char c)
+{
+    switch(c)
+    {
+    case 'K':
+        return Common::CellType::King;
+    case 'B':
+        return Common::CellType::Bishop;
+    case 'N':
+        return Common::CellType::Knight;
+    case 'R':
+        return Common::CellType::Rook;
+    }
+
+    return  Common::CellType::None;
+}
+
+Common::Case move_from(const Common::Move& move)
+{
+    return std::get<0>(move);
+}
+
+Common::Case move_to(const Common::Move& move)
+{
+    return std::get<1>(move);
+}
+
+int case_row(Common::Case c)
+{
+    return c / 8;
+}
+
+int case_col(Common::Case c)
+{
+    return c % 8;
+}
+
+int case_index(Common::Case c)
+{
+    return c;
+}
+
+Common::Case new_case(int row, int column)
+{
+    return column + (8 * row);
 }

@@ -11,7 +11,6 @@
 Server::Server(const ServerInfo& server_info) :
     m_server_info(server_info),
     m_should_quit(false),
-    m_zmq_context(),
     m_poller(),
     m_connection_socket(this, context(), endpoint()),
     m_client_sockets(),
@@ -20,19 +19,11 @@ Server::Server(const ServerInfo& server_info) :
 {
     m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
     m_poller.add(STDIN_FILENO, zmqpp::poller::poll_in);
-
-//    using R = std::function<void(const ClientRegistry::ClientId&)>;
-
-//    R start = std::bind(&Server::start_monitor_client, this, std::placeholders::_1);
-//    R stop = std::bind(&Server::stop_monitor_client, this, std::placeholders::_1);
-
-//    m_client_registry.client_added.connect(start);
-//    m_client_registry.client_removed.connect(stop);
 }
 
-zmqpp::context* Server::context()
+zmqpp::context* Server::context() const
 {
-    return &m_zmq_context;
+    return m_server_info.context;
 }
 
 zmqpp::endpoint_t Server::endpoint() const
@@ -96,9 +87,11 @@ zmqpp::endpoint_t Server::new_connection(const std::string& ip, const std::strin
     ClientRegistry::ClientId id = ClientRegistry::Id(ip, port);
 
     ClientRegistry* registry = &m_client_registry;
+    msg_server("Client '" + id + "' request new connection");
 
     if(registry->client_exists(id)) {
         ClientRegistry::ClientSocket::SPtr socket = registry->socket(id);
+        msg_server("Client '" + id + "' already exists in the database. Listen to him at '" + socket->endpoint() + "'");
 
         return socket->endpoint();
     }
@@ -108,6 +101,7 @@ zmqpp::endpoint_t Server::new_connection(const std::string& ip, const std::strin
     if(!registry->add_client(id, socket))
         return "";
 
+    msg_server("Client '" + id + "' create new socket connection. Listen to him at '" + socket->endpoint() + "'");
     start_monitor_socket(socket);
 
     return socket->endpoint();
@@ -124,6 +118,7 @@ void Server::close_connection(const ClientSocket::SPtr& socket)
 //        return;
 //    }
 
+    msg_server("Client '" + id + "' close connection with server");
     stop_monitor_socket(socket);
 
     registry->remove_client(id);
@@ -158,8 +153,11 @@ Server::GameId Server::create_game(GameActor actor, const ClientSocket::SPtr& so
     return GameId();
 }
 
-void Server::join_game(GameId id, const ClientSocket::SPtr& socket)
+Server::GameId Server::join_game(GameId id, const ClientSocket::SPtr& socket)
 {
+    if(socket->busy() && id == GameId())
+        id = socket->id();
+
     const GameRegistry* registry = &m_game_registry;
 
     Game::SPtr game = registry->find_game(id);
@@ -167,16 +165,13 @@ void Server::join_game(GameId id, const ClientSocket::SPtr& socket)
     // game exists obviously ?
     if(game)
     {
-        GameId _id;
-        GameActor _actor;
+        GameId _id = GameId();
 
         // if player is already in the game
         if(game->is_white_player(socket)) {
             _id = id;
-            _actor = GameActor::White;
         } else if(game->is_black_player(socket)) {
             _id = id;
-            _actor = GameActor::Black;
         }
         // otherwise is game waiting for players ?
         else if(game->is_pending())
@@ -187,22 +182,20 @@ void Server::join_game(GameId id, const ClientSocket::SPtr& socket)
                 if(game->has_white_player()) {
                     game->set_black_socket(socket);
                     _id = id;
-                    _actor = GameActor::Black;
                 } else if(game->has_black_player()) {
                     game->set_white_socket(socket);
                     _id = id;
-                    _actor = GameActor::White;
-                } else {
-                    _id = GameId();
-                    _actor = GameActor::None;
                 }
             }
         }
+
+        return _id;
     }
 
+    return GameId();
 }
 
-void Server::spectate_game(GameId id, const PlayerSocket::SPtr& socket)
+Server::GameId Server::spectate_game(GameId id, const PlayerSocket::SPtr& socket)
 {
     const GameRegistry* registry = &m_game_registry;
 
@@ -212,16 +205,28 @@ void Server::spectate_game(GameId id, const PlayerSocket::SPtr& socket)
     if(game)
     {
         // TODO: do it
+        return id;
     }
+
+    return GameId();
 }
 
-std::string Server::game_position(GameId id) const
+Common::Position Server::game_position(GameId id) const
 {
     const GameRegistry* registry = &m_game_registry;
 
     Game::SPtr game = registry->find_game(id);
 
     return (game ? game->position() : "");
+}
+
+Server::GameActor Server::game_actor(GameId id, const PlayerSocket::SPtr& socket) const
+{
+    const GameRegistry* registry = &m_game_registry;
+
+    Game::SPtr game = registry->find_game(id);
+
+    return (game ? game->actor(socket) : GameActor::None);
 }
 
 bool Server::play_move(GameId id, Move move, GameActor actor)

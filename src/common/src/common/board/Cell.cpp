@@ -1,15 +1,16 @@
 #include "Cell.hpp"
 
-Cell::Cell(Type _type, int _row, int _column) :
+Cell::Cell(Common::Case _c, Type _type) :
+    c(_c),
     type(_type),
-    player(GameActor::None),
-    row(_row),
-    column(_column),
-    index((row * 8) + column)
+    actor(GameActor::None)
+//    row(_row),
+//    column(_column),
+//    index((row * 8) + column)
 {
 }
 
 bool Cell::isEmpty() const
 {
-    return player == GameActor::None;
+    return actor == GameActor::None;
 }

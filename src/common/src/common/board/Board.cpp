@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 
+using Case = Common::Case;
 using Move = Common::Move;
 using GameActor = Common::GameActor;
 
@@ -18,23 +19,23 @@ Board::Board() :
     // Initialization of the Cells
     for (int row = 0; row < 8; ++row) {
         for (int col = 0; col < 8; ++col) {
-            _plateau[row][col] = Cell(Cell::Type::None,row,col);
+            _plateau[row][col] = Cell(new_case(row,col), Cell::Type::None);
         }
     }
 
     // Initialization of the CampCells
     Cell::Type type = Cell::Type::CampCell;
-    _campCell = { Cell(type,-1,0), Cell(type,-1,7), Cell(type,8,0), Cell(type,8,7) };
+    _campCell = { Cell(new_case(-1,0),type), Cell(new_case(-1,7),type), Cell(new_case(8,0),type), Cell(new_case(8,7),type) };
 
     // Initialization of Black and White Pieces
     for(int col = 0; col < 8; ++col)
     {
         // For White
-        _plateau[0][col].player = GameActor::White;
+        _plateau[0][col].actor = GameActor::White;
         _piecesW.push_back(&_plateau[0][col]);
 
         // For Black
-        _plateau[7][col].player = GameActor::Black;
+        _plateau[7][col].actor = GameActor::Black;
         _piecesB.push_back(&_plateau[7][col]);
     }
 }
@@ -44,9 +45,9 @@ Board::Board() :
  * for each camp cell whether there is a piece on that cell,
  * the current player and whether the game is finished or not
  */
-const std::string Board::getBoardConfiguration() const
+const Common::Position Board::getBoardConfiguration() const
 {
-    std::string s = "";
+    Common::Position s = "";
 
     // Populate the cells of the board
     for(int row = 0; row < 8; ++row)
@@ -54,26 +55,13 @@ const std::string Board::getBoardConfiguration() const
         for (int col = 0; col < 8; ++col)
         {
             const Cell& cell = _plateau[row][col];
-            switch(cell.type)
-            {
-            case Cell::Type::King:
-                s += "K";
-                break;
-            case Cell::Type::Bishop:
-                s += "B";
-                break;
-            case Cell::Type::Knight:
-                s += "N";
-                break;
-            case Cell::Type::Rook:
-                s += "R";
-                break;
-            default:
-                s += " ";
-            }
+
+            char c = from_cell_type(cell.type);
+
+            s += (c != char() ? c : ' ');
 
             if(cell)
-                s += (cell.player == GameActor::White ? "+" : "-");
+                s += (cell.actor == GameActor::White ? "+" : "-");
             else
                 s += " ";
         }
@@ -103,115 +91,56 @@ const std::string Board::getBoardConfiguration() const
     return s;
 }
 
-void Board::setFromBoardConfiguration(const std::string& configuration)
+void Board::setFromBoardConfiguration(const Common::Position& position)
 {
     clear();
 
-    using iter = std::string::const_iterator;
-
-    iter plateau_begin = configuration.begin();
-    iter plateau_end = plateau_begin + 136;
-
-    iter camp_cell_begin = plateau_end;
-    iter camp_cell_end = camp_cell_begin + 4;
-
-    iter current_player_begin = camp_cell_end;
-    iter current_player_end = current_player_begin + 1;
-
-    iter winning_player_begin = current_player_end;
-    iter winning_player_end = winning_player_begin + 1;
-
-    if(winning_player_end != configuration.end())
-        throw std::runtime_error("bad configuration format");
-
-    iter it;
-    char c;
+    if(!has_valid_format(position))
+        throw std::runtime_error("bad position format");
 
     // Plateau
     {
-        int index = 0;
+        yield_cases(position, [&](Case c, Cell::Type type, GameActor actor) {
+            Cell& cell = indexToCell(c);
 
-        for (it = plateau_begin; it != plateau_end; ++it) {
-            int row = index / 8;
-            int col = index % 8;
+            cell.type = type;
+            cell.actor = actor;
 
-            Cell& cell = _plateau[row][col];
-
-            if(*it == '\n')
-                continue;
-
-            // cell type
-            c = *it;
-
-            switch(c)
+            switch(actor)
             {
-            case 'K':
-                cell.type = Cell::Type::King;
-                break;
-            case 'B':
-                cell.type = Cell::Type::Bishop;
-                break;
-            case 'N':
-                cell.type = Cell::Type::Knight;
-                break;
-            case 'R':
-                cell.type = Cell::Type::Rook;
-                break;
-            default:
-                throw std::runtime_error("unknown character");
-            }
-
-            // cell player
-            c = *(++it);
-
-            switch(c)
-            {
-            case '+':
-                cell.player = GameActor::White;
+            case GameActor::White:
                 _piecesW.push_back(&cell);
                 break;
-            case '-':
-                cell.player = GameActor::Black;
+            case GameActor::Black:
                 _piecesB.push_back(&cell);
                 break;
+            default:
+                break;
             }
-
-            index++;
-        }
+        });
     }
 
-    // CampCell
+    // Camp Cells
     {
-        it = camp_cell_begin;
+        yield_camp_cells(position, [&](Case c, GameActor actor) {
+            Cell& cell = indexToCell(c);
 
-        Cell& whiteLeft = _campCell[0];
-        Cell& whiteRight = _campCell[1];
-        Cell& blackLeft = _campCell[2];
-        Cell& blackRight = _campCell[3];
-
-        c = *it;
-        whiteLeft.player = (c == '-' ? GameActor::Black : GameActor::None); ++it;
-
-        c = *it;
-        whiteRight.player = (c == '-' ? GameActor::Black : GameActor::None); ++it;
-
-        c = *it;
-        blackLeft.player = (c == '+' ? GameActor::White : GameActor::None); ++it;
-
-        c = *it;
-        blackRight.player = (c == '+' ? GameActor::White : GameActor::None); ++it;
+            cell.actor = actor;
+        });
     }
 
     // Current Player
     {
-        it = current_player_begin;
-        _currentPlayer = (*it == '+' ? GameActor::White : GameActor::Black);
+        yield_current_player(position, [&](GameActor actor) {
+            _currentPlayer = actor;
+        });
     }
 
     // Winning Player
     {
-        it = winning_player_begin;
-        _winningPlayer = (*it == ' ' ? GameActor::None : (*it == '+' ? GameActor::White : GameActor::Black));
+        yield_winning_player(position, [&](GameActor actor) {
+            _winningPlayer = actor;
+        });
     }
 }
 
@@ -260,7 +189,7 @@ void Board::clear()
     for (int row = 0; row < 8; ++row) {
         for (int col = 0; col < 8; ++col) {
             Cell& cell = _plateau[row][col];
-            cell.player = GameActor::None;
+            cell.actor = GameActor::None;
         }
     }
 
@@ -269,33 +198,30 @@ void Board::clear()
     Cell& blackLeft = _campCell[2];
     Cell& blackRight = _campCell[3];
 
-    whiteLeft.player = GameActor::None;
-    whiteRight.player = GameActor::None;
-    blackLeft.player = GameActor::None;
-    blackRight.player = GameActor::None;
+    whiteLeft.actor = GameActor::None;
+    whiteRight.actor = GameActor::None;
+    blackLeft.actor = GameActor::None;
+    blackRight.actor = GameActor::None;
 }
 
 bool Board::isValidMove(const Move& m, GameActor player) const
 {
-    int from = std::get<0>(m);
-    int to = std::get<1>(m);
+    Case from = move_from(m);
+    Case to = move_to(m);
 
     const Cell& from_cell = indexToCell(from);
     const Cell& to_cell = indexToCell(to);
 
-    if (from_cell.player != player)
+    if (from_cell.actor != player)
         return false;
 
-    if (to_cell.player == player)
+    if (to_cell.actor == player)
         return false;
 
-    int src_row = from_cell.row;
-    int src_col = from_cell.column;
-
-    std::vector<Move> moves = findAllMoves(src_row, src_col);
+    std::vector<Move> moves = findAllMoves(from);
 
     for (const Move& move: moves) {
-        int _to = std::get<1>(move);
+        Case _to = move_to(move);
         const Cell& target_cell = indexToCell(_to);
         if (target_cell == to_cell)
             return true;
@@ -306,21 +232,24 @@ bool Board::isValidMove(const Move& m, GameActor player) const
 
 bool Board::playMove(const Move& move)
 {
+    if(isGameFinished())
+        return false;
+
     if (!isValidMove(move, getCurrentPlayer()))
         return false;
 
-    int from = std::get<0>(move);
-    int to = std::get<1>(move);
+    Case from = move_from(move);
+    Case to = move_to(move);
 
     Cell& src_cell = indexToCell(from);
     Cell& dst_cell = indexToCell(to);
-    GameActor player = src_cell.player;
+    GameActor player = src_cell.actor;
 
     if(dst_cell)
         removePiece(dst_cell);
 
-    dst_cell.player = player;
-    src_cell.player = GameActor::None;
+    dst_cell.actor = player;
+    src_cell.actor = GameActor::None;
 
     nextPlayer();
 
@@ -329,16 +258,19 @@ bool Board::playMove(const Move& move)
     return true;
 }
 
-std::vector<Move> Board::findAllMoves(int row, int col) const
+std::vector<Move> Board::findAllMoves(Case c) const
 {
     std::vector<Move> moves;
+
+    int row = case_row(c);
+    int col = case_col(c);
 
     const Cell& cell = _plateau[row][col];
 
     if (!cell || cell.isCampCell())
         return moves;
 
-    GameActor player = cell.player;
+    GameActor player = cell.actor;
 
     const Cell& whiteLeft = _campCell[0];
     const Cell& whiteRight = _campCell[1];
@@ -349,18 +281,18 @@ std::vector<Move> Board::findAllMoves(int row, int col) const
     if (row == 0 && player == GameActor::Black)
     {
         if(!whiteLeft)
-            moves.push_back(Move(cell.index, whiteLeft.index));
+            moves.push_back(Move(cell.c, whiteLeft.c));
 
         if(!whiteRight)
-            moves.push_back(Move(cell.index, whiteRight.index));
+            moves.push_back(Move(cell.c, whiteRight.c));
     }
     if (row == 7 && player == GameActor::White)
     {
         if(!blackLeft)
-            moves.push_back(Move(cell.index, blackLeft.index));
+            moves.push_back(Move(cell.c, blackLeft.c));
 
         if(!blackRight)
-            moves.push_back(Move(cell.index, blackRight.index));
+            moves.push_back(Move(cell.c, blackRight.c));
     }
 
     switch(cell.type)
@@ -381,8 +313,8 @@ std::vector<Move> Board::findAllMoves(int row, int col) const
                 continue;
 
             const Cell& new_cell = _plateau[new_row][new_col];
-            if(!new_cell || new_cell.player == otherPlayer(player))
-                moves.push_back(Move(cell.index, new_cell.index));
+            if(!new_cell || new_cell.actor == otherPlayer(player))
+                moves.push_back(Move(cell.c, new_cell.c));
         }
         break;
     }
@@ -407,14 +339,14 @@ std::vector<Move> Board::findAllMoves(int row, int col) const
 
                 if(!new_cell)
                 {
-                    moves.push_back(Move(cell.index, new_cell.index));
+                    moves.push_back(Move(cell.c, new_cell.c));
                     if(new_cell.type == Cell::Type::Bishop)
                         break;
                 }
                 else
                 {
-                    if(new_cell.player == otherPlayer(player))
-                        moves.push_back(Move(cell.index, new_cell.index));
+                    if(new_cell.actor == otherPlayer(player))
+                        moves.push_back(Move(cell.c, new_cell.c));
 
                     break;
                 }
@@ -446,14 +378,14 @@ std::vector<Move> Board::findAllMoves(int row, int col) const
 
                 if(!new_cell)
                 {
-                    moves.push_back(Move(cell.index, new_cell.index));
+                    moves.push_back(Move(cell.c, new_cell.c));
                     if(new_cell.type == Cell::Type::Rook)
                         break;
                 }
                 else
                 {
-                    if(new_cell.player == otherPlayer(player))
-                        moves.push_back(Move(cell.index, new_cell.index));
+                    if(new_cell.actor == otherPlayer(player))
+                        moves.push_back(Move(cell.c, new_cell.c));
 
                     break;
                 }
@@ -481,8 +413,8 @@ std::vector<Move> Board::findAllMoves(int row, int col) const
                 continue;
 
             const Cell& new_cell = _plateau[new_row][new_col];
-            if(!new_cell || new_cell.player == otherPlayer(player))
-                moves.push_back(Move(cell.index, new_cell.index));
+            if(!new_cell || new_cell.actor == otherPlayer(player))
+                moves.push_back(Move(cell.c, new_cell.c));
         }
         break;
     }
@@ -536,19 +468,21 @@ void Board::nextPlayer()
 
 void Board::removePiece(const Cell& cell)
 {
-    std::vector<Cell*> * pieces = cell.player == GameActor::White ? &_piecesW : &_piecesB;
+    std::vector<Cell*> * pieces = cell.actor == GameActor::White ? &_piecesW : &_piecesB;
 
     auto it = std::find(pieces->begin(), pieces->end(), &cell);
     if (it != pieces->end())
         pieces->erase(it);
 }
 
-Cell& Board::indexToCell(int index)
+Cell& Board::indexToCell(Case c)
 {
+    int index = case_index(c);
+
     if(index >= 0 || index < 64)
     {
-        int row = index / 8;
-        int col = index % 8;
+        int row = case_row(c);
+        int col = case_col(c);
 
         return _plateau[row][col];
     }
@@ -565,12 +499,14 @@ Cell& Board::indexToCell(int index)
     throw std::runtime_error("no Cell defined for index " + std::to_string(index));
 }
 
-const Cell& Board::indexToCell(int index) const
+const Cell& Board::indexToCell(Case c) const
 {
+    int index = case_index(c);
+
     if(index >= 0 || index < 64)
     {
-        int row = index / 8;
-        int col = index % 8;
+        int row = case_row(c);
+        int col = case_col(c);
 
         return _plateau[row][col];
     }
@@ -585,12 +521,4 @@ const Cell& Board::indexToCell(int index) const
         return _campCell[3];
 
     throw std::runtime_error("no Cell defined for index " + std::to_string(index));
-}
-
-Board::BoardMove Board::boardMoveFromMove(const Common::Move& move)
-{
-    Cell* first = nullptr;
-    Cell* second = nullptr;
-
-    return {first, second};
 }

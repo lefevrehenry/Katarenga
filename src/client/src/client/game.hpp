@@ -40,6 +40,7 @@ public:
 
 public:
     GameActor actor() const;
+    Common::Position position() const;
 
 public:
     bool has_server_socket() const;
@@ -56,6 +57,7 @@ public:
 public:
     nod::signal<void()> server_joined;
     nod::signal<void()> server_left;
+    nod::signal<void(Common::Move)> move_played;
 
 private:
     void update_status();

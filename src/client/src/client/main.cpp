@@ -1,15 +1,26 @@
 // Katarenga
-#include <common/common_utils.hpp>
-
+#include <client/application.hpp>
 #include <client/client.hpp>
+#include <client/client_utils.hpp>
+
+#include <common/common_utils.hpp>
 
 int main()
 {
-    Initialize();
+    zmqpp::context context;
+
+    {
+        Initialize();
+    }
 
     ServerInfo server_info = ReadConfigFile();
+    server_info.context = &context;
 
-    Client client(server_info);
+    AppInfo app_info;
+    app_info.context = &context;
+    app_info.thread_endpoint = "inproc://katarenga_client";
 
-    return client.exec();
+    Client client(server_info, app_info);
+
+    return 0; //client.exec();
 }

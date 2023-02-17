@@ -42,8 +42,10 @@ public:
     bool has_white_player() const;
     bool has_black_player() const;
 
-    bool is_white_player(const PlayerSocket::SPtr socket) const;
-    bool is_black_player(const PlayerSocket::SPtr socket) const;
+    bool is_white_player(const PlayerSocket::SPtr& socket) const;
+    bool is_black_player(const PlayerSocket::SPtr& socket) const;
+
+    Common::GameActor actor(const PlayerSocket::SPtr& socket) const;
 
 public:
     void set_white_socket(const PlayerSocket::SPtr& socket);
@@ -53,13 +55,13 @@ public:
     bool play(const Common::Move& move, Common::GameActor player);
     void print_board() const
     {
-        std::string configuration = m_board.getBoardConfiguration();
+        Common::Position configuration = m_board.getBoardConfiguration();
 
         std::cout << configuration << std::endl;
     }
 
 public:
-    std::string position() const { return m_board.getBoardConfiguration(); }
+    Common::Position position() const { return m_board.getBoardConfiguration(); }
 
 public:
     nod::signal<void()> white_player_joined;

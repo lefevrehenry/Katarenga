@@ -4,43 +4,38 @@
 // Katarenga
 #include <common/common_utils.hpp>
 
-// Base class for all cells of the Board
+/**
+ * @brief The Cell class
+ */
 struct Cell
 {
     using GameActor = Common::GameActor;
 
 public:
-    enum class Type
-    {
-        None,
-        King,
-        Rook,
-        Bishop,
-        Knight,
-        CampCell
-    };
+    using Type = Common::CellType;
 
 public:
     Cell() = default;
-    Cell(Type type, int row, int column);
+    Cell(Common::Case c, Type type);
 
 public:
     // Tells whether the cell is is occupied by a player or not
     bool isEmpty() const;
 
 public:
-    bool operator==(const Cell& other) const { return row == other.row && column == other.column; }
+    bool operator==(const Cell& other) const { return c == other.c; }
     operator bool() const { return !isEmpty(); }
 
 public:
-    bool isCampCell() const { return !(index >= 0 && index < 64); }
+    bool isCampCell() const { return !(case_index(c) >= 0 && case_index(c) < 64); }
 
 public:
+    Common::Case c;     // Case of the Cell
     Type type;         // Type of the Cell
-    GameActor player;  // Points to the Piece on this Cell, or nullptr
-    int row;           // Row of this Cell
-    int column;        // Column of this Cell
-    int index;         // Index of this Cell, equals to (8 * row) + column
+    GameActor actor;   // Points to the Piece on this Cell, or nullptr
+//    int row;           // Row of this Cell
+//    int column;        // Column of this Cell
+//    int index;         // Index of this Cell, equals to (8 * row) + column
 
 };
 
