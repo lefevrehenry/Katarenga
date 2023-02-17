@@ -8,7 +8,24 @@
 #include <zmqpp/zmqpp.hpp>
 
 /**
- * @brief The PairEngine class
+ * @brief The PairEngine class aims to freely received or sent message without
+ * any particular assumptions
+ *
+ * A reaction on a received message is performed by calling 'process_receive'
+ * A speciazation of 'execute_receive_message' on M is called. It is derived
+ * class's responsability to provide this specialization and it must follow
+ * the form:
+ *
+ *    void execute_receive_message<M>(M::Parameters)
+ *
+ * And making a message is performed by calling 'process_send<M>'
+ * A speciazation of 'execute_send_message' on M is called to get the
+ * corresponding payload. It is derived class's responsability to provide this
+ * specialization and it must follow the form:
+ *
+ *    M::Parameters execute_send_message<M>()
+ *
+ * Afterwards the message stands in a zmqpp::message and is returned to the caller
  */
 template< typename T >
 class PairEngine
@@ -20,18 +37,39 @@ class PairEngine
     using SendMap = std::map<int, SendExecutor>;
 
 public:
+    /**
+     * Register the messages you want the engine react to
+     * As you register a receive message 'M' you must provide a specialization which is:
+     *
+     *   1. execute_receive_message<M>
+     *
+     * See above for the complete signatures of these functions
+     */
     template< typename M >
     void registerReceiveMessage() {
         receive_map[Message::Id<M>()] = &PairEngine<T>::execute_receive<M>;
     }
-
+    /**
+     * Register the messages you want the engine react to
+     * As you register a receive message 'M' you must provide a specialization which is:
+     *
+     *   1. execute_receive_message<M>
+     *
+     * See above for the complete signatures of these functions
+     */
     template< typename M >
     void registerSendMessage() {
         send_map[Message::Id<M>()] = &PairEngine<T>::execute_send<M>;
     }
 
 protected:
-    void route_receive(const zmqpp::message& input_message)
+    /**
+     * a Kateranga message in the form of zmqpp::message that will trigger a reaction
+     * of the engine if known or a throw if not
+     *
+     * here reaction means call 'execute_receive_message<M>' specialization
+     */
+    void process_receive(const zmqpp::message& input_message)
     {
         int id;
         input_message.get(id, 0);
@@ -46,9 +84,16 @@ protected:
 
         (this->*executor)(input_message);
     }
-
+    /**
+     * triggers a reaction of the engine
+     *
+     * here reaction means call 'execute_send_message<M>' specialization
+     *
+     * then a Kateranga message in the form of a zmqpp::message is returned
+     * based on the payload of type M::Parameters
+     */
     template< typename M >
-    zmqpp::message route_send()
+    zmqpp::message process_send()
     {
         int id = Message::Id<M>();
 
