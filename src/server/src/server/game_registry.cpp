@@ -25,8 +25,6 @@ bool GameRegistry::add_game(GameId id, const Game::SPtr& game)
 
     m_games.insert(std::make_pair(id, game));
 
-    game_added(id);
-
     return true;
 }
 
@@ -36,8 +34,6 @@ bool GameRegistry::remove_game(GameId id)
         return false;
 
     m_games.erase(id);
-
-    game_removed(id);
 
     return true;
 }

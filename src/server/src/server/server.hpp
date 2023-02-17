@@ -2,6 +2,7 @@
 #define KATARENGA_SERVER_SERVER_HPP
 
 // Katarenga
+#include <common/common_utils.hpp>
 #include <common/messages/messages.hpp>
 #include <common/sockets/abstract_socket.hpp>
 
@@ -21,26 +22,40 @@ class ConnectionSocket;
  */
 class Server
 {
-    using ClientSockets = std::vector<ClientRegistry::ClientSocket::SPtr>;
+    using ClientId = ClientRegistry::ClientId;
+    using ClientSocket = ClientRegistry::ClientSocket;
+
+    using ClientSockets = std::vector<ClientSocket::SPtr>;
+
+    using GameId = Common::GameId;
+    using GameActor = Common::GameActor;
+    using Move = Common::Move;
 
 public:
     Server(const ServerInfo& server_info);
+
+private:
+    zmqpp::context* context();
+    zmqpp::endpoint_t endpoint() const;
 
 public:
     void loop();
 
 public:
-    ClientRegistry* client_registry();
+    zmqpp::endpoint_t new_connection(const std::string& ip, const std::string& port);
+    void close_connection(const ClientSocket::SPtr& socket);
 
-public:
-    GameRegistry* game_registry();
+    GameId create_game(GameActor actor, const ClientSocket::SPtr& socket);
+    void join_game(GameId id, const ClientSocket::SPtr& socket);
+    void spectate_game(GameId id, const ClientSocket::SPtr& socket);
 
-public:
-    zmqpp::endpoint_t create_new_client_endpoint() const;
+    std::string game_position(GameId id) const;
+
+    bool play_move(GameId id, Move move, GameActor actor);
 
 private:
-    void start_monitor_client(ClientRegistry::ClientId id);
-    void stop_monitor_client(ClientRegistry::ClientId id);
+    void start_monitor_socket(const ClientSocket::SPtr& socket);
+    void stop_monitor_socket(const ClientSocket::SPtr& socket);
 
 private:
     void process_command_line(const std::string& command);

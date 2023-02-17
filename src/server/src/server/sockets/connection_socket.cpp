@@ -24,35 +24,20 @@ typename NewConnection::Reply::Parameters ConnectionSocket::execute_message<NewC
     reply.accepted = false;
     std::strncpy(reply.pair_endpoint, "", sizeof(reply.pair_endpoint));
 
-    ClientRegistry* registry = m_server->client_registry();
-
     //std::string name = request.name;
-    //std::string ip = request.ip;
-    //std::string port = request.port;
+    std::string ip = request.ip;
+    std::string port = request.port;
 
-    ClientRegistry::ClientId id = ClientRegistry::Id(request.ip, request.port);
+    zmqpp::endpoint_t endpoint = m_server->new_connection(ip, port);
 
-    if(registry->client_exists(id)) {
-        ClientRegistry::ClientSocket::SPtr socket = registry->socket(id);
-
-        reply.accepted = true;
-        std::strncpy(reply.pair_endpoint, socket->endpoint().c_str(), sizeof(reply.pair_endpoint));
-
+    if(endpoint.empty())
         return reply;
-    }
-
-    zmqpp::endpoint_t endpoint = m_server->create_new_client_endpoint();
 
     if(endpoint.length() > sizeof(reply.pair_endpoint)-1)
         return reply;
 
-    ClientRegistry::ClientSocket::SPtr socket(new ClientRegistry::ClientSocket(m_server, context(), endpoint));
-
-    if(!registry->add_client(id, socket))
-        return reply;
-
     reply.accepted = true;
-    std::strncpy(reply.pair_endpoint, socket->endpoint().c_str(), sizeof(reply.pair_endpoint));
+    std::strncpy(reply.pair_endpoint, endpoint.c_str(), sizeof(reply.pair_endpoint));
 
     return reply;
 }

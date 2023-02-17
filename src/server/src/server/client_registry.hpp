@@ -4,9 +4,6 @@
 // Katarenga
 #include <server/sockets/player_socket.hpp>
 
-// Nod
-#include <nod/nod.hpp>
-
 // Standard Library
 #include <map>
 #include <memory>
@@ -45,10 +42,6 @@ public:
 public:
     ClientSocket::SPtr socket(ClientId id) const;
     ClientId id(const ClientSocket::SPtr& socket) const;
-
-public:
-    nod::signal<void(ClientId)> client_added;
-    nod::signal<void(ClientId)> client_removed;
 
 private:
     Clients m_clients;
