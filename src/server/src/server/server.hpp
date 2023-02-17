@@ -2,6 +2,7 @@
 #define KATARENGA_SERVER_SERVER_HPP
 
 // Katarenga
+#include <common/common_utils.hpp>
 #include <common/messages/messages.hpp>
 #include <common/sockets/abstract_socket.hpp>
 
@@ -21,13 +22,19 @@ class ConnectionSocket;
  */
 class Server
 {
+    using ClientId = ClientRegistry::ClientId;
     using ClientSocket = ClientRegistry::ClientSocket;
+
     using ClientSockets = std::vector<ClientSocket::SPtr>;
+
+    using GameId = Common::GameId;
+    using GameActor = Common::GameActor;
+    using Move = Common::Move;
 
 public:
     Server(const ServerInfo& server_info);
 
-public:
+private:
     zmqpp::context* context();
     zmqpp::endpoint_t endpoint() const;
 
@@ -36,6 +43,15 @@ public:
 
 public:
     zmqpp::endpoint_t new_connection(const std::string& ip, const std::string& port);
+    void close_connection(const ClientSocket::SPtr& socket);
+
+    GameId create_game(GameActor actor, const ClientSocket::SPtr& socket);
+    void join_game(GameId id, const ClientSocket::SPtr& socket);
+    void spectate_game(GameId id, const ClientSocket::SPtr& socket);
+
+    std::string game_position(GameId id) const;
+
+    bool play_move(GameId id, Move move, GameActor actor);
 
 private:
     void start_monitor_socket(const ClientSocket::SPtr& socket);

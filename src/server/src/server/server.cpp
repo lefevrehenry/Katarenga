@@ -113,6 +113,131 @@ zmqpp::endpoint_t Server::new_connection(const std::string& ip, const std::strin
     return socket->endpoint();
 }
 
+void Server::close_connection(const ClientSocket::SPtr& socket)
+{
+    ClientRegistry* registry = &m_client_registry;
+
+    ClientId id = registry->id(socket);
+
+//    if(id.empty()) {
+//        msg_server("ClientSocket id not registered");
+//        return;
+//    }
+
+    stop_monitor_socket(socket);
+
+    registry->remove_client(id);
+}
+
+Server::GameId Server::create_game(GameActor actor, const ClientSocket::SPtr& socket)
+{
+    GameRegistry* registry = &m_game_registry;
+
+    // the socket is not already busy by a another Game ?
+    if(!socket->busy())
+    {
+        GameRegistry::GameId id = Game::GenerateId();
+        Game::SPtr game = Game::Create();
+
+        switch (actor) {
+        case GameActor::White:
+            game->set_white_socket(socket);
+            break;
+        case GameActor::Black:
+            game->set_black_socket(socket);
+            break;
+        default:
+            game->set_white_socket(socket);
+        }
+
+        registry->add_game(id, game);
+
+        return id;
+    }
+
+    return GameId();
+}
+
+void Server::join_game(GameId id, const ClientSocket::SPtr& socket)
+{
+    const GameRegistry* registry = &m_game_registry;
+
+    Game::SPtr game = registry->find_game(id);
+
+    // game exists obviously ?
+    if(game)
+    {
+        GameId _id;
+        GameActor _actor;
+
+        // if player is already in the game
+        if(game->is_white_player(socket)) {
+            _id = id;
+            _actor = GameActor::White;
+        } else if(game->is_black_player(socket)) {
+            _id = id;
+            _actor = GameActor::Black;
+        }
+        // otherwise is game waiting for players ?
+        else if(game->is_pending())
+        {
+            // the socket is not already busy by a game ?
+            if(!socket->busy())
+            {
+                if(game->has_white_player()) {
+                    game->set_black_socket(socket);
+                    _id = id;
+                    _actor = GameActor::Black;
+                } else if(game->has_black_player()) {
+                    game->set_white_socket(socket);
+                    _id = id;
+                    _actor = GameActor::White;
+                } else {
+                    _id = GameId();
+                    _actor = GameActor::None;
+                }
+            }
+        }
+    }
+
+}
+
+void Server::spectate_game(GameId id, const PlayerSocket::SPtr& socket)
+{
+    const GameRegistry* registry = &m_game_registry;
+
+    Game::SPtr game = registry->find_game(id);
+
+    // game exists obviously ?
+    if(game)
+    {
+        // TODO: do it
+    }
+}
+
+std::string Server::game_position(GameId id) const
+{
+    const GameRegistry* registry = &m_game_registry;
+
+    Game::SPtr game = registry->find_game(id);
+
+    return (game ? game->position() : "");
+}
+
+bool Server::play_move(GameId id, Move move, GameActor actor)
+{
+    const GameRegistry* registry = &m_game_registry;
+
+    Game::SPtr game = registry->find_game(id);
+
+    // game exists obviously ?
+    if(!game)
+        return false;
+
+    // confirm the move has been played (or not)
+    return game->play(move, actor);
+}
+
 void Server::start_monitor_socket(const ClientSocket::SPtr& socket)
 {
     m_client_sockets.push_back(socket);
