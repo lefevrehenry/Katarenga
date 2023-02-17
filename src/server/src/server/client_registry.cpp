@@ -23,8 +23,6 @@ bool ClientRegistry::add_client(ClientId id, const ClientSocket::SPtr& socket)
 
     m_clients.insert(std::make_pair(id, socket));
 
-    client_added(id);
-
     return true;
 }
 
@@ -32,8 +30,6 @@ bool ClientRegistry::remove_client(ClientId id)
 {
     if(!client_exists(id))
         return false;
-
-    client_removed(id);
 
     m_clients.erase(id);
 
