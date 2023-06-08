@@ -43,6 +43,11 @@ bool PlayerSocket::busy() const
     return m_is_busy;
 }
 
+PlayerSocket::GameId PlayerSocket::id() const
+{
+    return m_id;
+}
+
 template<>
 void PlayerSocket::execute_receive_message<CreateGame>(const typename CreateGame::Parameters& p)
 {
@@ -62,7 +67,16 @@ void PlayerSocket::execute_receive_message<CreateGame>(const typename CreateGame
 template<>
 void PlayerSocket::execute_receive_message<JoinGame>(const typename JoinGame::Parameters& p)
 {
-    m_server->join_game(p.id, shared_from_this());
+    m_id = GameId();
+    m_actor = GameActor::None;
+
+    {
+        GameId id = m_server->join_game(p.id, shared_from_this());
+        GameActor actor = m_server->game_actor(id, shared_from_this());
+
+        m_id = id;
+        m_actor = actor;
+    }
 
     send_message<GameJoined>();
 }
@@ -70,7 +84,14 @@ void PlayerSocket::execute_receive_message<JoinGame>(const typename JoinGame::Pa
 template<>
 void PlayerSocket::execute_receive_message<SpectateGame>(const typename SpectateGame::Parameters& p)
 {
-    m_server->spectate_game(p.id, shared_from_this());
+    m_id = GameId();
+    m_actor = GameActor::None;
+
+    {
+        GameId id = m_server->spectate_game(p.id, shared_from_this());
+
+        m_id = id;
+    }
 
     send_message<GameSpectated>();
 }
@@ -150,7 +171,7 @@ typename GameSpectated::Parameters PlayerSocket::execute_send_message<GameSpecta
 {
     GameSpectated::Parameters p;
 
-    p.accepted = false;
+    p.accepted = (m_id != GameId());
 
     return p;
 }

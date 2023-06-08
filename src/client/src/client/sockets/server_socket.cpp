@@ -14,7 +14,6 @@ ServerSocket::ServerSocket(Client* client, zmqpp::context* context, const zmqpp:
 {
     connect(endpoint);
 
-
     registerSendMessage<CloseConnection>();
 
     registerSendMessage<CreateGame>();
@@ -33,14 +32,7 @@ ServerSocket::ServerSocket(Client* client, zmqpp::context* context, const zmqpp:
 template<>
 typename CloseConnection::Parameters ServerSocket::execute_send_message<CloseConnection>()
 {
-    Game::SPtr game = m_client->game();
-
-    if(game)
-    {
-        game->set_server_socket(nullptr);
-
-        m_client->destroy_game();
-    }
+    m_client->close_connection();
 
     return {};
 }
@@ -69,50 +61,24 @@ typename JoinGame::Parameters ServerSocket::execute_send_message<JoinGame>()
 template<>
 void ServerSocket::execute_receive_message<GameCreated>(const typename GameCreated::Parameters& p)
 {
-    m_client->destroy_game();
+    if(p.accepted) {
+        m_client->init_game(p.actor, p.position, shared_from_this());
 
-    m_client->create_game(p.actor);
-
-    Game::SPtr game = m_client->game();
-
-    if(game)
-    {
-        if(p.accepted) {
-            ServerSocket::SPtr socket = shared_from_this();
-
-            game->set_server_socket(socket);
-
-            game->init_from_position(p.position, p.actor);
-
-            msg_client("Game created");
-        } else {
-            msg_client("create game has been rejected");
-        }
+        msg_client("Game created");
+    } else {
+        msg_client("create game has been rejected");
     }
 }
 
 template<>
 void ServerSocket::execute_receive_message<GameJoined>(const typename GameJoined::Parameters& p)
 {
-    m_client->destroy_game();
+    if(p.accepted) {
+        m_client->init_game(p.actor, p.position, shared_from_this());
 
-    m_client->create_game(p.actor);
-
-    Game::SPtr game = m_client->game();
-
-    if(game)
-    {
-        if(p.accepted) {
-            ServerSocket::SPtr socket = shared_from_this();
-
-            game->set_server_socket(socket);
-
-            game->init_from_position(p.position, p.actor);
-
-            msg_client("Game joined");
-        } else {
-            msg_client("join game has been rejected");
-        }
+        msg_client("Game joined");
+    } else {
+        msg_client("join game has been rejected");
     }
 }
 
@@ -125,15 +91,8 @@ void ServerSocket::execute_receive_message<GameSpectated>(const typename GameSpe
 template<>
 void ServerSocket::execute_receive_message<PlayMove::Reply>(const typename PlayMove::Reply::Parameters& p)
 {
-    Game::SPtr game = m_client->game();
-
-    if(!game)
-        return;
-
     if(p.accepted) {
-        Common::Move m = p.move;
-
-        bool ok = game->play(m);
+        bool ok = m_client->play_move(p.move);
 
         if(ok)
             msg_client("move has been played");

@@ -121,9 +121,14 @@ int main()
 //    if (parse_arguments(argc, argv, server_info))
 //        return 1;
 
-    Initialize();
+    zmqpp::context context;
+
+    {
+        Initialize();
+    }
 
     ServerInfo server_info = ReadConfigFile();
+    server_info.context = &context;
 
     Server server(server_info);
 

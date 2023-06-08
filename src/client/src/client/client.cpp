@@ -4,18 +4,17 @@
 #include <common/board/Board.hpp>
 #include <common/messages/message.hpp>
 #include <common/messages/messages.hpp>
-#include <client/client_utils.hpp>
 
 // Standard Library
-#include <string>
 #include <unistd.h>
+#include <string>
 
-Client::Client(const ServerInfo& server_info) :
+Client::Client(const ServerInfo& server_info, const AppInfo& app_info) :
     m_server_info(server_info),
+    m_app_info(app_info),
     m_should_quit(false),
-    m_zmq_context(),
     m_poller(),
-    m_connection_socket(this, &m_zmq_context, server_info.processus_endpoint),
+    m_connection_socket(this, context(), server_endpoint()),
     m_game(nullptr)
 {
     m_poller.add(m_connection_socket, zmqpp::poller::poll_in);
@@ -27,27 +26,36 @@ Client::~Client()
     close_server_socket();
 }
 
-int Client::exec()
+zmqpp::context* Client::context() const
 {
-    msg_client("Starting main loop of the client");
+    return m_app_info.context;
+}
 
-    while(!m_should_quit)
-    {
-//        msg_client("poll");
-        std::cout << ">>> " << std::flush;
-        if(m_poller.poll(zmqpp::poller::wait_forever))
+zmqpp::endpoint_t Client::app_endpoint() const
+{
+    return m_app_info.thread_endpoint;
+}
+
+zmqpp::endpoint_t Client::server_endpoint() const
+{
+    return m_server_info.processus_endpoint;
+}
+
+void Client::poll()
+{
+//    msg_client("Starting main loop of the client");
+
+//    while(!m_should_quit)
+//    {
+        if(m_poller.poll(0))
         {
             if(m_poller.has_input(m_connection_socket))
             {
-                std::cout << std::endl;
-
                 m_connection_socket.process_input_message();
             }
 
             if(m_server_socket && m_poller.has_input(*m_server_socket))
             {
-                std::cout << std::endl;
-
                 m_server_socket->process_input_message();
             }
 
@@ -60,26 +68,57 @@ int Client::exec()
                 process_command_line(command);
             }
         }
+//    }
+
+//    msg_client("client ending");
+
+//    return 0;
+}
+
+void Client::close_connection()
+{
+    if(!m_game)
+        return;
+
+    m_game->set_server_socket(nullptr);
+
+    destroy_game();
+}
+
+void Client::init_game(GameActor actor, const std::string& position, const ServerSocket::SPtr& socket)
+{
+    destroy_game();
+    create_game(actor);
+
+    {
+        m_game->set_server_socket(socket);
+        m_game->init_from_position(position, actor);
     }
 
-    msg_client("client ending");
-
-    return 0;
+    position_changed(m_game->position());
 }
 
-ConnectionSocket::SPtr Client::connection_socket() const
+bool Client::play_move(Common::Move move)
 {
-    return nullptr;
+    if(!m_game)
+        return false;
+
+    bool ok = m_game->play(move);
+
+    if(ok)
+        move_played(move);
+
+    return ok;
 }
+
+//void Client::quit()
+//{
+//    m_should_quit = true;
+//}
 
 ServerSocket::SPtr Client::server_socket() const
 {
     return m_server_socket;
-}
-
-Game::SPtr Client::game() const
-{
-    return m_game;
 }
 
 void Client::open_server_socket(const zmqpp::endpoint_t& endpoint)
@@ -87,7 +126,7 @@ void Client::open_server_socket(const zmqpp::endpoint_t& endpoint)
     if(m_server_socket)
         return;
 
-    m_server_socket = std::make_shared<ServerSocket>(this, &m_zmq_context, endpoint);
+    m_server_socket = std::make_shared<ServerSocket>(this, context(), endpoint);
 
     m_poller.add(*m_server_socket, zmqpp::poller::poll_in);
 }
@@ -105,6 +144,12 @@ void Client::close_server_socket()
 void Client::create_game(GameActor actor)
 {
     m_game = std::make_shared<Game>(actor);
+
+//    nod::signal<void(Common::Move)>& S = this->move_played;
+
+    m_game->move_played.connect([this](const Common::Move& move) {
+        this->move_played(move);
+    });
 }
 
 void Client::destroy_game()

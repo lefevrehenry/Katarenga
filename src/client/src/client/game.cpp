@@ -25,6 +25,11 @@ Game::GameActor Game::actor() const
     return m_actor;
 }
 
+Common::Position Game::position() const
+{
+    return m_board.getBoardConfiguration();
+}
+
 bool Game::has_server_socket() const
 {
     return bool(m_server_socket);
@@ -80,7 +85,12 @@ bool Game::play(const Common::Move& move)
     if(m_board.getCurrentPlayer() != m_actor)
         return false;
 
-    return m_board.playMove(move);
+    bool ok = m_board.playMove(move);
+
+    if(ok)
+        move_played(move);
+
+    return ok;
 }
 
 void Game::print_board() const

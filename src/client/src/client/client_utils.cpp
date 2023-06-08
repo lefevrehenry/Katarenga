@@ -1,5 +1,9 @@
 #include "client_utils.hpp"
 
+// Katarenga
+#include <common/messages/message.hpp>
+#include <client/messages/client_messages.hpp>
+
 // Standard Library
 #include <iostream>
 
@@ -12,6 +16,11 @@ static const std::string PURPLE        = std::string("\033[0;35m");
 static const std::string CYAN          = std::string("\033[0;36m");
 static const std::string WHITE         = std::string("\033[0;37m");
 static const std::string DEFAULT_COLOR = std::string("\033[0m");
+
+void InitializeClient()
+{
+    Message::Id<Quit>();
+}
 
 void msg_client(const std::string& msg)
 {

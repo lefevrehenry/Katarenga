@@ -29,6 +29,7 @@ public:
 
 public:
     bool busy() const;
+    GameId id() const;
 
 public:
     void mark_busy() { m_is_busy = true; }

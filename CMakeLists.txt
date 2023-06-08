@@ -9,18 +9,17 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-
 option(BUILD_SERVER "Whether to build the server executable" ON)
-if (BUILD_SERVER)
+if(BUILD_SERVER)
     message(STATUS "The server executable will be built")
 endif()
+
 option(BUILD_CLIENT "Whether to build the client executable" ON)
-if (BUILD_CLIENT)
+if(BUILD_CLIENT)
     message(STATUS "The client executable will be built")
 endif()
 
-
-if (BUILD_SERVER OR BUILD_CLIENT)
+if(BUILD_SERVER OR BUILD_CLIENT)
     ## ZeroMQ dependency
     find_package(ZMQPP 4.2.0 MODULE QUIET)
     if(NOT ZMQPP_FOUND)
@@ -29,27 +28,24 @@ if (BUILD_SERVER OR BUILD_CLIENT)
     get_target_property(_ZMQPP_DIR ZMQPP INTERFACE_INCLUDE_DIRECTORIES)
     message(STATUS "Found ZMQPP: ${_ZMQPP_DIR}")
 
-    ## Docopt dependency
-    find_package(docopt MODULE QUIET)
-    if(NOT DOCOPT_FOUND)
-        find_package(docopt CONFIG REQUIRED)
-    endif()
-    get_target_property(_DOCOPT_DIR docopt INTERFACE_INCLUDE_DIRECTORIES)
-    message(STATUS "Found docopt: ${_DOCOPT_DIR}")
-
     # build common library
     message(STATUS "Configuring common library")
     add_subdirectory(src/common)
 endif()
 
 # build the server executable
-if("${BUILD_SERVER}")
+if(BUILD_SERVER)
     message("-- Configuring server build")
     add_subdirectory(src/server)
 endif()
 
 # build the client executable
-if("${BUILD_CLIENT}")
+if(BUILD_CLIENT)
     message("-- Configuring client build")
     add_subdirectory(src/client)
 endif()
+
+# copy share/ directory into build tree
+execute_process(COMMAND "${CMAKE_COMMAND}" "-E" copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/share ${CMAKE_BINARY_DIR}/share)
+
+#install(DIRECTORY share/ DESTINATION share/)
