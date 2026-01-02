@@ -7,6 +7,11 @@ set(HEADER_FILES
     src/common/board/Board.hpp
     src/common/board/Cell.hpp
     src/common/board/board_utils.hpp
+    
+    src/common/config/Configuration.hpp
+    src/common/config/ConfigurationLoader.hpp
+    src/common/config/FileLoader.hpp
+    src/common/config/IniLoader.hpp
 
     src/common/engines/pair_engine.hpp
     src/common/engines/reply_engine.hpp
@@ -27,6 +32,11 @@ set(SOURCE_FILES
     src/common/board/Board.cpp
     src/common/board/Cell.cpp
     src/common/board/board_utils.cpp
+    
+    src/common/config/Configuration.cpp
+    src/common/config/ConfigurationLoader.cpp
+    src/common/config/FileLoader.cpp
+    src/common/config/IniLoader.cpp
 
     src/common/engines/pair_engine.cpp
     src/common/engines/reply_engine.cpp

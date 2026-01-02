@@ -1,5 +1,7 @@
 // Katarenga
 #include <common/common_utils.hpp>
+#include <common/config/ConfigurationLoader.hpp>
+#include <common/config/IniLoader.hpp>
 
 #include <server/server.hpp>
 
@@ -114,6 +116,64 @@ void client(const ServerInfo& server_info)
     msg_client("client ending");
 }
 
+using Filename = std::string;
+using Path = fs::path;
+using Paths = std::vector<fs::path>;
+
+struct Configuration
+{
+    using Key = std::string;
+    using Value = std::any;
+
+    template<class T>
+    T get(Key key) {
+        if(!has(key))
+            throw std::runtime_error("key not found");
+
+        return std::any_cast<T>(map.at(key));
+    }
+
+    bool has(Key key) {
+        return maps.find(key) != std::end(map);
+    }
+
+    template<class T>
+    void insert(Key key, T value) {
+        if(has(key))
+            throw std::runtime_error("key not found");
+
+        maps.insert(key, value);
+    }
+
+private:
+    std::map<Key,Value> maps;
+
+};
+
+struct ServerConfigurationLoader : public ConfigurationLoader
+{
+    static const Filename DefaultConfigFileName = "server.cfg";
+
+    static const Paths DefaultPaths = {
+        fs::path(),
+        fs::path(),
+        fs::path(),
+    };
+
+    static const Loaders DefaultLoaders = {
+        IniLoader()
+    };
+
+    ServerConfigurationLoader(const Filename& filename, const Paths& paths) : ConfigurationLoader(filename, paths, DefaultLoaders) {
+    }
+
+    ServerConfigurationLoader(const Filename& filename) : ServerConfigurationLoader(filename, DefaultPaths) {
+    }
+
+    ServerConfigurationLoader() : ServerConfigurationLoader(DefaultConfigFileName) {
+    }
+};
+
 int main()
 {
     // Let's parse the command-line arguments!
@@ -126,6 +186,14 @@ int main()
     {
         Initialize();
     }
+
+    ConfigurationLoader configurationLoader;
+
+    Configuration configuration = configurationLoader.load();
+
+    RealmConfiguration realmConf(configuration);
+    GameConfiguration gameConf(configuration);
+
 
     ServerInfo server_info = ReadConfigFile();
     server_info.context = &context;

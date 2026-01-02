@@ -17,11 +17,76 @@
 
 namespace fs = std::filesystem;
 
+/**
+ *
+ * class Configuration {
+ *     Map<Key, Value>
+ *
+ *     template<class T>
+ *     T get(Key)
+ *     bool has(Key)
+ *
+ *     insert(Key, Value)
+ * }
+ *
+ * interface ConfigurationLoader {
+ *
+ *     base de chemins
+ *     nom de fichier
+ *     liste de loaders
+ *
+ *     ConfigurationLoader()
+ *
+ *     virtual Configuration load() = 0;
+ * }
+ *
+ * class IniLoader : FileLoader {
+ *
+ *     IniLoader(config_file)
+ *
+ *     Configuration load(Pattern) override {
+ *         if(!config_file)
+ *             throw;
+ *
+ *         Configuration configuration;
+ *
+ *         inih::INIReader ini(config_file);
+ *
+ *         ...
+ *
+ *         return configuration;
+ *     }
+ * }
+ *
+ *
+ * class RealmConfiguration {
+ *
+ *     enum Keys {
+ *         Port,
+ *         Ip,
+ *     }
+ *
+ *     RealmConfiguration(Configuration configuration) {
+ *         this.port = configuration.get<int>("server.port")
+ *         this.ip = configuration.get<int>("server.ip")
+ *     }
+ *
+ *     int port() {
+ *         return this.port;
+ *     }
+ * }
+ *
+ */
+
+
 ServerInfo ReadConfigFile()
 {
     std::string home = std::getenv("HOME");
 
     fs::path config_file = fs::path(home) / ".config" / "katarenga" / "server.cfg";
+    // fs::path config_file = bin_dir / "config" / "katarenga" / "server.cfg";
+    // fs::path config_file = working_dir / "server.cfg";
+    // fs::path config_file = getenv("KATARENGA_CONFIG") / "server.cfg";
 
     inih::INIReader ini(config_file);
 
